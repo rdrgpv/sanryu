@@ -4,6 +4,7 @@ const Instrutor = require('./Instrutor');
 const Turma = require('./Turma');
 const Aluno = require('./Aluno');
 const Matricula = require('./Matricula');
+const Faixa = require('./Faixa');
 
 Instrutor.hasMany(Turma, { foreignKey: 'instrutorId', as: 'turmas' });
 Turma.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
@@ -23,4 +24,5 @@ module.exports = {
   Turma,
   Aluno,
   Matricula,
+  Faixa,
 };

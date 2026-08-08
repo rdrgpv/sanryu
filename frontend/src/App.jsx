@@ -9,6 +9,7 @@ import Dashboard from './pages/admin/Dashboard.jsx';
 import Alunos from './pages/admin/Alunos.jsx';
 import Turmas from './pages/admin/Turmas.jsx';
 import Instrutores from './pages/admin/Instrutores.jsx';
+import Faixas from './pages/admin/Faixas.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import PublicLayout from './components/PublicLayout.jsx';
 import AdminLayout from './components/AdminLayout.jsx';
@@ -52,6 +53,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AdminLayout><Instrutores /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/faixas"
+        element={
+          <ProtectedRoute>
+            <AdminLayout><Faixas /></AdminLayout>
           </ProtectedRoute>
         }
       />

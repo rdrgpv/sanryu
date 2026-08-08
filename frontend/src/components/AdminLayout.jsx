@@ -6,6 +6,7 @@ const links = [
   { to: '/admin/alunos', label: 'Alunos' },
   { to: '/admin/turmas', label: 'Turmas' },
   { to: '/admin/instrutores', label: 'Instrutores' },
+  { to: '/admin/faixas', label: 'Faixas' },
 ];
 
 export default function AdminLayout({ children }) {

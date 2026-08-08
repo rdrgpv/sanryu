@@ -5,6 +5,7 @@ const turmaController = require('../controllers/turmaController');
 const instrutorController = require('../controllers/instrutorController');
 const matriculaController = require('../controllers/matriculaController');
 const dashboardController = require('../controllers/dashboardController');
+const faixaController = require('../controllers/faixaController');
 
 const router = express.Router();
 
@@ -34,5 +35,11 @@ router.delete('/instrutores/:id', instrutorController.remover);
 router.get('/matriculas', matriculaController.listar);
 router.post('/matriculas', matriculaController.criar);
 router.delete('/matriculas/:id', matriculaController.remover);
+
+router.get('/faixas', faixaController.listar);
+router.post('/faixas', faixaController.criar);
+router.get('/faixas/:id', faixaController.buscarPorId);
+router.put('/faixas/:id', faixaController.atualizar);
+router.delete('/faixas/:id', faixaController.remover);
 
 module.exports = router;
