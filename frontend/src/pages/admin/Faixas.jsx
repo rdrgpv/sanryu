@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import Modal from '../../components/Modal.jsx';
+import { IconPlus } from '../../components/icons.jsx';
 
 const CORES = [
   { nome: 'Branca', hex: '#FFFFFF' },
@@ -29,6 +31,7 @@ export default function Faixas() {
   const [faixas, setFaixas] = useState([]);
   const [form, setForm] = useState(estadoInicial);
   const [editandoId, setEditandoId] = useState(null);
+  const [modalAberto, setModalAberto] = useState(false);
   const [erro, setErro] = useState(null);
 
   async function carregarFaixas() {
@@ -51,6 +54,12 @@ export default function Faixas() {
     setForm((prev) => ({ ...prev, cor: hex }));
   }
 
+  function abrirNovo() {
+    setEditandoId(null);
+    setForm(estadoInicial);
+    setModalAberto(true);
+  }
+
   function iniciarEdicao(faixa) {
     setEditandoId(faixa.id);
     setForm({
@@ -60,11 +69,14 @@ export default function Faixas() {
       ordem: faixa.ordem,
       ativo: faixa.ativo,
     });
+    setModalAberto(true);
   }
 
-  function cancelarEdicao() {
+  function fecharModal() {
+    setModalAberto(false);
     setEditandoId(null);
     setForm(estadoInicial);
+    setErro(null);
   }
 
   async function handleSubmit(event) {
@@ -83,7 +95,7 @@ export default function Faixas() {
       } else {
         await api.post('/admin/faixas', payload);
       }
-      cancelarEdicao();
+      fecharModal();
       carregarFaixas();
     } catch (err) {
       setErro(err.response?.data?.error || 'Erro ao salvar faixa.');
@@ -98,62 +110,70 @@ export default function Faixas() {
 
   return (
     <div>
-      <h1 className="admin__title">Faixas</h1>
+      <div className="admin__header">
+        <h1 className="admin__title">Faixas</h1>
+        <button type="button" className="btn btn--primary" onClick={abrirNovo}>
+          <IconPlus style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} />
+          Nova faixa
+        </button>
+      </div>
 
-      <form className="form form--inline" onSubmit={handleSubmit}>
-        <label className="form__field">
-          <span>Nome</span>
-          <input name="nome" value={form.nome} onChange={handleChange} required />
-        </label>
-        <label className="form__field">
-          <span>Grau {grauObrigatorio ? '' : '(opcional)'}</span>
-          <input
-            type="number"
-            name="grau"
-            min="0"
-            value={form.grau}
-            onChange={handleChange}
-            required={grauObrigatorio}
-          />
-        </label>
-        <label className="form__field">
-          <span>Ordem</span>
-          <input type="number" name="ordem" value={form.ordem} onChange={handleChange} required />
-        </label>
-        <label className="form__field form__field--checkbox">
-          <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
-          <span>Ativa</span>
-        </label>
-
-        <div className="form__field form__field--wide">
-          <span>Cor da faixa</span>
-          <div className="cor-picker">
-            {CORES.map((cor) => (
-              <button
-                key={cor.nome}
-                type="button"
-                className={`cor-swatch ${form.cor === cor.hex ? 'is-selected' : ''}`}
-                style={{ background: cor.hex }}
-                title={cor.nome}
-                aria-label={cor.nome}
-                onClick={() => selecionarCor(cor.hex)}
+      {modalAberto && (
+        <Modal title={editandoId ? 'Editar faixa' : 'Nova faixa'} onClose={fecharModal}>
+          <form className="form form--inline" onSubmit={handleSubmit}>
+            <label className="form__field">
+              <span>Nome</span>
+              <input name="nome" value={form.nome} onChange={handleChange} required />
+            </label>
+            <label className="form__field">
+              <span>Grau {grauObrigatorio ? '' : '(opcional)'}</span>
+              <input
+                type="number"
+                name="grau"
+                min="0"
+                value={form.grau}
+                onChange={handleChange}
+                required={grauObrigatorio}
               />
-            ))}
-          </div>
-        </div>
+            </label>
+            <label className="form__field">
+              <span>Ordem</span>
+              <input type="number" name="ordem" value={form.ordem} onChange={handleChange} required />
+            </label>
+            <label className="form__field form__field--checkbox">
+              <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
+              <span>Ativa</span>
+            </label>
 
-        <div className="form__actions">
-          <button type="submit" className="btn btn--primary">
-            {editandoId ? 'Salvar alterações' : 'Adicionar faixa'}
-          </button>
-          {editandoId && (
-            <button type="button" className="btn btn--ghost" onClick={cancelarEdicao}>
-              Cancelar
-            </button>
-          )}
-        </div>
-        {erro && <p className="alert alert--error">{erro}</p>}
-      </form>
+            <div className="form__field form__field--wide">
+              <span>Cor da faixa</span>
+              <div className="cor-picker">
+                {CORES.map((cor) => (
+                  <button
+                    key={cor.nome}
+                    type="button"
+                    className={`cor-swatch ${form.cor === cor.hex ? 'is-selected' : ''}`}
+                    style={{ background: cor.hex }}
+                    title={cor.nome}
+                    aria-label={cor.nome}
+                    onClick={() => selecionarCor(cor.hex)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="form__actions">
+              <button type="submit" className="btn btn--primary">
+                {editandoId ? 'Salvar alterações' : 'Adicionar faixa'}
+              </button>
+              <button type="button" className="btn btn--ghost" onClick={fecharModal}>
+                Cancelar
+              </button>
+            </div>
+            {erro && <p className="alert alert--error">{erro}</p>}
+          </form>
+        </Modal>
+      )}
 
       <div className="table-scroll">
         <table className="data-table">

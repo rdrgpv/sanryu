@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import Modal from '../../components/Modal.jsx';
+import { IconPlus } from '../../components/icons.jsx';
 
 const estadoInicial = {
   nome: '',
@@ -17,6 +19,7 @@ export default function Turmas() {
   const [instrutores, setInstrutores] = useState([]);
   const [form, setForm] = useState(estadoInicial);
   const [editandoId, setEditandoId] = useState(null);
+  const [modalAberto, setModalAberto] = useState(false);
   const [erro, setErro] = useState(null);
 
   async function carregarTurmas() {
@@ -34,6 +37,12 @@ export default function Turmas() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
+  function abrirNovo() {
+    setEditandoId(null);
+    setForm(estadoInicial);
+    setModalAberto(true);
+  }
+
   function iniciarEdicao(turma) {
     setEditandoId(turma.id);
     setForm({
@@ -46,11 +55,14 @@ export default function Turmas() {
       horaFim: turma.horaFim,
       vagas: turma.vagas,
     });
+    setModalAberto(true);
   }
 
-  function cancelarEdicao() {
+  function fecharModal() {
+    setModalAberto(false);
     setEditandoId(null);
     setForm(estadoInicial);
+    setErro(null);
   }
 
   async function handleSubmit(event) {
@@ -65,7 +77,7 @@ export default function Turmas() {
       } else {
         await api.post('/admin/turmas', payload);
       }
-      cancelarEdicao();
+      fecharModal();
       carregarTurmas();
     } catch (err) {
       setErro(err.response?.data?.error || 'Erro ao salvar turma.');
@@ -80,60 +92,68 @@ export default function Turmas() {
 
   return (
     <div>
-      <h1 className="admin__title">Turmas</h1>
+      <div className="admin__header">
+        <h1 className="admin__title">Turmas</h1>
+        <button type="button" className="btn btn--primary" onClick={abrirNovo}>
+          <IconPlus style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} />
+          Nova turma
+        </button>
+      </div>
 
-      <form className="form form--inline" onSubmit={handleSubmit}>
-        <label className="form__field">
-          <span>Nome</span>
-          <input name="nome" value={form.nome} onChange={handleChange} required />
-        </label>
-        <label className="form__field">
-          <span>Modalidade</span>
-          <input name="modalidade" value={form.modalidade} onChange={handleChange} required />
-        </label>
-        <label className="form__field">
-          <span>Nível</span>
-          <input name="nivel" value={form.nivel} onChange={handleChange} />
-        </label>
-        <label className="form__field">
-          <span>Instrutor</span>
-          <select name="instrutorId" value={form.instrutorId} onChange={handleChange}>
-            <option value="">Selecione</option>
-            {instrutores.map((instrutor) => (
-              <option key={instrutor.id} value={instrutor.id}>
-                {instrutor.nome}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="form__field">
-          <span>Dias (ex: Segunda,Quarta)</span>
-          <input name="diaSemana" value={form.diaSemana} onChange={handleChange} required />
-        </label>
-        <label className="form__field">
-          <span>Início</span>
-          <input type="time" name="horaInicio" value={form.horaInicio} onChange={handleChange} required />
-        </label>
-        <label className="form__field">
-          <span>Fim</span>
-          <input type="time" name="horaFim" value={form.horaFim} onChange={handleChange} required />
-        </label>
-        <label className="form__field">
-          <span>Vagas</span>
-          <input type="number" name="vagas" min="1" value={form.vagas} onChange={handleChange} />
-        </label>
-        <div className="form__actions">
-          <button type="submit" className="btn btn--primary">
-            {editandoId ? 'Salvar alterações' : 'Adicionar turma'}
-          </button>
-          {editandoId && (
-            <button type="button" className="btn btn--ghost" onClick={cancelarEdicao}>
-              Cancelar
-            </button>
-          )}
-        </div>
-        {erro && <p className="alert alert--error">{erro}</p>}
-      </form>
+      {modalAberto && (
+        <Modal title={editandoId ? 'Editar turma' : 'Nova turma'} onClose={fecharModal}>
+          <form className="form form--inline" onSubmit={handleSubmit}>
+            <label className="form__field">
+              <span>Nome</span>
+              <input name="nome" value={form.nome} onChange={handleChange} required />
+            </label>
+            <label className="form__field">
+              <span>Modalidade</span>
+              <input name="modalidade" value={form.modalidade} onChange={handleChange} required />
+            </label>
+            <label className="form__field">
+              <span>Nível</span>
+              <input name="nivel" value={form.nivel} onChange={handleChange} />
+            </label>
+            <label className="form__field">
+              <span>Instrutor</span>
+              <select name="instrutorId" value={form.instrutorId} onChange={handleChange}>
+                <option value="">Selecione</option>
+                {instrutores.map((instrutor) => (
+                  <option key={instrutor.id} value={instrutor.id}>
+                    {instrutor.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="form__field">
+              <span>Dias (ex: Segunda,Quarta)</span>
+              <input name="diaSemana" value={form.diaSemana} onChange={handleChange} required />
+            </label>
+            <label className="form__field">
+              <span>Início</span>
+              <input type="time" name="horaInicio" value={form.horaInicio} onChange={handleChange} required />
+            </label>
+            <label className="form__field">
+              <span>Fim</span>
+              <input type="time" name="horaFim" value={form.horaFim} onChange={handleChange} required />
+            </label>
+            <label className="form__field">
+              <span>Vagas</span>
+              <input type="number" name="vagas" min="1" value={form.vagas} onChange={handleChange} />
+            </label>
+            <div className="form__actions">
+              <button type="submit" className="btn btn--primary">
+                {editandoId ? 'Salvar alterações' : 'Adicionar turma'}
+              </button>
+              <button type="button" className="btn btn--ghost" onClick={fecharModal}>
+                Cancelar
+              </button>
+            </div>
+            {erro && <p className="alert alert--error">{erro}</p>}
+          </form>
+        </Modal>
+      )}
 
       <div className="table-scroll">
         <table className="data-table">
