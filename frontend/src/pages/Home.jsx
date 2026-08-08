@@ -45,7 +45,7 @@ export default function Home() {
             </div>
           </div>
           <div className="hero__badge">
-            <img src="/logos/sanryu-dragao.jpg" alt="San·Ryu Dojo" />
+            <img src="/logos/sanryu-dragao.png" alt="San·Ryu Dojo" />
           </div>
         </div>
       </section>

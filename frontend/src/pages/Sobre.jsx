@@ -90,7 +90,7 @@ export default function Sobre() {
       <section className="section">
         <div className="container narrow" style={{ textAlign: 'center' }}>
           <img
-            src="/logos/morganti-jujitsu-selo.jpg"
+            src="/logos/morganti-jujitsu-selo-hd.webp"
             alt="Selo oficial Morganti Ju-Jitsu"
             style={{ maxWidth: '220px', margin: '0 auto 1.5rem' }}
           />

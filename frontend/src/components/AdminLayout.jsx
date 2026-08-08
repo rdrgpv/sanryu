@@ -22,7 +22,7 @@ export default function AdminLayout({ children }) {
     <div className="admin">
       <aside className="admin__sidebar">
         <NavLink to="/admin" className="admin__brand">
-          <img src="/logos/sanryu-wordmark.jpg" alt="San·Ryu Dojo" />
+          <img src="/logos/sanryu-wordmark.png" alt="San·Ryu Dojo" />
         </NavLink>
         <nav className="admin__nav">
           {links.map((link) => (
