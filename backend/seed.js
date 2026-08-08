@@ -140,10 +140,15 @@ async function seed() {
   }
 
   console.log('Seed finalizado.');
-  process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error('Erro ao executar seed:', err);
-  process.exit(1);
-});
+module.exports = seed;
+
+if (require.main === module) {
+  seed()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('Erro ao executar seed:', err);
+      process.exit(1);
+    });
+}
