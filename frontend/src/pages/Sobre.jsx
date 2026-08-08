@@ -11,15 +11,65 @@ export default function Sobre() {
       <section className="section">
         <div className="container narrow">
           <p>
-            O nome <em>San·Ryu</em> (三竜, "três dragões") vem da tradição do Método Morganti, que
-            historicamente uniu Judo, Karatê e Ju-Jitsu sob um mesmo teto. Hoje, o San·Ryu Dojo é
-            dedicado inteiramente ao <strong>Ju-Jitsu</strong>, seguindo a metodologia oficial da
-            Morganti Ju-Jitsu®.
+            Bem-vindos ao nosso Dojo. Pensamos em inúmeros nomes para descrever nosso local de
+            treino, nossa equipe, uma minúscula parte do todo que é o <strong>Morganti Ju-Jitsu</strong>.
+            Muitas sugestões vieram de nomes de guerreiras — Imperatriz Jingū, Tomoe Gozen, Hangaku
+            Gozen, Nakano Takeko, dentre outras — mas ainda estava faltando algo.
           </p>
           <p>
-            Formamos alunos de todas as idades, de crianças em sua primeira aula a competidores
-            experientes, através de um sistema de katas e graduação por faixas que preserva a
-            tradição marcial japonesa com uma pedagogia atenta às necessidades de cada aluno.
+            A sugestão veio do David, publicitário que faz parte de tudo que fazemos e que ainda
+            não é sensei, mas está na jornada: <em>San·Ryu</em>.
+          </p>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <h2 className="section__title">Entenda o porquê do nome</h2>
+          <div className="grid grid--2">
+            <div className="tile">
+              <h3>SAN — o triângulo</h3>
+              <p>
+                Base forte, equilíbrio, representativo das três fases de luta e do indivíduo:
+                corpo, mente e espírito, do ímpeto da motivação pessoal. Está totalmente
+                relacionado com o que foi aprendido com o Shidoshi Ricardo Morganti,{' '}
+                <a href="https://www.instagram.com/shihan_alberto_nicoletti/" target="_blank" rel="noopener noreferrer">
+                  Shihan Alberto Nicoletti
+                </a>{' '}
+                e{' '}
+                <a href="https://www.instagram.com/shihanmarcelo/" target="_blank" rel="noopener noreferrer">
+                  Shihan Marcelo
+                </a>
+                , que acompanha o trabalho em São Paulo. A tomoe, símbolo do Morganti, é o
+                triângulo em movimento que faz a junção das três fases de luta.
+              </p>
+            </div>
+            <div className="tile">
+              <h3>RYU — o dragão</h3>
+              <p>
+                São caminhos ou técnicas que também convergem para o nosso estilo, além de também
+                significar dragão. Os dragões são criaturas míticas, símbolo de força, sabedoria e
+                prosperidade. No Japão, acredita-se que são guardiões da nação, que protegem as
+                pessoas dos males e minimizam qualquer catástrofe.
+              </p>
+            </div>
+          </div>
+          <p style={{ marginTop: '2rem' }}>
+            Achamos excelente também homenagear dois Senseis que estão sempre por perto e fazem
+            parte do nosso Dojo: Sensei{' '}
+            <a href="https://www.instagram.com/rdrgpv/" target="_blank" rel="noopener noreferrer">
+              @rdrgpv
+            </a>{' '}
+            e Sensei{' '}
+            <a href="https://www.instagram.com/matheusr_07/" target="_blank" rel="noopener noreferrer">
+              @matheusr_07
+            </a>
+            . Somos sempre uma equipe — a força vem de um ajudar o outro.
+          </p>
+          <p className="hero__slogan" style={{ color: 'var(--cor-sumi)' }}>
+            "Ainda que tiver um aluno, MJJ vai estar." — Shidoshi
+            <br />
+            Bora! Juntos, MJJ.
           </p>
         </div>
       </section>
