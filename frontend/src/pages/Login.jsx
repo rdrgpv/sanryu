@@ -32,7 +32,7 @@ export default function Login() {
   return (
     <div className="login">
       <form className="login__card form" onSubmit={handleSubmit}>
-        <p className="login__kicker">道場 Sanryu</p>
+        <img className="login__logo" src="/logos/sanryu-wordmark.jpg" alt="San·Ryu Dojo" />
         <h1>Área administrativa</h1>
 
         <label className="form__field">

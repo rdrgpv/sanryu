@@ -1,7 +1,7 @@
 {
   "name": "sanryu-backend",
   "version": "1.0.0",
-  "description": "API do Dojo Sanryu",
+  "description": "API do San·Ryu Dojo",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

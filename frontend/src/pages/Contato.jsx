@@ -68,9 +68,9 @@ export default function Contato() {
             <h2>Endereço</h2>
             <p>Rua das Artes Marciais, 123 — São Paulo, SP</p>
             <p>(11) 4000-0000</p>
-            <p>contato@dojosanryu.com.br</p>
+            <p>contato@sanryudojo.com.br</p>
 
-            <div className="map-placeholder" role="img" aria-label="Mapa de localização do Dojo Sanryu">
+            <div className="map-placeholder" role="img" aria-label="Mapa de localização do San·Ryu Dojo">
               Mapa — Rua das Artes Marciais, 123
             </div>
           </div>

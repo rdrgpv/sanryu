@@ -16,7 +16,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar__inner container">
         <NavLink to="/" className="navbar__brand" onClick={() => setOpen(false)}>
-          道場 <span>Sanryu</span>
+          <img src="/logos/sanryu-wordmark.jpg" alt="San·Ryu Dojo — Morganti Ju-Jitsu" />
         </NavLink>
 
         <button

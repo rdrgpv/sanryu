@@ -1,7 +1,8 @@
-# Dojo Sanryu
+# San·Ryu Dojo — Morganti Ju-Jitsu
 
-Site institucional e painel administrativo do Dojo Sanryu. Monorepo com API em
-Node.js/Express/Sequelize (SQLite) e frontend em React/Vite.
+Site institucional e painel administrativo do San·Ryu Dojo, dedicado ao Método
+Morganti Ju-Jitsu. Monorepo com API em Node.js/Express/Sequelize (SQLite/MySQL)
+e frontend em React/Vite.
 
 ## Estrutura
 

@@ -42,7 +42,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', async () => {
-  console.log(`Servidor Dojo Sanryu rodando em http://0.0.0.0:${PORT}`);
+  console.log(`Servidor San·Ryu Dojo rodando em http://0.0.0.0:${PORT}`);
 
   try {
     await sequelize.authenticate();

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
-const { sequelize, Admin, Instrutor, Turma, Aluno, Matricula } = require('./src/models');
+const { sequelize, Admin, Instrutor, Turma, Aluno, Matricula, Faixa } = require('./src/models');
 
 async function seed() {
   await sequelize.sync();
@@ -22,24 +22,24 @@ async function seed() {
   const instrutorCount = await Instrutor.count();
 
   if (instrutorCount === 0) {
-    const [sensei, judoca, karateca] = await Instrutor.bulkCreate([
+    const [sensei, kidsCoach, competicaoCoach] = await Instrutor.bulkCreate([
       {
-        nome: 'Sensei Hiroshi Tanaka',
+        nome: 'Sensei Roberto Morganti',
         faixa: 'Preta 5º Dan',
-        especialidade: 'Jiu-Jitsu',
-        bio: 'Mais de 20 anos de tatame, formado no Japão e radicado no Brasil desde 2005.',
+        especialidade: 'Ju-Jitsu',
+        bio: 'Responsável técnico do San·Ryu Dojo, formado no Método Morganti Ju-Jitsu com mais de 20 anos de tatame.',
       },
       {
-        nome: 'Sensei Marina Kobayashi',
+        nome: 'Sensei Fernanda Lima',
+        faixa: 'Preta 2º Dan',
+        especialidade: 'Ju-Jitsu Kids',
+        bio: 'Especialista em ensino infantil, forma a próxima geração dentro do Método Morganti.',
+      },
+      {
+        nome: 'Sensei Bruno Alencar',
         faixa: 'Preta 3º Dan',
-        especialidade: 'Judo',
-        bio: 'Ex-atleta de seleção, hoje dedicada a formar a próxima geração de judocas.',
-      },
-      {
-        nome: 'Sensei Ricardo Almeida',
-        faixa: 'Preta 4º Dan',
-        especialidade: 'Karatê',
-        bio: 'Especialista em karatê tradicional Shotokan, com foco em disciplina e kata.',
+        especialidade: 'Ju-Jitsu Competição',
+        bio: 'Ex-competidor, hoje dedicado à preparação de atletas para campeonatos.',
       },
     ], { returning: true });
 
@@ -50,8 +50,28 @@ async function seed() {
     if (turmaCount === 0) {
       await Turma.bulkCreate([
         {
-          nome: 'Jiu-Jitsu Iniciante',
-          modalidade: 'Jiu-Jitsu',
+          nome: 'Ju-Jitsu Kids Iniciante',
+          modalidade: 'Ju-Jitsu',
+          nivel: 'Iniciante',
+          instrutorId: kidsCoach.id,
+          diaSemana: 'Segunda,Quarta',
+          horaInicio: '17:00',
+          horaFim: '18:00',
+          vagas: 25,
+        },
+        {
+          nome: 'Ju-Jitsu Kids Avançado',
+          modalidade: 'Ju-Jitsu',
+          nivel: 'Avançado',
+          instrutorId: kidsCoach.id,
+          diaSemana: 'Terça,Quinta',
+          horaInicio: '17:00',
+          horaFim: '18:00',
+          vagas: 20,
+        },
+        {
+          nome: 'Ju-Jitsu Adulto Iniciante',
+          modalidade: 'Ju-Jitsu',
           nivel: 'Iniciante',
           instrutorId: sensei.id,
           diaSemana: 'Segunda,Quarta,Sexta',
@@ -60,8 +80,8 @@ async function seed() {
           vagas: 20,
         },
         {
-          nome: 'Jiu-Jitsu Avançado',
-          modalidade: 'Jiu-Jitsu',
+          nome: 'Ju-Jitsu Avançado',
+          modalidade: 'Ju-Jitsu',
           nivel: 'Avançado',
           instrutorId: sensei.id,
           diaSemana: 'Terça,Quinta',
@@ -70,34 +90,14 @@ async function seed() {
           vagas: 15,
         },
         {
-          nome: 'Judo Kids',
-          modalidade: 'Judo',
-          nivel: 'Todos os níveis',
-          instrutorId: judoca.id,
-          diaSemana: 'Segunda,Quarta',
-          horaInicio: '17:00',
-          horaFim: '18:00',
-          vagas: 25,
-        },
-        {
-          nome: 'Judo Adulto',
-          modalidade: 'Judo',
-          nivel: 'Todos os níveis',
-          instrutorId: judoca.id,
+          nome: 'Ju-Jitsu Competição',
+          modalidade: 'Ju-Jitsu',
+          nivel: 'Avançado',
+          instrutorId: competicaoCoach.id,
           diaSemana: 'Sábado',
           horaInicio: '09:00',
-          horaFim: '10:30',
-          vagas: 20,
-        },
-        {
-          nome: 'Karatê Shotokan',
-          modalidade: 'Karate',
-          nivel: 'Todos os níveis',
-          instrutorId: karateca.id,
-          diaSemana: 'Terça,Quinta,Sábado',
-          horaInicio: '18:00',
-          horaFim: '19:00',
-          vagas: 20,
+          horaFim: '11:00',
+          vagas: 15,
         },
       ], { returning: true });
 
@@ -105,6 +105,22 @@ async function seed() {
     }
   } else {
     console.log('Instrutores já existem, pulando instrutores e turmas.');
+  }
+
+  const faixaCount = await Faixa.count();
+
+  if (faixaCount === 0) {
+    await Faixa.bulkCreate([
+      { nome: 'Branca', cor: '#FFFFFF', ordem: 1 },
+      { nome: 'Azul', cor: '#0000FF', ordem: 2 },
+      { nome: 'Roxa', cor: '#800080', ordem: 3 },
+      { nome: 'Marrom', cor: '#8B4513', ordem: 4 },
+      { nome: 'Preta', cor: '#000000', grau: 1, ordem: 5 },
+    ]);
+
+    console.log('Faixas de exemplo criadas.');
+  } else {
+    console.log('Faixas já existem, pulando.');
   }
 
   const alunoCount = await Aluno.count();
