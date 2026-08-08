@@ -25,11 +25,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Erro interno do servidor.' });
 });
 
-async function start() {
-  await sequelize.sync();
-  app.listen(PORT, () => {
-    console.log(`Servidor Dojo Sanryu rodando em http://localhost:${PORT}`);
-  });
-}
+app.listen(PORT, '0.0.0.0', async () => {
+  console.log(`Servidor Dojo Sanryu rodando em http://0.0.0.0:${PORT}`);
 
-start();
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+    console.log('Banco de dados conectado.');
+  } catch (error) {
+    console.error('Erro ao conectar/sincronizar o banco de dados:', error);
+  }
+});
