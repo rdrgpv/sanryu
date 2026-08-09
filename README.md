@@ -29,7 +29,10 @@ npm run dev       # http://localhost:4000
 ```
 
 Edite `.env` para trocar `JWT_SECRET` e as credenciais padrão de admin antes de
-rodar `npm run seed`.
+rodar `npm run seed`. Para o módulo de Eventos, configure também
+`GATAME_API_URL`/`GATAME_EMAIL`/`GATAME_SENHA` (credencial fixa usada para
+consultar a API de carteirinha na inscrição pública) e `PIX_CIDADE` (usada no
+QR code Pix gerado a partir da configuração cadastrada em `/admin/bancos`).
 
 ### Frontend
 
@@ -69,9 +72,15 @@ Ver detalhes completos dos modelos e endpoints nos arquivos de rotas em
 `backend/src/routes/`. Resumo:
 
 - `GET /api/turmas`, `GET /api/instrutores`, `POST /api/contato` — públicos
+- `GET /api/eventos`, `GET /api/eventos/:id/publico` — listagem/detalhe de
+  eventos publicados
+- `POST /api/eventos/:id/consulta`, `POST /api/eventos/:id/inscricoes` —
+  fluxo público de inscrição em evento (consulta a API de carteirinha e
+  geração do QR code Pix)
 - `POST /api/auth/login` — autenticação, retorna JWT
 - `/api/admin/*` — protegidas por JWT (`Authorization: Bearer <token>`);
-  CRUD de alunos, turmas, instrutores e matrículas, além de
+  CRUD de alunos, turmas, instrutores, matrículas, faixas, tipos de evento,
+  eventos (+ listagem de inscrições) e configuração de conta Pix, além de
   `GET /api/admin/dashboard` com contadores gerais
 
 ## Banco de dados

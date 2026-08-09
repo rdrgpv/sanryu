@@ -23,6 +23,14 @@ const Faixa = sequelize.define('Faixa', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  valorComCarteirinha: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  valorSemCarteirinha: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
 });
 
 module.exports = Faixa;

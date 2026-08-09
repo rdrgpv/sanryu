@@ -1,6 +1,6 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
-const { sequelize, Admin, Instrutor, Turma, Aluno, Matricula, Faixa } = require('./src/models');
+const { sequelize, Admin, Instrutor, Turma, Aluno, Matricula, Faixa, TipoEvento, Banco } = require('./src/models');
 
 async function seed() {
   await sequelize.sync();
@@ -111,16 +111,39 @@ async function seed() {
 
   if (faixaCount === 0) {
     await Faixa.bulkCreate([
-      { nome: 'Branca', cor: '#FFFFFF', ordem: 1 },
-      { nome: 'Azul', cor: '#0000FF', ordem: 2 },
-      { nome: 'Roxa', cor: '#800080', ordem: 3 },
-      { nome: 'Marrom', cor: '#8B4513', ordem: 4 },
-      { nome: 'Preta', cor: '#000000', grau: 1, ordem: 5 },
+      { nome: 'Branca', cor: '#FFFFFF', ordem: 1, valorComCarteirinha: 100, valorSemCarteirinha: 150 },
+      { nome: 'Azul', cor: '#0000FF', ordem: 2, valorComCarteirinha: 120, valorSemCarteirinha: 170 },
+      { nome: 'Roxa', cor: '#800080', ordem: 3, valorComCarteirinha: 140, valorSemCarteirinha: 190 },
+      { nome: 'Marrom', cor: '#8B4513', ordem: 4, valorComCarteirinha: 160, valorSemCarteirinha: 210 },
+      { nome: 'Preta', cor: '#000000', grau: 1, ordem: 5, valorComCarteirinha: 200, valorSemCarteirinha: 250 },
     ]);
 
     console.log('Faixas de exemplo criadas.');
   } else {
     console.log('Faixas já existem, pulando.');
+  }
+
+  const tipoEventoCount = await TipoEvento.count();
+
+  if (tipoEventoCount === 0) {
+    await TipoEvento.create({ id: 1, nome: 'Exame de Faixa', cobravel: true });
+    console.log('Tipo de evento padrão "Exame de Faixa" criado.');
+  } else {
+    console.log('Tipos de evento já existem, pulando.');
+  }
+
+  const bancoCount = await Banco.count();
+
+  if (bancoCount === 0) {
+    await Banco.create({
+      nome: 'Conta principal',
+      chavePix: process.env.PIX_CHAVE_PADRAO || 'contato@sanryudojo.com.br',
+      tipoChave: 'email',
+      titular: 'San Ryu Dojo',
+    });
+    console.log('Configuração Pix padrão criada.');
+  } else {
+    console.log('Configuração Pix já existe, pulando.');
   }
 
   const alunoCount = await Aluno.count();

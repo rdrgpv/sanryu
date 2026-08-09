@@ -25,6 +25,8 @@ const estadoInicial = {
   grau: '',
   ordem: 0,
   ativo: true,
+  valorComCarteirinha: '',
+  valorSemCarteirinha: '',
 };
 
 export default function Faixas() {
@@ -68,6 +70,8 @@ export default function Faixas() {
       grau: faixa.grau ?? '',
       ordem: faixa.ordem,
       ativo: faixa.ativo,
+      valorComCarteirinha: faixa.valorComCarteirinha ?? '',
+      valorSemCarteirinha: faixa.valorSemCarteirinha ?? '',
     });
     setModalAberto(true);
   }
@@ -87,6 +91,8 @@ export default function Faixas() {
       ...form,
       ordem: Number(form.ordem),
       grau: grauObrigatorio && form.grau !== '' ? Number(form.grau) : null,
+      valorComCarteirinha: form.valorComCarteirinha !== '' ? Number(form.valorComCarteirinha) : null,
+      valorSemCarteirinha: form.valorSemCarteirinha !== '' ? Number(form.valorSemCarteirinha) : null,
     };
 
     try {
@@ -144,6 +150,28 @@ export default function Faixas() {
               <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
               <span>Ativa</span>
             </label>
+            <label className="form__field">
+              <span>Valor do exame (com carteirinha)</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="valorComCarteirinha"
+                value={form.valorComCarteirinha}
+                onChange={handleChange}
+              />
+            </label>
+            <label className="form__field">
+              <span>Valor do exame (sem carteirinha)</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                name="valorSemCarteirinha"
+                value={form.valorSemCarteirinha}
+                onChange={handleChange}
+              />
+            </label>
 
             <div className="form__field form__field--wide">
               <span>Cor da faixa</span>
@@ -183,6 +211,8 @@ export default function Faixas() {
               <th>Nome</th>
               <th>Grau</th>
               <th>Ordem</th>
+              <th>Valor c/ carteirinha</th>
+              <th>Valor s/ carteirinha</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
@@ -196,6 +226,8 @@ export default function Faixas() {
                 <td>{faixa.nome}</td>
                 <td>{faixa.grau ?? '-'}</td>
                 <td>{faixa.ordem}</td>
+                <td>{faixa.valorComCarteirinha != null ? `R$ ${Number(faixa.valorComCarteirinha).toFixed(2)}` : '-'}</td>
+                <td>{faixa.valorSemCarteirinha != null ? `R$ ${Number(faixa.valorSemCarteirinha).toFixed(2)}` : '-'}</td>
                 <td>{faixa.ativo ? 'Ativa' : 'Inativa'}</td>
                 <td className="data-table__actions">
                   <button type="button" className="btn btn--small" onClick={() => iniciarEdicao(faixa)}>
@@ -213,7 +245,7 @@ export default function Faixas() {
             ))}
             {faixas.length === 0 && (
               <tr>
-                <td colSpan={6}>Nenhuma faixa cadastrada.</td>
+                <td colSpan={8}>Nenhuma faixa cadastrada.</td>
               </tr>
             )}
           </tbody>

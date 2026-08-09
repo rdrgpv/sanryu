@@ -6,6 +6,9 @@ const instrutorController = require('../controllers/instrutorController');
 const matriculaController = require('../controllers/matriculaController');
 const dashboardController = require('../controllers/dashboardController');
 const faixaController = require('../controllers/faixaController');
+const tipoEventoController = require('../controllers/tipoEventoController');
+const eventoController = require('../controllers/eventoController');
+const bancoController = require('../controllers/bancoController');
 
 const router = express.Router();
 
@@ -41,5 +44,24 @@ router.post('/faixas', faixaController.criar);
 router.get('/faixas/:id', faixaController.buscarPorId);
 router.put('/faixas/:id', faixaController.atualizar);
 router.delete('/faixas/:id', faixaController.remover);
+
+router.get('/tipos-evento', tipoEventoController.listar);
+router.post('/tipos-evento', tipoEventoController.criar);
+router.get('/tipos-evento/:id', tipoEventoController.buscarPorId);
+router.put('/tipos-evento/:id', tipoEventoController.atualizar);
+router.delete('/tipos-evento/:id', tipoEventoController.remover);
+
+router.get('/eventos', eventoController.listar);
+router.post('/eventos', eventoController.criar);
+router.get('/eventos/:id', eventoController.buscarPorId);
+router.put('/eventos/:id', eventoController.atualizar);
+router.delete('/eventos/:id', eventoController.remover);
+router.get('/eventos/:id/inscricoes', eventoController.listarInscricoes);
+
+router.get('/bancos', bancoController.listar);
+router.post('/bancos', bancoController.criar);
+router.get('/bancos/:id', bancoController.buscarPorId);
+router.put('/bancos/:id', bancoController.atualizar);
+router.delete('/bancos/:id', bancoController.remover);
 
 module.exports = router;
