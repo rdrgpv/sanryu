@@ -6,10 +6,10 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { IconAlunos, IconTurmas, IconInstrutores, IconMatriculas, IconPlus } from '../../components/icons.jsx';
 
 const quicklinks = [
-  { to: '/admin/alunos', label: 'Novo aluno', icon: <IconAlunos /> },
-  { to: '/admin/turmas', label: 'Nova turma', icon: <IconTurmas /> },
-  { to: '/admin/instrutores', label: 'Novo instrutor', icon: <IconInstrutores /> },
-  { to: '/admin/faixas', label: 'Nova faixa', icon: <IconPlus /> },
+  { to: '/admin/alunos/novo', label: 'Novo aluno', icon: <IconAlunos /> },
+  { to: '/admin/turmas/novo', label: 'Nova turma', icon: <IconTurmas /> },
+  { to: '/admin/instrutores/novo', label: 'Novo instrutor', icon: <IconInstrutores /> },
+  { to: '/admin/faixas/novo', label: 'Nova faixa', icon: <IconPlus /> },
 ];
 
 export default function Dashboard() {

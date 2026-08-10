@@ -51,3 +51,36 @@ export function IconPlus(props) {
     </svg>
   );
 }
+
+export function IconEdit(props) {
+  return (
+    <svg {...common} {...props}>
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19 3 20l1-4 12.5-12.5z" />
+    </svg>
+  );
+}
+
+export function IconTrash(props) {
+  return (
+    <svg {...common} {...props}>
+      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" />
+    </svg>
+  );
+}
+
+export function IconRefresh(props) {
+  return (
+    <svg {...common} {...props}>
+      <path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3" />
+      <path d="M18 3v4h-4M6 21v-4h4" />
+    </svg>
+  );
+}
+
+export function IconBack(props) {
+  return (
+    <svg {...common} {...props}>
+      <path d="M19 12H5M11 6l-6 6 6 6" />
+    </svg>
+  );
+}
