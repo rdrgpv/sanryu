@@ -43,7 +43,16 @@ export default function AdminLayout({ children }) {
       <CSidebar className="border-end" colorScheme="dark" position="fixed">
         <CSidebarHeader className="border-bottom">
           <CSidebarBrand>
-            <img src="/logos/sanryu-wordmark.png" alt="San·Ryu Dojo" style={{ filter: 'invert(1) brightness(2)' }} />
+            <div
+              style={{
+                background: '#fff',
+                borderRadius: 6,
+                padding: '0.5rem 0.9rem',
+                display: 'inline-flex',
+              }}
+            >
+              <img src="/logos/sanryu-wordmark.png" alt="San·Ryu Dojo" style={{ height: 32, width: 'auto' }} />
+            </div>
           </CSidebarBrand>
         </CSidebarHeader>
         <CSidebarNav>
