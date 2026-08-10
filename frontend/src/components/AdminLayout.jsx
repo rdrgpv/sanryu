@@ -7,6 +7,10 @@ const links = [
   { to: '/admin/turmas', label: 'Turmas' },
   { to: '/admin/instrutores', label: 'Instrutores' },
   { to: '/admin/faixas', label: 'Faixas' },
+  { to: '/admin/tipos-evento', label: 'Tipos de Evento' },
+  { to: '/admin/eventos', label: 'Eventos' },
+  { to: '/admin/bancos', label: 'Configuração Pix' },
+  { to: '/admin/configuracoes', label: 'Configurações' },
 ];
 
 export default function AdminLayout({ children }) {
