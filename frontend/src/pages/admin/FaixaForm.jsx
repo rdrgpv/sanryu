@@ -25,6 +25,8 @@ const estadoInicial = {
   grau: '',
   ordem: 0,
   ativo: true,
+  valorComCarteirinha: '',
+  valorSemCarteirinha: '',
 };
 
 export default function FaixaForm() {
@@ -46,6 +48,8 @@ export default function FaixaForm() {
         grau: faixa.grau ?? '',
         ordem: faixa.ordem,
         ativo: faixa.ativo,
+        valorComCarteirinha: faixa.valorComCarteirinha ?? '',
+        valorSemCarteirinha: faixa.valorSemCarteirinha ?? '',
       });
     });
   }, [id, editando]);
@@ -67,6 +71,8 @@ export default function FaixaForm() {
       ...form,
       ordem: Number(form.ordem),
       grau: grauObrigatorio && form.grau !== '' ? Number(form.grau) : null,
+      valorComCarteirinha: form.valorComCarteirinha !== '' ? Number(form.valorComCarteirinha) : null,
+      valorSemCarteirinha: form.valorSemCarteirinha !== '' ? Number(form.valorSemCarteirinha) : null,
     };
 
     try {
@@ -112,6 +118,28 @@ export default function FaixaForm() {
           <label className="form__field form__field--checkbox">
             <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
             <span>Ativa</span>
+          </label>
+          <label className="form__field">
+            <span>Valor do exame (com carteirinha)</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              name="valorComCarteirinha"
+              value={form.valorComCarteirinha}
+              onChange={handleChange}
+            />
+          </label>
+          <label className="form__field">
+            <span>Valor do exame (sem carteirinha)</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              name="valorSemCarteirinha"
+              value={form.valorSemCarteirinha}
+              onChange={handleChange}
+            />
           </label>
 
           <div className="form__field form__field--wide">

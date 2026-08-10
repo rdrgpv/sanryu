@@ -940,6 +940,64 @@ button, input, select, textarea {
   margin-bottom: 0;
 }
 
+/* Modal (usado por telas ainda não migradas pro padrão de página própria) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--cor-branco);
+  border-radius: var(--raio);
+  width: 100%;
+  max-width: 640px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+
+.modal__header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--cor-sumi);
+  padding: 0.25rem 0.5rem;
+}
+
+.modal__close:hover {
+  color: var(--cor-hanko);
+}
+
+.modal__body {
+  padding: 1.5rem;
+}
+
+.modal__body .form--inline {
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
 /* Dashboard */
 .dashboard__welcome {
   color: var(--cor-cinza);
