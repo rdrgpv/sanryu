@@ -10,8 +10,24 @@ import {
   CButton,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle } from '@coreui/icons';
+import { cilCopy, cilCheckCircle, cilCloudDownload } from '@coreui/icons';
 import api from '../../services/api';
+
+const COLUNAS_EXPORTACAO = [
+  'Nome',
+  'Email',
+  'Telefone',
+  'Faixa',
+  'Nascimento',
+  'Responsável',
+  'Nº Carteirinha',
+  'Validade Carteirinha',
+  'Origem',
+  'Apto',
+  'Valor',
+  'Pagamento',
+  'Inscrito em',
+];
 
 // Datas de nascimento/validade de carteirinha são strings "YYYY-MM-DD" sem horário — evita
 // `new Date(string)`, que interpreta como meia-noite UTC e "volta" um dia em fusos negativos (Brasil).
@@ -50,12 +66,52 @@ export default function EventoInscricoes() {
     }
   }
 
+  function exportarCSV() {
+    const linhas = inscricoes.map((inscricao) => [
+      inscricao.nome || '',
+      inscricao.email || '',
+      inscricao.telefone || '',
+      inscricao.faixa || '',
+      formatarData(inscricao.dataNascimento),
+      inscricao.responsavel || '',
+      inscricao.numeroCarteirinha || '',
+      formatarData(inscricao.validadeCarteirinha),
+      inscricao.origemDados || '',
+      inscricao.apto ? 'Sim' : 'Não',
+      inscricao.valorCobrado != null ? Number(inscricao.valorCobrado).toFixed(2).replace('.', ',') : '',
+      inscricao.statusPagamento || '',
+      new Date(inscricao.createdAt).toLocaleString('pt-BR'),
+    ]);
+
+    const escapar = (valor) => `"${String(valor).replace(/"/g, '""')}"`;
+    // Separador ; e BOM de UTF-8: é o que o Excel em pt-BR espera pra abrir direto com
+    // acentuação certa (o padrão americano usa , como separador, que conflita com decimal).
+    const csv = [COLUNAS_EXPORTACAO, ...linhas].map((linha) => linha.map(escapar).join(';')).join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const nomeArquivo = `inscricoes-${(evento?.nome || id).toString().replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.csv`;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
       <Link to="/admin/eventos" className="text-body-secondary text-decoration-none d-inline-block mb-2">
         &larr; Voltar
       </Link>
-      <h1 className="h3 mb-3">Inscrições{evento ? ` — ${evento.nome}` : ''}</h1>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1 className="h3 mb-0">Inscrições{evento ? ` — ${evento.nome}` : ''}</h1>
+        <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0}>
+          <CIcon icon={cilCloudDownload} className="me-1" />
+          Exportar CSV
+        </CButton>
+      </div>
 
       <CTable hover responsive className="bg-white">
         <CTableHead>
