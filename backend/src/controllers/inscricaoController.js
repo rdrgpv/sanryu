@@ -16,6 +16,38 @@ function mapCandidato(raw) {
   };
 }
 
+// Só a origem "gatame" traz dados cadastrais confiáveis (nome/nascimento) e faixa. Nos demais
+// casos, a pessoa precisa confirmar/completar esses dados manualmente na inscrição.
+function precisaDadosExtras(candidato) {
+  return candidato.origem !== 'gatame' || !candidato.faixa;
+}
+
+// Extrai ano/mês/dia direto da string (formato YYYY-MM-DD, usado tanto pela API do Gatame quanto
+// pelo input type="date") em vez de usar `new Date(string)`, que interpreta a data como meia-noite
+// UTC e pode "voltar" um dia em fusos negativos como o do Brasil.
+function calcularIdade(dataNascimento) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dataNascimento || '');
+
+  if (!match) {
+    return null;
+  }
+
+  const [, anoStr, mesStr, diaStr] = match;
+  const ano = Number(anoStr);
+  const mes = Number(mesStr);
+  const dia = Number(diaStr);
+
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - ano;
+  const aindaNaoFezAniversario = hoje.getMonth() + 1 < mes || (hoje.getMonth() + 1 === mes && hoje.getDate() < dia);
+
+  if (aindaNaoFezAniversario) {
+    idade -= 1;
+  }
+
+  return idade;
+}
+
 function tratarErroConsulta(err, res) {
   if (err.interno) {
     console.error(err);
@@ -87,7 +119,7 @@ async function inscrever(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const { email, indice, faixaEscolhida } = req.body;
+  const { email, indice, faixaEscolhida, dadosExtras } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -127,6 +159,42 @@ async function inscrever(req, res) {
   }
 
   const candidato = mapCandidato(candidatoRaw);
+
+  if (precisaDadosExtras(candidato)) {
+    const nome = (dadosExtras?.nome || '').trim();
+    const telefone = (dadosExtras?.telefone || '').trim();
+    const dataNascimento = (dadosExtras?.dataNascimento || '').trim();
+
+    if (!nome || !telefone || !dataNascimento) {
+      return res.status(400).json({
+        error: 'Informe nome, telefone e data de nascimento para continuar.',
+        precisaDadosExtras: true,
+      });
+    }
+
+    const idade = calcularIdade(dataNascimento);
+
+    if (idade === null) {
+      return res.status(400).json({ error: 'Data de nascimento inválida.', precisaDadosExtras: true });
+    }
+
+    const menorDeIdade = idade < 18;
+    const responsavel = (dadosExtras?.responsavel || '').trim();
+
+    if (menorDeIdade && !responsavel) {
+      return res.status(400).json({
+        error: 'Para menores de idade, informe o nome do responsável.',
+        precisaDadosExtras: true,
+        menorDeIdade: true,
+      });
+    }
+
+    candidato.nome = nome;
+    candidato.dataNascimento = dataNascimento;
+    candidato.telefone = telefone;
+    candidato.responsavel = menorDeIdade ? responsavel : null;
+  }
+
   const resultadoValor = await calcularValorInscricao({
     evento,
     tipoEvento: evento.tipoEvento,
@@ -184,6 +252,8 @@ async function inscrever(req, res) {
     nome: candidato.nome,
     faixa: resultadoValor.faixaUsada || candidato.faixa,
     dataNascimento: candidato.dataNascimento,
+    telefone: candidato.telefone || null,
+    responsavel: candidato.responsavel || null,
     numeroCarteirinha: candidato.numeroCarteirinha,
     validadeCarteirinha: candidato.validadeCarteirinha,
     origemDados: candidato.origem,

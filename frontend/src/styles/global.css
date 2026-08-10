@@ -577,6 +577,17 @@ button, input, select, textarea {
   display: inline-block;
 }
 
+/* Desenho de faixa (retângulo) usado na tela de inscrição */
+.faixa-retangulo {
+  display: inline-block;
+  width: 4.5rem;
+  height: 1.4rem;
+  vertical-align: middle;
+  margin-left: 0.6rem;
+  border: 1px solid rgba(17, 17, 17, 0.25);
+  border-radius: 2px;
+}
+
 .contact-info {
   background: var(--cor-sumi);
   color: var(--cor-branco);

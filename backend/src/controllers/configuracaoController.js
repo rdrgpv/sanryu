@@ -50,4 +50,31 @@ async function remover(req, res) {
   res.status(204).send();
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover };
+// Salva vários parâmetros de um mesmo sistema de uma vez (upsert por sistema+parametro), para telas
+// de configuração com campos fixos e nomeados em vez de CRUD linha a linha.
+async function salvarLote(req, res) {
+  const { sistema, itens } = req.body;
+
+  if (!sistema || !Array.isArray(itens)) {
+    return res.status(400).json({ error: 'sistema e itens são obrigatórios.' });
+  }
+
+  try {
+    const salvos = await Promise.all(
+      itens.map(async (item) => {
+        const [configuracao] = await Configuracao.findOrCreate({
+          where: { sistema, parametro: item.parametro },
+          defaults: { sistema, parametro: item.parametro, valor: item.valor ?? null, tipoParametro: item.tipoParametro || 'S' },
+        });
+
+        return configuracao.update({ valor: item.valor ?? null, tipoParametro: item.tipoParametro || 'S' });
+      })
+    );
+
+    res.json(salvos);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover, salvarLote };

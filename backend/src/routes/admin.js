@@ -68,6 +68,7 @@ router.delete('/bancos/:id', bancoController.remover);
 
 router.get('/configuracoes', configuracaoController.listar);
 router.post('/configuracoes', configuracaoController.criar);
+router.put('/configuracoes/lote', configuracaoController.salvarLote);
 router.get('/configuracoes/:id', configuracaoController.buscarPorId);
 router.put('/configuracoes/:id', configuracaoController.atualizar);
 router.delete('/configuracoes/:id', configuracaoController.remover);

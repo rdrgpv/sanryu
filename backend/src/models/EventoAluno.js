@@ -25,6 +25,14 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  telefone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  responsavel: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   numeroCarteirinha: {
     type: DataTypes.STRING,
     allowNull: true,

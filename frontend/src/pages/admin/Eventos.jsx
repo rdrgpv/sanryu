@@ -26,10 +26,14 @@ function paraInputDatetime(iso) {
   return new Date(data.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
+// Datas de nascimento/validade de carteirinha são strings "YYYY-MM-DD" sem horário — evita
+// `new Date(string)`, que interpreta como meia-noite UTC e "volta" um dia em fusos negativos (Brasil).
 function formatarData(valor) {
   if (!valor) return '-';
-  const data = new Date(valor);
-  return Number.isNaN(data.getTime()) ? valor : data.toLocaleDateString('pt-BR');
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(valor);
+  if (!match) return valor;
+  const [, ano, mes, dia] = match;
+  return `${dia}/${mes}/${ano}`;
 }
 
 export default function Eventos() {
@@ -263,8 +267,10 @@ export default function Eventos() {
                 <tr>
                   <th>Nome</th>
                   <th>Email</th>
+                  <th>Telefone</th>
                   <th>Faixa</th>
                   <th>Nascimento</th>
+                  <th>Responsável</th>
                   <th>Nº Carteirinha</th>
                   <th>Validade Carteirinha</th>
                   <th>Origem</th>
@@ -281,8 +287,10 @@ export default function Eventos() {
                   <tr key={inscricao.id}>
                     <td>{inscricao.nome || '-'}</td>
                     <td>{inscricao.email}</td>
+                    <td>{inscricao.telefone || '-'}</td>
                     <td>{inscricao.faixa || '-'}</td>
                     <td>{formatarData(inscricao.dataNascimento)}</td>
+                    <td>{inscricao.responsavel || '-'}</td>
                     <td>{inscricao.numeroCarteirinha || '-'}</td>
                     <td>{formatarData(inscricao.validadeCarteirinha)}</td>
                     <td>{inscricao.origemDados || '-'}</td>
@@ -325,7 +333,7 @@ export default function Eventos() {
                 ))}
                 {inscricoes.length === 0 && (
                   <tr>
-                    <td colSpan={13}>Nenhuma inscrição registrada.</td>
+                    <td colSpan={15}>Nenhuma inscrição registrada.</td>
                   </tr>
                 )}
               </tbody>

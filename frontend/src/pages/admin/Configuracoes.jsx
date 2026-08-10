@@ -1,173 +1,126 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
-import Modal from '../../components/Modal.jsx';
-import { IconPlus } from '../../components/icons.jsx';
 
-const estadoInicial = { sistema: 'SAN', parametro: '', valor: '', tipoParametro: 'S' };
+const SISTEMA = 'SAN';
+
+// Lista fixa dos parâmetros conhecidos do sistema — igual à ideia do configuracao-ade: a tela não
+// edita linhas genéricas de "parametro/valor", e sim um formulário com campo próprio pra cada um.
+const CAMPOS = [
+  { parametro: 'GATAME_URL', label: 'URL da API do Gatame', tipo: 'text', sensivel: false },
+  { parametro: 'GATAME_EMAIL', label: 'E-mail da credencial do Gatame', tipo: 'text', sensivel: false },
+  { parametro: 'GATAME_SENHA', label: 'Senha da credencial do Gatame', tipo: 'text', sensivel: true },
+  { parametro: 'MP_ACCESS_TOKEN', label: 'Access Token do Mercado Pago', tipo: 'text', sensivel: true },
+];
+
+const estadoInicial = CAMPOS.reduce((acc, campo) => ({ ...acc, [campo.parametro]: '' }), {});
 
 export default function Configuracoes() {
-  const [configuracoes, setConfiguracoes] = useState([]);
-  const [form, setForm] = useState(estadoInicial);
-  const [editandoId, setEditandoId] = useState(null);
-  const [modalAberto, setModalAberto] = useState(false);
+  const [valores, setValores] = useState(estadoInicial);
+  const [visiveis, setVisiveis] = useState({});
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState(null);
+  const [sucesso, setSucesso] = useState(false);
 
-  async function carregarConfiguracoes() {
+  async function carregarValores() {
+    setCarregando(true);
     const res = await api.get('/admin/configuracoes');
-    setConfiguracoes(res.data);
+    const doSistema = res.data.filter((config) => config.sistema === SISTEMA);
+
+    const novosValores = { ...estadoInicial };
+    doSistema.forEach((config) => {
+      if (config.parametro in novosValores) {
+        novosValores[config.parametro] = config.valor || '';
+      }
+    });
+
+    setValores(novosValores);
+    setCarregando(false);
   }
 
   useEffect(() => {
-    carregarConfiguracoes();
+    carregarValores();
   }, []);
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: name === 'sistema' ? value.toUpperCase() : value }));
+  function handleChange(parametro, valor) {
+    setValores((prev) => ({ ...prev, [parametro]: valor }));
+    setSucesso(false);
   }
 
-  function abrirNovo() {
-    setEditandoId(null);
-    setForm(estadoInicial);
-    setModalAberto(true);
-  }
-
-  function iniciarEdicao(configuracao) {
-    setEditandoId(configuracao.id);
-    setForm({
-      sistema: configuracao.sistema,
-      parametro: configuracao.parametro,
-      valor: configuracao.valor || '',
-      tipoParametro: configuracao.tipoParametro,
-    });
-    setModalAberto(true);
-  }
-
-  function fecharModal() {
-    setModalAberto(false);
-    setEditandoId(null);
-    setForm(estadoInicial);
-    setErro(null);
+  function alternarVisibilidade(parametro) {
+    setVisiveis((prev) => ({ ...prev, [parametro]: !prev[parametro] }));
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setErro(null);
+    setSucesso(false);
+    setSalvando(true);
+
+    const itens = CAMPOS.map((campo) => ({
+      parametro: campo.parametro,
+      valor: valores[campo.parametro],
+      tipoParametro: 'S',
+    }));
 
     try {
-      if (editandoId) {
-        await api.put(`/admin/configuracoes/${editandoId}`, form);
-      } else {
-        await api.post('/admin/configuracoes', form);
-      }
-      fecharModal();
-      carregarConfiguracoes();
+      await api.put('/admin/configuracoes/lote', { sistema: SISTEMA, itens });
+      setSucesso(true);
     } catch (err) {
-      setErro(err.response?.data?.error || 'Erro ao salvar configuração.');
+      setErro(err.response?.data?.error || 'Erro ao salvar configurações.');
+    } finally {
+      setSalvando(false);
     }
   }
-
-  async function handleRemover(id) {
-    if (!window.confirm('Tem certeza que deseja excluir esta configuração?')) return;
-    await api.delete(`/admin/configuracoes/${id}`);
-    carregarConfiguracoes();
-  }
-
-  const campoSensivel = form.parametro.toUpperCase().includes('SENHA');
 
   return (
     <div>
       <div className="admin__header">
         <h1 className="admin__title">Configurações</h1>
-        <button type="button" className="btn btn--primary" onClick={abrirNovo}>
-          <IconPlus style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} />
-          Nova configuração
-        </button>
       </div>
 
       <p className="tile__meta" style={{ marginBottom: '1.25rem' }}>
-        Parâmetros gerais do sistema (ex.: credencial do Gatame — GATAME_URL, GATAME_EMAIL, GATAME_SENHA). As
-        alterações valem imediatamente, sem precisar reiniciar o servidor.
+        Credenciais de integração do sistema. As alterações valem imediatamente, sem precisar
+        reiniciar o servidor.
       </p>
 
-      {modalAberto && (
-        <Modal title={editandoId ? 'Editar configuração' : 'Nova configuração'} onClose={fecharModal}>
-          <form className="form form--inline" onSubmit={handleSubmit}>
-            <label className="form__field">
-              <span>Sistema</span>
-              <input name="sistema" value={form.sistema} onChange={handleChange} maxLength={3} required />
-            </label>
-            <label className="form__field">
-              <span>Parâmetro</span>
-              <input name="parametro" value={form.parametro} onChange={handleChange} maxLength={50} required />
-            </label>
-            <label className="form__field">
-              <span>Tipo</span>
-              <input name="tipoParametro" value={form.tipoParametro} onChange={handleChange} maxLength={1} required />
-            </label>
-            <label className="form__field form__field--wide">
-              <span>Valor</span>
-              <input
-                type={campoSensivel ? 'password' : 'text'}
-                name="valor"
-                value={form.valor}
-                onChange={handleChange}
-                maxLength={150}
-              />
-            </label>
-            <div className="form__actions">
-              <button type="submit" className="btn btn--primary">
-                {editandoId ? 'Salvar alterações' : 'Adicionar configuração'}
-              </button>
-              <button type="button" className="btn btn--ghost" onClick={fecharModal}>
-                Cancelar
-              </button>
-            </div>
-            {erro && <p className="alert alert--error">{erro}</p>}
-          </form>
-        </Modal>
-      )}
-
-      <div className="table-scroll">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Sistema</th>
-              <th>Parâmetro</th>
-              <th>Valor</th>
-              <th>Tipo</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {configuracoes.map((configuracao) => (
-              <tr key={configuracao.id}>
-                <td>{configuracao.sistema}</td>
-                <td>{configuracao.parametro}</td>
-                <td>{configuracao.parametro.toUpperCase().includes('SENHA') ? '••••••••' : configuracao.valor || '-'}</td>
-                <td>{configuracao.tipoParametro}</td>
-                <td className="data-table__actions">
-                  <button type="button" className="btn btn--small" onClick={() => iniciarEdicao(configuracao)}>
-                    Editar
-                  </button>
+      {carregando ? (
+        <p>Carregando...</p>
+      ) : (
+        <form className="form form--inline" onSubmit={handleSubmit}>
+          {CAMPOS.map((campo) => (
+            <label key={campo.parametro} className="form__field form__field--wide">
+              <span>{campo.label}</span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  type={campo.sensivel && !visiveis[campo.parametro] ? 'password' : 'text'}
+                  value={valores[campo.parametro]}
+                  onChange={(event) => handleChange(campo.parametro, event.target.value)}
+                  style={{ flex: 1 }}
+                />
+                {campo.sensivel && (
                   <button
                     type="button"
-                    className="btn btn--small btn--danger"
-                    onClick={() => handleRemover(configuracao.id)}
+                    className="btn btn--ghost btn--small"
+                    onClick={() => alternarVisibilidade(campo.parametro)}
                   >
-                    Excluir
+                    {visiveis[campo.parametro] ? 'Ocultar' : 'Mostrar'}
                   </button>
-                </td>
-              </tr>
-            ))}
-            {configuracoes.length === 0 && (
-              <tr>
-                <td colSpan={5}>Nenhuma configuração cadastrada.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                )}
+              </div>
+            </label>
+          ))}
+
+          <div className="form__actions">
+            <button type="submit" className="btn btn--primary" disabled={salvando}>
+              {salvando ? 'Salvando...' : 'Salvar configurações'}
+            </button>
+          </div>
+
+          {sucesso && <p className="alert alert--success">Configurações salvas com sucesso.</p>}
+          {erro && <p className="alert alert--error">{erro}</p>}
+        </form>
+      )}
     </div>
   );
 }

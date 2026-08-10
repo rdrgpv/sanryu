@@ -5,6 +5,18 @@ async function listar(req, res) {
   res.json(faixas);
 }
 
+// Usado pela tela pública de inscrição para descobrir a próxima faixa na ordem da graduação e
+// desenhar a cor — sem os valores de exame (dado interno de gestão do dojo).
+async function listarPublico(req, res) {
+  const faixas = await Faixa.findAll({
+    where: { ativo: true },
+    attributes: ['id', 'nome', 'ordem', 'cor'],
+    order: [['ordem', 'ASC']],
+  });
+
+  res.json(faixas);
+}
+
 async function buscarPorId(req, res) {
   const faixa = await Faixa.findByPk(req.params.id);
 
@@ -50,4 +62,4 @@ async function remover(req, res) {
   res.status(204).send();
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover };
+module.exports = { listar, listarPublico, buscarPorId, criar, atualizar, remover };
