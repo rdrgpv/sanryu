@@ -1,7 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+  CFormInput,
+  CFormSelect,
+  CButton,
+  CInputGroup,
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilPeople } from '@coreui/icons';
 import api from '../../services/api';
-import Toolbar from '../../components/Toolbar.jsx';
+import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 
 export default function Alunos() {
   const navigate = useNavigate();
@@ -54,84 +68,82 @@ export default function Alunos() {
 
   return (
     <div>
-      <h1 className="admin__title">Alunos</h1>
+      <h1 className="h3 mb-3">Alunos</h1>
 
-      <Toolbar
+      <AdminToolbar
         podeEditar={!!selecionadoId}
         onNovo={() => navigate('/admin/alunos/novo')}
         onEditar={() => navigate(`/admin/alunos/${selecionadoId}/editar`)}
         onExcluir={handleExcluir}
         onAtualizar={carregarAlunos}
         extra={
-          <button
-            type="button"
-            className="toolbar__btn"
+          <CButton
+            color="secondary"
+            variant="outline"
             disabled={!selecionadoId}
             onClick={() => setMatriculando((prev) => !prev)}
           >
+            <CIcon icon={cilPeople} className="me-1" />
             Matricular
-          </button>
+          </CButton>
         }
       />
 
       {matriculando && (
-        <div className="matricula-box">
-          <select value={turmaSelecionada} onChange={(event) => setTurmaSelecionada(event.target.value)}>
+        <CInputGroup className="mb-3" style={{ maxWidth: 420 }}>
+          <CFormSelect value={turmaSelecionada} onChange={(event) => setTurmaSelecionada(event.target.value)}>
             <option value="">Selecione a turma</option>
             {turmas.map((turma) => (
               <option key={turma.id} value={turma.id}>
                 {turma.nome}
               </option>
             ))}
-          </select>
-          <button type="button" className="btn btn--small btn--primary" onClick={handleMatricular}>
-            Confirmar matrícula
-          </button>
-        </div>
+          </CFormSelect>
+          <CButton color="primary" onClick={handleMatricular}>
+            Confirmar
+          </CButton>
+        </CInputGroup>
       )}
 
-      <input
-        className="search-input"
+      <CFormInput
+        className="mb-3"
+        style={{ maxWidth: 360 }}
         placeholder="Buscar por nome ou email..."
         value={busca}
         onChange={(event) => setBusca(event.target.value)}
       />
 
-      <div className="table-scroll">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Telefone</th>
-              <th>Faixa</th>
-              <th>Status</th>
-              <th>Turmas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {alunos.map((aluno) => (
-              <tr
-                key={aluno.id}
-                className={selecionadoId === aluno.id ? 'is-selected' : ''}
-                onClick={() => selecionarLinha(aluno.id)}
-              >
-                <td>{aluno.nome}</td>
-                <td>{aluno.email}</td>
-                <td>{aluno.telefone || '-'}</td>
-                <td>{aluno.faixa}</td>
-                <td>{aluno.ativo ? 'Ativo' : 'Inativo'}</td>
-                <td>{(aluno.turmas || []).map((t) => t.nome).join(', ') || '-'}</td>
-              </tr>
-            ))}
-            {alunos.length === 0 && (
-              <tr>
-                <td colSpan={6}>Nenhum aluno encontrado.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <CTable hover responsive className="bg-white">
+        <CTableHead>
+          <CTableRow>
+            <CTableHeaderCell>Nome</CTableHeaderCell>
+            <CTableHeaderCell>Email</CTableHeaderCell>
+            <CTableHeaderCell>Telefone</CTableHeaderCell>
+            <CTableHeaderCell>Faixa</CTableHeaderCell>
+            <CTableHeaderCell>Status</CTableHeaderCell>
+            <CTableHeaderCell>Turmas</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {alunos.map((aluno) => (
+            <CTableRow key={aluno.id} active={selecionadoId === aluno.id} onClick={() => selecionarLinha(aluno.id)}>
+              <CTableDataCell>{aluno.nome}</CTableDataCell>
+              <CTableDataCell>{aluno.email}</CTableDataCell>
+              <CTableDataCell>{aluno.telefone || '-'}</CTableDataCell>
+              <CTableDataCell>{aluno.faixa}</CTableDataCell>
+              <CTableDataCell>{aluno.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
+              <CTableDataCell>{(aluno.turmas || []).map((t) => t.nome).join(', ') || '-'}</CTableDataCell>
+            </CTableRow>
+          ))}
+          {alunos.length === 0 && (
+            <CTableRow>
+              <CTableDataCell colSpan={6} className="text-body-secondary">
+                Nenhum aluno encontrado.
+              </CTableDataCell>
+            </CTableRow>
+          )}
+        </CTableBody>
+      </CTable>
     </div>
   );
 }

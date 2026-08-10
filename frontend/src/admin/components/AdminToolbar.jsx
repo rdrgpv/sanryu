@@ -2,7 +2,18 @@ import { CButton, CButtonGroup } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilPlus, cilPencil, cilTrash, cilReload } from '@coreui/icons';
 
-export default function AdminToolbar({ onNovo, onEditar, onExcluir, onAtualizar, podeEditar, novoLabel = 'Novo', extra }) {
+export default function AdminToolbar({
+  onNovo,
+  onEditar,
+  onExcluir,
+  onAtualizar,
+  podeEditar,
+  podeExcluir,
+  novoLabel = 'Novo',
+  extra,
+}) {
+  const excluirHabilitado = podeExcluir === undefined ? podeEditar : podeExcluir;
+
   return (
     <CButtonGroup role="group" className="mb-3">
       <CButton color="primary" onClick={onNovo}>
@@ -13,7 +24,7 @@ export default function AdminToolbar({ onNovo, onEditar, onExcluir, onAtualizar,
         <CIcon icon={cilPencil} className="me-1" />
         Editar
       </CButton>
-      <CButton color="danger" variant="outline" disabled={!podeEditar} onClick={onExcluir}>
+      <CButton color="danger" variant="outline" disabled={!excluirHabilitado} onClick={onExcluir}>
         <CIcon icon={cilTrash} className="me-1" />
         Excluir
       </CButton>

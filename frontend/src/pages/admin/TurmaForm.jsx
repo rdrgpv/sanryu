@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormSelect, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
-import { IconBack } from '../../components/icons.jsx';
 
 const estadoInicial = {
   nome: '',
@@ -68,63 +68,68 @@ export default function TurmaForm() {
 
   return (
     <div>
-      <Link to="/admin/turmas" className="form-page__back">
-        <IconBack /> Voltar
+      <Link to="/admin/turmas" className="text-body-secondary text-decoration-none d-inline-block mb-2">
+        &larr; Voltar
       </Link>
-      <h1 className="admin__title">{editando ? 'Editar turma' : 'Nova turma'}</h1>
+      <h1 className="h3 mb-3">{editando ? 'Editar turma' : 'Nova turma'}</h1>
 
-      <div className="form-page">
-        <form className="form form--inline" onSubmit={handleSubmit}>
-          <label className="form__field">
-            <span>Nome</span>
-            <input name="nome" value={form.nome} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Modalidade</span>
-            <input name="modalidade" value={form.modalidade} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Nível</span>
-            <input name="nivel" value={form.nivel} onChange={handleChange} />
-          </label>
-          <label className="form__field">
-            <span>Instrutor</span>
-            <select name="instrutorId" value={form.instrutorId} onChange={handleChange}>
-              <option value="">Selecione</option>
-              {instrutores.map((instrutor) => (
-                <option key={instrutor.id} value={instrutor.id}>
-                  {instrutor.nome}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="form__field">
-            <span>Dias (ex: Segunda,Quarta)</span>
-            <input name="diaSemana" value={form.diaSemana} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Início</span>
-            <input type="time" name="horaInicio" value={form.horaInicio} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Fim</span>
-            <input type="time" name="horaFim" value={form.horaFim} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Vagas</span>
-            <input type="number" name="vagas" min="1" value={form.vagas} onChange={handleChange} />
-          </label>
-          <div className="form__actions">
-            <button type="submit" className="btn btn--primary">
-              {editando ? 'Salvar alterações' : 'Adicionar turma'}
-            </button>
-            <Link to="/admin/turmas" className="btn btn--ghost">
-              Cancelar
-            </Link>
-          </div>
-          {erro && <p className="alert alert--error">{erro}</p>}
-        </form>
-      </div>
+      <CCard>
+        <CCardBody>
+          <CForm onSubmit={handleSubmit}>
+            <CRow className="g-3">
+              <CCol md={4}>
+                <CFormLabel>Nome</CFormLabel>
+                <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Modalidade</CFormLabel>
+                <CFormInput name="modalidade" value={form.modalidade} onChange={handleChange} required />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Nível</CFormLabel>
+                <CFormInput name="nivel" value={form.nivel} onChange={handleChange} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Instrutor</CFormLabel>
+                <CFormSelect name="instrutorId" value={form.instrutorId} onChange={handleChange}>
+                  <option value="">Selecione</option>
+                  {instrutores.map((instrutor) => (
+                    <option key={instrutor.id} value={instrutor.id}>
+                      {instrutor.nome}
+                    </option>
+                  ))}
+                </CFormSelect>
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Dias (ex: Segunda,Quarta)</CFormLabel>
+                <CFormInput name="diaSemana" value={form.diaSemana} onChange={handleChange} required />
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Início</CFormLabel>
+                <CFormInput type="time" name="horaInicio" value={form.horaInicio} onChange={handleChange} required />
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Fim</CFormLabel>
+                <CFormInput type="time" name="horaFim" value={form.horaFim} onChange={handleChange} required />
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Vagas</CFormLabel>
+                <CFormInput type="number" name="vagas" min="1" value={form.vagas} onChange={handleChange} />
+              </CCol>
+            </CRow>
+
+            <div className="d-flex gap-2 mt-4">
+              <CButton type="submit" color="primary">
+                {editando ? 'Salvar alterações' : 'Adicionar turma'}
+              </CButton>
+              <CButton as={Link} to="/admin/turmas" color="secondary" variant="outline">
+                Cancelar
+              </CButton>
+            </div>
+            {erro && <div className="alert alert-danger mt-3">{erro}</div>}
+          </CForm>
+        </CCardBody>
+      </CCard>
     </div>
   );
 }

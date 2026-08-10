@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormTextarea, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
-import { IconBack } from '../../components/icons.jsx';
 
 const estadoInicial = {
   nome: '',
@@ -55,44 +55,49 @@ export default function InstrutorForm() {
 
   return (
     <div>
-      <Link to="/admin/instrutores" className="form-page__back">
-        <IconBack /> Voltar
+      <Link to="/admin/instrutores" className="text-body-secondary text-decoration-none d-inline-block mb-2">
+        &larr; Voltar
       </Link>
-      <h1 className="admin__title">{editando ? 'Editar instrutor' : 'Novo instrutor'}</h1>
+      <h1 className="h3 mb-3">{editando ? 'Editar instrutor' : 'Novo instrutor'}</h1>
 
-      <div className="form-page">
-        <form className="form form--inline" onSubmit={handleSubmit}>
-          <label className="form__field">
-            <span>Nome</span>
-            <input name="nome" value={form.nome} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Faixa</span>
-            <input name="faixa" value={form.faixa} onChange={handleChange} />
-          </label>
-          <label className="form__field">
-            <span>Especialidade</span>
-            <input name="especialidade" value={form.especialidade} onChange={handleChange} />
-          </label>
-          <label className="form__field">
-            <span>Foto (URL)</span>
-            <input name="fotoUrl" value={form.fotoUrl} onChange={handleChange} />
-          </label>
-          <label className="form__field form__field--wide">
-            <span>Bio</span>
-            <textarea name="bio" rows={2} value={form.bio} onChange={handleChange} />
-          </label>
-          <div className="form__actions">
-            <button type="submit" className="btn btn--primary">
-              {editando ? 'Salvar alterações' : 'Adicionar instrutor'}
-            </button>
-            <Link to="/admin/instrutores" className="btn btn--ghost">
-              Cancelar
-            </Link>
-          </div>
-          {erro && <p className="alert alert--error">{erro}</p>}
-        </form>
-      </div>
+      <CCard>
+        <CCardBody>
+          <CForm onSubmit={handleSubmit}>
+            <CRow className="g-3">
+              <CCol md={4}>
+                <CFormLabel>Nome</CFormLabel>
+                <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Faixa</CFormLabel>
+                <CFormInput name="faixa" value={form.faixa} onChange={handleChange} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Especialidade</CFormLabel>
+                <CFormInput name="especialidade" value={form.especialidade} onChange={handleChange} />
+              </CCol>
+              <CCol md={6}>
+                <CFormLabel>Foto (URL)</CFormLabel>
+                <CFormInput name="fotoUrl" value={form.fotoUrl} onChange={handleChange} />
+              </CCol>
+              <CCol xs={12}>
+                <CFormLabel>Bio</CFormLabel>
+                <CFormTextarea name="bio" rows={2} value={form.bio} onChange={handleChange} />
+              </CCol>
+            </CRow>
+
+            <div className="d-flex gap-2 mt-4">
+              <CButton type="submit" color="primary">
+                {editando ? 'Salvar alterações' : 'Adicionar instrutor'}
+              </CButton>
+              <CButton as={Link} to="/admin/instrutores" color="secondary" variant="outline">
+                Cancelar
+              </CButton>
+            </div>
+            {erro && <div className="alert alert-danger mt-3">{erro}</div>}
+          </CForm>
+        </CCardBody>
+      </CCard>
     </div>
   );
 }

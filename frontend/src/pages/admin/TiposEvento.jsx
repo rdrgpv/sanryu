@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+} from '@coreui/react';
 import api from '../../services/api';
-import Modal from '../../components/Modal.jsx';
-import { IconPlus } from '../../components/icons.jsx';
-
-const estadoInicial = { nome: '', cobravel: false };
+import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 
 export default function TiposEvento() {
+  const navigate = useNavigate();
   const [tipos, setTipos] = useState([]);
-  const [form, setForm] = useState(estadoInicial);
-  const [editandoId, setEditandoId] = useState(null);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [erro, setErro] = useState(null);
+  const [selecionadoId, setSelecionadoId] = useState(null);
 
   async function carregarTipos() {
     const res = await api.get('/admin/tipos-evento');
@@ -21,130 +25,67 @@ export default function TiposEvento() {
     carregarTipos();
   }, []);
 
-  function handleChange(event) {
-    const { name, value, type, checked } = event.target;
-    setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  function selecionarLinha(id) {
+    setSelecionadoId((atual) => (atual === id ? null : id));
   }
 
-  function abrirNovo() {
-    setEditandoId(null);
-    setForm(estadoInicial);
-    setModalAberto(true);
-  }
-
-  function iniciarEdicao(tipo) {
-    setEditandoId(tipo.id);
-    setForm({ nome: tipo.nome, cobravel: tipo.cobravel });
-    setModalAberto(true);
-  }
-
-  function fecharModal() {
-    setModalAberto(false);
-    setEditandoId(null);
-    setForm(estadoInicial);
-    setErro(null);
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setErro(null);
-
-    try {
-      if (editandoId) {
-        await api.put(`/admin/tipos-evento/${editandoId}`, form);
-      } else {
-        await api.post('/admin/tipos-evento', form);
-      }
-      fecharModal();
-      carregarTipos();
-    } catch (err) {
-      setErro(err.response?.data?.error || 'Erro ao salvar tipo de evento.');
-    }
-  }
-
-  async function handleRemover(tipo) {
+  async function handleExcluir() {
+    if (!selecionadoId) return;
     if (!window.confirm('Tem certeza que deseja excluir este tipo de evento?')) return;
 
     try {
-      await api.delete(`/admin/tipos-evento/${tipo.id}`);
+      await api.delete(`/admin/tipos-evento/${selecionadoId}`);
+      setSelecionadoId(null);
       carregarTipos();
     } catch (err) {
       window.alert(err.response?.data?.error || 'Erro ao excluir tipo de evento.');
     }
   }
 
+  const selecionado = tipos.find((t) => t.id === selecionadoId);
+  const podeExcluir = !!selecionado && selecionado.id !== 1;
+
   return (
     <div>
-      <div className="admin__header">
-        <h1 className="admin__title">Tipos de Evento</h1>
-        <button type="button" className="btn btn--primary" onClick={abrirNovo}>
-          <IconPlus style={{ verticalAlign: '-3px', marginRight: '0.4rem' }} />
-          Novo tipo de evento
-        </button>
-      </div>
+      <h1 className="h3 mb-3">Tipos de Evento</h1>
 
-      {modalAberto && (
-        <Modal title={editandoId ? 'Editar tipo de evento' : 'Novo tipo de evento'} onClose={fecharModal}>
-          <form className="form form--inline" onSubmit={handleSubmit}>
-            <label className="form__field">
-              <span>Nome</span>
-              <input name="nome" value={form.nome} onChange={handleChange} required />
-            </label>
-            <label className="form__field form__field--checkbox">
-              <input type="checkbox" name="cobravel" checked={form.cobravel} onChange={handleChange} />
-              <span>Cobrável</span>
-            </label>
-            <div className="form__actions">
-              <button type="submit" className="btn btn--primary">
-                {editandoId ? 'Salvar alterações' : 'Adicionar tipo de evento'}
-              </button>
-              <button type="button" className="btn btn--ghost" onClick={fecharModal}>
-                Cancelar
-              </button>
-            </div>
-            {erro && <p className="alert alert--error">{erro}</p>}
-          </form>
-        </Modal>
+      <AdminToolbar
+        podeEditar={!!selecionadoId}
+        podeExcluir={podeExcluir}
+        onNovo={() => navigate('/admin/tipos-evento/novo')}
+        onEditar={() => navigate(`/admin/tipos-evento/${selecionadoId}/editar`)}
+        onExcluir={handleExcluir}
+        onAtualizar={carregarTipos}
+      />
+      {selecionado?.id === 1 && (
+        <p className="text-body-secondary small mt-n2 mb-3">
+          O tipo padrão "Exame de Faixa" não pode ser excluído.
+        </p>
       )}
 
-      <div className="table-scroll">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Cobrável</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tipos.map((tipo) => (
-              <tr key={tipo.id}>
-                <td>{tipo.nome}</td>
-                <td>{tipo.cobravel ? 'Sim' : 'Não'}</td>
-                <td className="data-table__actions">
-                  <button type="button" className="btn btn--small" onClick={() => iniciarEdicao(tipo)}>
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn--small btn--danger"
-                    onClick={() => handleRemover(tipo)}
-                    disabled={tipo.id === 1}
-                    title={tipo.id === 1 ? 'O tipo padrão "Exame de Faixa" não pode ser excluído.' : undefined}
-                  >
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {tipos.length === 0 && (
-              <tr>
-                <td colSpan={3}>Nenhum tipo de evento cadastrado.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <CTable hover responsive className="bg-white">
+        <CTableHead>
+          <CTableRow>
+            <CTableHeaderCell>Nome</CTableHeaderCell>
+            <CTableHeaderCell>Cobrável</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {tipos.map((tipo) => (
+            <CTableRow key={tipo.id} active={selecionadoId === tipo.id} onClick={() => selecionarLinha(tipo.id)}>
+              <CTableDataCell>{tipo.nome}</CTableDataCell>
+              <CTableDataCell>{tipo.cobravel ? 'Sim' : 'Não'}</CTableDataCell>
+            </CTableRow>
+          ))}
+          {tipos.length === 0 && (
+            <CTableRow>
+              <CTableDataCell colSpan={2} className="text-body-secondary">
+                Nenhum tipo de evento cadastrado.
+              </CTableDataCell>
+            </CTableRow>
+          )}
+        </CTableBody>
+      </CTable>
     </div>
   );
 }

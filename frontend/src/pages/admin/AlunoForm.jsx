@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
-import { IconBack } from '../../components/icons.jsx';
 
 const estadoInicial = {
   nome: '',
@@ -57,48 +57,57 @@ export default function AlunoForm() {
 
   return (
     <div>
-      <Link to="/admin/alunos" className="form-page__back">
-        <IconBack /> Voltar
+      <Link to="/admin/alunos" className="text-body-secondary text-decoration-none d-inline-block mb-2">
+        &larr; Voltar
       </Link>
-      <h1 className="admin__title">{editando ? 'Editar aluno' : 'Novo aluno'}</h1>
+      <h1 className="h3 mb-3">{editando ? 'Editar aluno' : 'Novo aluno'}</h1>
 
-      <div className="form-page">
-        <form className="form form--inline" onSubmit={handleSubmit}>
-          <label className="form__field">
-            <span>Nome</span>
-            <input name="nome" value={form.nome} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Email</span>
-            <input type="email" name="email" value={form.email} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Telefone</span>
-            <input name="telefone" value={form.telefone} onChange={handleChange} />
-          </label>
-          <label className="form__field">
-            <span>Nascimento</span>
-            <input type="date" name="dataNascimento" value={form.dataNascimento} onChange={handleChange} />
-          </label>
-          <label className="form__field">
-            <span>Faixa</span>
-            <input name="faixa" value={form.faixa} onChange={handleChange} />
-          </label>
-          <label className="form__field form__field--checkbox">
-            <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
-            <span>Ativo</span>
-          </label>
-          <div className="form__actions">
-            <button type="submit" className="btn btn--primary">
-              {editando ? 'Salvar alterações' : 'Adicionar aluno'}
-            </button>
-            <Link to="/admin/alunos" className="btn btn--ghost">
-              Cancelar
-            </Link>
-          </div>
-          {erro && <p className="alert alert--error">{erro}</p>}
-        </form>
-      </div>
+      <CCard>
+        <CCardBody>
+          <CForm onSubmit={handleSubmit}>
+            <CRow className="g-3">
+              <CCol md={4}>
+                <CFormLabel>Nome</CFormLabel>
+                <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Email</CFormLabel>
+                <CFormInput type="email" name="email" value={form.email} onChange={handleChange} required />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Telefone</CFormLabel>
+                <CFormInput name="telefone" value={form.telefone} onChange={handleChange} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Nascimento</CFormLabel>
+                <CFormInput
+                  type="date"
+                  name="dataNascimento"
+                  value={form.dataNascimento}
+                  onChange={handleChange}
+                />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Faixa</CFormLabel>
+                <CFormInput name="faixa" value={form.faixa} onChange={handleChange} />
+              </CCol>
+              <CCol md={4} className="d-flex align-items-end">
+                <CFormCheck name="ativo" label="Ativo" checked={form.ativo} onChange={handleChange} />
+              </CCol>
+            </CRow>
+
+            <div className="d-flex gap-2 mt-4">
+              <CButton type="submit" color="primary">
+                {editando ? 'Salvar alterações' : 'Adicionar aluno'}
+              </CButton>
+              <CButton as={Link} to="/admin/alunos" color="secondary" variant="outline">
+                Cancelar
+              </CButton>
+            </div>
+            {erro && <div className="alert alert-danger mt-3">{erro}</div>}
+          </CForm>
+        </CCardBody>
+      </CCard>
     </div>
   );
 }

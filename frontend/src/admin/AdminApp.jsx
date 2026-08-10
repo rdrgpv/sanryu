@@ -9,8 +9,12 @@ import InstrutorForm from '../pages/admin/InstrutorForm.jsx';
 import Faixas from '../pages/admin/Faixas.jsx';
 import FaixaForm from '../pages/admin/FaixaForm.jsx';
 import TiposEvento from '../pages/admin/TiposEvento.jsx';
+import TipoEventoForm from '../pages/admin/TipoEventoForm.jsx';
 import EventosAdmin from '../pages/admin/Eventos.jsx';
+import EventoForm from '../pages/admin/EventoForm.jsx';
+import EventoInscricoes from '../pages/admin/EventoInscricoes.jsx';
 import Bancos from '../pages/admin/Bancos.jsx';
+import BancoForm from '../pages/admin/BancoForm.jsx';
 import Configuracoes from '../pages/admin/Configuracoes.jsx';
 import AdminRoute from '../components/AdminRoute.jsx';
 import '@coreui/coreui/dist/css/coreui.min.css';
@@ -38,8 +42,18 @@ export default function AdminApp() {
       <Route path="faixas/:id/editar" element={<AdminRoute><FaixaForm /></AdminRoute>} />
 
       <Route path="tipos-evento" element={<AdminRoute><TiposEvento /></AdminRoute>} />
+      <Route path="tipos-evento/novo" element={<AdminRoute><TipoEventoForm /></AdminRoute>} />
+      <Route path="tipos-evento/:id/editar" element={<AdminRoute><TipoEventoForm /></AdminRoute>} />
+
       <Route path="eventos" element={<AdminRoute><EventosAdmin /></AdminRoute>} />
+      <Route path="eventos/novo" element={<AdminRoute><EventoForm /></AdminRoute>} />
+      <Route path="eventos/:id/editar" element={<AdminRoute><EventoForm /></AdminRoute>} />
+      <Route path="eventos/:id/inscricoes" element={<AdminRoute><EventoInscricoes /></AdminRoute>} />
+
       <Route path="bancos" element={<AdminRoute><Bancos /></AdminRoute>} />
+      <Route path="bancos/novo" element={<AdminRoute><BancoForm /></AdminRoute>} />
+      <Route path="bancos/:id/editar" element={<AdminRoute><BancoForm /></AdminRoute>} />
+
       <Route path="configuracoes" element={<AdminRoute><Configuracoes /></AdminRoute>} />
     </Routes>
   );

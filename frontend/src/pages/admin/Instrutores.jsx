@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+} from '@coreui/react';
 import api from '../../services/api';
-import Toolbar from '../../components/Toolbar.jsx';
+import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 
 export default function Instrutores() {
   const navigate = useNavigate();
@@ -31,9 +39,9 @@ export default function Instrutores() {
 
   return (
     <div>
-      <h1 className="admin__title">Instrutores</h1>
+      <h1 className="h3 mb-3">Instrutores</h1>
 
-      <Toolbar
+      <AdminToolbar
         podeEditar={!!selecionadoId}
         onNovo={() => navigate('/admin/instrutores/novo')}
         onEditar={() => navigate(`/admin/instrutores/${selecionadoId}/editar`)}
@@ -41,37 +49,37 @@ export default function Instrutores() {
         onAtualizar={carregarInstrutores}
       />
 
-      <div className="table-scroll">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Faixa</th>
-              <th>Especialidade</th>
-              <th>Bio</th>
-            </tr>
-          </thead>
-          <tbody>
-            {instrutores.map((instrutor) => (
-              <tr
-                key={instrutor.id}
-                className={selecionadoId === instrutor.id ? 'is-selected' : ''}
-                onClick={() => selecionarLinha(instrutor.id)}
-              >
-                <td>{instrutor.nome}</td>
-                <td>{instrutor.faixa}</td>
-                <td>{instrutor.especialidade || '-'}</td>
-                <td className="data-table__bio">{instrutor.bio || '-'}</td>
-              </tr>
-            ))}
-            {instrutores.length === 0 && (
-              <tr>
-                <td colSpan={4}>Nenhum instrutor cadastrado.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <CTable hover responsive className="bg-white">
+        <CTableHead>
+          <CTableRow>
+            <CTableHeaderCell>Nome</CTableHeaderCell>
+            <CTableHeaderCell>Faixa</CTableHeaderCell>
+            <CTableHeaderCell>Especialidade</CTableHeaderCell>
+            <CTableHeaderCell>Bio</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {instrutores.map((instrutor) => (
+            <CTableRow
+              key={instrutor.id}
+              active={selecionadoId === instrutor.id}
+              onClick={() => selecionarLinha(instrutor.id)}
+            >
+              <CTableDataCell>{instrutor.nome}</CTableDataCell>
+              <CTableDataCell>{instrutor.faixa}</CTableDataCell>
+              <CTableDataCell>{instrutor.especialidade || '-'}</CTableDataCell>
+              <CTableDataCell style={{ maxWidth: 320 }}>{instrutor.bio || '-'}</CTableDataCell>
+            </CTableRow>
+          ))}
+          {instrutores.length === 0 && (
+            <CTableRow>
+              <CTableDataCell colSpan={4} className="text-body-secondary">
+                Nenhum instrutor cadastrado.
+              </CTableDataCell>
+            </CTableRow>
+          )}
+        </CTableBody>
+      </CTable>
     </div>
   );
 }

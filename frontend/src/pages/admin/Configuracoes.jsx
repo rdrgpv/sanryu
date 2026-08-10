@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CInputGroup, CButton } from '@coreui/react';
 import api from '../../services/api';
 
 const SISTEMA = 'SAN';
@@ -75,11 +76,8 @@ export default function Configuracoes() {
 
   return (
     <div>
-      <div className="admin__header">
-        <h1 className="admin__title">Configurações</h1>
-      </div>
-
-      <p className="tile__meta" style={{ marginBottom: '1.25rem' }}>
+      <h1 className="h3 mb-2">Configurações</h1>
+      <p className="text-body-secondary mb-3">
         Credenciais de integração do sistema. As alterações valem imediatamente, sem precisar
         reiniciar o servidor.
       </p>
@@ -87,39 +85,41 @@ export default function Configuracoes() {
       {carregando ? (
         <p>Carregando...</p>
       ) : (
-        <form className="form form--inline" onSubmit={handleSubmit}>
-          {CAMPOS.map((campo) => (
-            <label key={campo.parametro} className="form__field form__field--wide">
-              <span>{campo.label}</span>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type={campo.sensivel && !visiveis[campo.parametro] ? 'password' : 'text'}
-                  value={valores[campo.parametro]}
-                  onChange={(event) => handleChange(campo.parametro, event.target.value)}
-                  style={{ flex: 1 }}
-                />
-                {campo.sensivel && (
-                  <button
-                    type="button"
-                    className="btn btn--ghost btn--small"
-                    onClick={() => alternarVisibilidade(campo.parametro)}
-                  >
-                    {visiveis[campo.parametro] ? 'Ocultar' : 'Mostrar'}
-                  </button>
-                )}
-              </div>
-            </label>
-          ))}
+        <CCard style={{ maxWidth: 640 }}>
+          <CCardBody>
+            <CForm onSubmit={handleSubmit}>
+              {CAMPOS.map((campo) => (
+                <div key={campo.parametro} className="mb-3">
+                  <CFormLabel>{campo.label}</CFormLabel>
+                  {campo.sensivel ? (
+                    <CInputGroup>
+                      <CFormInput
+                        type={visiveis[campo.parametro] ? 'text' : 'password'}
+                        value={valores[campo.parametro]}
+                        onChange={(event) => handleChange(campo.parametro, event.target.value)}
+                      />
+                      <CButton color="secondary" variant="outline" onClick={() => alternarVisibilidade(campo.parametro)}>
+                        {visiveis[campo.parametro] ? 'Ocultar' : 'Mostrar'}
+                      </CButton>
+                    </CInputGroup>
+                  ) : (
+                    <CFormInput
+                      value={valores[campo.parametro]}
+                      onChange={(event) => handleChange(campo.parametro, event.target.value)}
+                    />
+                  )}
+                </div>
+              ))}
 
-          <div className="form__actions">
-            <button type="submit" className="btn btn--primary" disabled={salvando}>
-              {salvando ? 'Salvando...' : 'Salvar configurações'}
-            </button>
-          </div>
+              <CButton type="submit" color="primary" disabled={salvando}>
+                {salvando ? 'Salvando...' : 'Salvar configurações'}
+              </CButton>
 
-          {sucesso && <p className="alert alert--success">Configurações salvas com sucesso.</p>}
-          {erro && <p className="alert alert--error">{erro}</p>}
-        </form>
+              {sucesso && <div className="alert alert-success mt-3">Configurações salvas com sucesso.</div>}
+              {erro && <div className="alert alert-danger mt-3">{erro}</div>}
+            </CForm>
+          </CCardBody>
+        </CCard>
       )}
     </div>
   );
