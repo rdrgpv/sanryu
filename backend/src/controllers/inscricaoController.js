@@ -1,6 +1,7 @@
 const { Evento, TipoEvento, Banco, EventoAluno } = require('../models');
 const gatameService = require('../services/gatameService');
 const pixService = require('../services/pixService');
+const mercadoPagoService = require('../services/mercadoPagoService');
 const { calcularValorInscricao } = require('../services/valorInscricaoService');
 
 function mapCandidato(raw) {
@@ -28,7 +29,7 @@ function tratarErroConsulta(err, res) {
 async function listarPublicados(req, res) {
   const eventos = await Evento.findAll({
     where: { publicado: true },
-    attributes: ['id', 'nome', 'descricao', 'local', 'data'],
+    attributes: ['id', 'nome', 'descricao', 'local', 'data', 'banner'],
     include: { model: TipoEvento, as: 'tipoEvento', attributes: ['nome'] },
     order: [['data', 'ASC']],
   });
@@ -39,7 +40,8 @@ async function listarPublicados(req, res) {
 async function buscarPublico(req, res) {
   const evento = await Evento.findOne({
     where: { id: req.params.id, publicado: true },
-    attributes: ['id', 'nome', 'descricao', 'local', 'data'],
+    attributes: ['id', 'nome', 'descricao', 'local', 'data', 'banner'],
+    include: { model: TipoEvento, as: 'tipoEvento', attributes: ['id', 'nome'] },
   });
 
   if (!evento) {
@@ -85,7 +87,7 @@ async function inscrever(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const { email, indice } = req.body;
+  const { email, indice, faixaEscolhida } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -93,8 +95,13 @@ async function inscrever(req, res) {
 
   const existente = await EventoAluno.findOne({ where: { eventoId: evento.id, email } });
 
-  if (existente) {
-    return res.status(200).json(existente);
+  // Um registro existente sem valor calculado (statusPagamento "pendente" e valorCobrado nulo) nunca chegou a
+  // ser resolvido — ex.: a faixa ainda não estava cadastrada. Nesse caso, permite recalcular em vez de travar
+  // a pessoa nesse estado para sempre.
+  const pendenteSemValor = existente && existente.valorCobrado == null && existente.statusPagamento === 'pendente';
+
+  if (existente && !pendenteSemValor) {
+    return res.status(200).json({ ...existente.toJSON(), jaInscrito: true });
   }
 
   let resultado;
@@ -120,32 +127,62 @@ async function inscrever(req, res) {
   }
 
   const candidato = mapCandidato(candidatoRaw);
-  const resultadoValor = await calcularValorInscricao({ evento, tipoEvento: evento.tipoEvento, candidato });
+  const resultadoValor = await calcularValorInscricao({
+    evento,
+    tipoEvento: evento.tipoEvento,
+    candidato,
+    faixaEscolhida,
+  });
+
+  if (resultadoValor.erroValidacao) {
+    return res.status(400).json({ error: resultadoValor.erroValidacao, opcoesFaixa: resultadoValor.opcoesFaixa });
+  }
 
   let qrcodePix = null;
+  let pixCopiaCola = null;
+  let mpPaymentId = null;
 
   if (resultadoValor.valor && Number(resultadoValor.valor) > 0) {
-    const banco = await Banco.findOne({ order: [['id', 'ASC']] });
-
-    if (banco) {
-      const payload = pixService.gerarPayload({
-        chavePix: banco.chavePix,
-        nomeRecebedor: banco.titular,
-        cidade: process.env.PIX_CIDADE || 'SAO PAULO',
+    const pagamentoMp = await mercadoPagoService
+      .criarPagamentoPix({
         valor: resultadoValor.valor,
-        txid: `EVT${evento.id}${Date.now()}`,
+        descricao: `Inscrição - ${evento.nome}`,
+        email,
+        referenciaExterna: `EVT${evento.id}-${Date.now()}`,
+      })
+      .catch((err) => {
+        console.error('Erro ao criar pagamento Pix via Mercado Pago, caindo para QR estático:', err.message);
+        return null;
       });
-      qrcodePix = await pixService.gerarQrCodeBase64(payload);
+
+    if (pagamentoMp) {
+      qrcodePix = pagamentoMp.qrcodeBase64;
+      pixCopiaCola = pagamentoMp.pixCopiaCola;
+      mpPaymentId = pagamentoMp.paymentId;
     } else {
-      console.error('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
+      // Fallback: Mercado Pago não configurado (ou falhou) — usa a chave Pix estática de /admin/bancos.
+      const banco = await Banco.findOne({ order: [['id', 'ASC']] });
+
+      if (banco) {
+        pixCopiaCola = pixService.gerarPayload({
+          chavePix: banco.chavePix,
+          nomeRecebedor: banco.titular,
+          cidade: banco.cidade,
+          valor: resultadoValor.valor,
+          txid: `EVT${evento.id}${Date.now()}`,
+        });
+        qrcodePix = await pixService.gerarQrCodeBase64(pixCopiaCola);
+      } else {
+        console.error('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
+      }
     }
   }
 
-  const eventoAluno = await EventoAluno.create({
+  const dadosInscricao = {
     eventoId: evento.id,
     email,
     nome: candidato.nome,
-    faixa: candidato.faixa,
+    faixa: resultadoValor.faixaUsada || candidato.faixa,
     dataNascimento: candidato.dataNascimento,
     numeroCarteirinha: candidato.numeroCarteirinha,
     validadeCarteirinha: candidato.validadeCarteirinha,
@@ -154,9 +191,13 @@ async function inscrever(req, res) {
     valorCobrado: resultadoValor.valor,
     statusPagamento: resultadoValor.statusPagamento,
     qrcodePix,
-  });
+    pixCopiaCola,
+    mpPaymentId,
+  };
 
-  res.status(201).json({ ...eventoAluno.toJSON(), aviso: resultadoValor.aviso });
+  const eventoAluno = pendenteSemValor ? await existente.update(dadosInscricao) : await EventoAluno.create(dadosInscricao);
+
+  res.status(pendenteSemValor ? 200 : 201).json({ ...eventoAluno.toJSON(), aviso: resultadoValor.aviso });
 }
 
 module.exports = { listarPublicados, buscarPublico, consultarCarteirinha, inscrever };

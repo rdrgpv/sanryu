@@ -18,6 +18,11 @@ const Banco = sequelize.define('Banco', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  cidade: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'SAO PAULO',
+  },
 });
 
 module.exports = Banco;

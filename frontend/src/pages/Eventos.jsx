@@ -33,6 +33,13 @@ export default function Eventos() {
             <div className="grid grid--3">
               {eventos.map((evento) => (
                 <Link key={evento.id} to={`/eventos/${evento.id}`} className="tile" style={{ textDecoration: 'none' }}>
+                  {evento.banner && (
+                    <img
+                      src={evento.banner}
+                      alt=""
+                      style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 'var(--raio)', marginBottom: '1rem' }}
+                    />
+                  )}
                   <p className="tile__tag">{evento.tipoEvento?.nome}</p>
                   <h3>{evento.nome}</h3>
                   <p>{new Date(evento.data).toLocaleString('pt-BR')}</p>

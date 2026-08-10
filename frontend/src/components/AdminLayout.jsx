@@ -10,6 +10,7 @@ const links = [
   { to: '/admin/tipos-evento', label: 'Tipos de Evento' },
   { to: '/admin/eventos', label: 'Eventos' },
   { to: '/admin/bancos', label: 'Configuração Pix' },
+  { to: '/admin/configuracoes', label: 'Configurações' },
 ];
 
 export default function AdminLayout({ children }) {

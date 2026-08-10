@@ -5,7 +5,7 @@ import { IconPlus } from '../../components/icons.jsx';
 
 const TIPOS_CHAVE = ['cpf', 'cnpj', 'email', 'telefone', 'aleatoria'];
 
-const estadoInicial = { nome: '', chavePix: '', tipoChave: TIPOS_CHAVE[2], titular: '' };
+const estadoInicial = { nome: '', chavePix: '', tipoChave: TIPOS_CHAVE[2], titular: '', cidade: '' };
 
 export default function Bancos() {
   const [bancos, setBancos] = useState([]);
@@ -41,6 +41,7 @@ export default function Bancos() {
       chavePix: banco.chavePix,
       tipoChave: banco.tipoChave,
       titular: banco.titular,
+      cidade: banco.cidade,
     });
     setModalAberto(true);
   }
@@ -114,6 +115,10 @@ export default function Bancos() {
               <span>Chave Pix</span>
               <input name="chavePix" value={form.chavePix} onChange={handleChange} required />
             </label>
+            <label className="form__field">
+              <span>Cidade</span>
+              <input name="cidade" value={form.cidade} onChange={handleChange} required />
+            </label>
             <div className="form__actions">
               <button type="submit" className="btn btn--primary">
                 {editandoId ? 'Salvar alterações' : 'Adicionar configuração'}
@@ -135,6 +140,7 @@ export default function Bancos() {
               <th>Titular</th>
               <th>Tipo de chave</th>
               <th>Chave Pix</th>
+              <th>Cidade</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -145,6 +151,7 @@ export default function Bancos() {
                 <td>{banco.titular}</td>
                 <td>{banco.tipoChave}</td>
                 <td>{banco.chavePix}</td>
+                <td>{banco.cidade}</td>
                 <td className="data-table__actions">
                   <button type="button" className="btn btn--small" onClick={() => iniciarEdicao(banco)}>
                     Editar
@@ -161,7 +168,7 @@ export default function Bancos() {
             ))}
             {bancos.length === 0 && (
               <tr>
-                <td colSpan={5}>Nenhuma configuração Pix cadastrada.</td>
+                <td colSpan={6}>Nenhuma configuração Pix cadastrada.</td>
               </tr>
             )}
           </tbody>

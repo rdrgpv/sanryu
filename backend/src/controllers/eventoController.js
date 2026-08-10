@@ -1,5 +1,6 @@
 const { Evento, TipoEvento, EventoAluno } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
+const mercadoPagoService = require('../services/mercadoPagoService');
 
 // Aplica a regra de valor do item 2: só é permitido usar o campo "valor" do evento
 // quando o tipo é cobrável e diferente de Exame de Faixa (cujo valor vem da faixa).
@@ -87,4 +88,34 @@ async function listarInscricoes(req, res) {
   res.json(inscricoes);
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, listarInscricoes };
+async function verificarPagamento(req, res) {
+  const inscricao = await EventoAluno.findByPk(req.params.id);
+
+  if (!inscricao) {
+    return res.status(404).json({ error: 'Inscrição não encontrada.' });
+  }
+
+  if (!inscricao.mpPaymentId) {
+    return res.status(400).json({ error: 'Esta inscrição não possui um pagamento via Mercado Pago associado.' });
+  }
+
+  try {
+    const resultado = await mercadoPagoService.consultarPagamento(inscricao.mpPaymentId);
+
+    if (resultado.statusPagamento !== inscricao.statusPagamento) {
+      await inscricao.update({ statusPagamento: resultado.statusPagamento });
+    }
+
+    res.json(inscricao);
+  } catch (err) {
+    if (err.interno) {
+      console.error(err);
+      return res.status(500).json({ error: 'Erro de configuração ao consultar o Mercado Pago.' });
+    }
+
+    console.error(err);
+    res.status(502).json({ error: 'Não foi possível consultar o status do pagamento agora. Tente novamente.' });
+  }
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover, listarInscricoes, verificarPagamento };

@@ -55,6 +55,14 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  pixCopiaCola: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  mpPaymentId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = EventoAluno;

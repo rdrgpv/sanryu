@@ -66,12 +66,12 @@ export default function Contato() {
 
           <div className="contact-info">
             <h2>Endereço</h2>
-            <p>Rua das Artes Marciais, 123 — São Paulo, SP</p>
+            <p>Rua Monte Serrat, 380 — Tatuapé, São Paulo - SP, 03312-000</p>
             <p>(11) 4000-0000</p>
-            <p>contato@sanryudojo.com.br</p>
+            <p>contato@sanryu.com.br</p>
 
             <div className="map-placeholder" role="img" aria-label="Mapa de localização do San·Ryu Dojo">
-              Mapa — Rua das Artes Marciais, 123
+              Mapa — Rua Monte Serrat, 380 — Tatuapé, São Paulo - SP
             </div>
           </div>
         </div>

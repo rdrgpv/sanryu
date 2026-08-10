@@ -9,6 +9,7 @@ const TipoEvento = require('./TipoEvento');
 const Evento = require('./Evento');
 const Banco = require('./Banco');
 const EventoAluno = require('./EventoAluno');
+const Configuracao = require('./Configuracao');
 
 Instrutor.hasMany(Turma, { foreignKey: 'instrutorId', as: 'turmas' });
 Turma.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
@@ -39,4 +40,5 @@ module.exports = {
   Evento,
   Banco,
   EventoAluno,
+  Configuracao,
 };

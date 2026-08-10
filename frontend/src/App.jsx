@@ -15,6 +15,7 @@ import Faixas from './pages/admin/Faixas.jsx';
 import TiposEvento from './pages/admin/TiposEvento.jsx';
 import EventosAdmin from './pages/admin/Eventos.jsx';
 import Bancos from './pages/admin/Bancos.jsx';
+import Configuracoes from './pages/admin/Configuracoes.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import PublicLayout from './components/PublicLayout.jsx';
 import AdminLayout from './components/AdminLayout.jsx';
@@ -92,6 +93,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AdminLayout><Bancos /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/configuracoes"
+        element={
+          <ProtectedRoute>
+            <AdminLayout><Configuracoes /></AdminLayout>
           </ProtectedRoute>
         }
       />

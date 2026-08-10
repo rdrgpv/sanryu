@@ -9,6 +9,7 @@ const faixaController = require('../controllers/faixaController');
 const tipoEventoController = require('../controllers/tipoEventoController');
 const eventoController = require('../controllers/eventoController');
 const bancoController = require('../controllers/bancoController');
+const configuracaoController = require('../controllers/configuracaoController');
 
 const router = express.Router();
 
@@ -57,11 +58,18 @@ router.get('/eventos/:id', eventoController.buscarPorId);
 router.put('/eventos/:id', eventoController.atualizar);
 router.delete('/eventos/:id', eventoController.remover);
 router.get('/eventos/:id/inscricoes', eventoController.listarInscricoes);
+router.post('/inscricoes/:id/verificar-pagamento', eventoController.verificarPagamento);
 
 router.get('/bancos', bancoController.listar);
 router.post('/bancos', bancoController.criar);
 router.get('/bancos/:id', bancoController.buscarPorId);
 router.put('/bancos/:id', bancoController.atualizar);
 router.delete('/bancos/:id', bancoController.remover);
+
+router.get('/configuracoes', configuracaoController.listar);
+router.post('/configuracoes', configuracaoController.criar);
+router.get('/configuracoes/:id', configuracaoController.buscarPorId);
+router.put('/configuracoes/:id', configuracaoController.atualizar);
+router.delete('/configuracoes/:id', configuracaoController.remover);
 
 module.exports = router;

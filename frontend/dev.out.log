@@ -3,7 +3,31 @@
 > vite
 
 
-  VITE v4.5.14  ready in 530 ms
+  VITE v4.5.14  ready in 605 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+21:41:33 [vite] hmr update /src/pages/admin/Eventos.jsx
+21:43:17 [vite] hmr update /src/pages/admin/Eventos.jsx
+21:45:31 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:45:58 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:48:27 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:48:34 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:48:43 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:48:59 [vite] hmr update /src/pages/admin/Eventos.jsx
+21:49:07 [vite] hmr update /src/pages/admin/Eventos.jsx
+21:58:23 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:58:32 [vite] hmr update /src/pages/InscricaoEvento.jsx
+21:58:48 [vite] hmr update /src/pages/InscricaoEvento.jsx
+22:15:08 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:15:26 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:15:33 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:15:42 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:15:47 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:16:12 [vite] hmr update /src/pages/Eventos.jsx
+22:16:22 [vite] hmr update /src/pages/InscricaoEvento.jsx
+22:25:12 [vite] hmr update /src/pages/Contato.jsx
+22:25:23 [vite] hmr update /src/components/Footer.jsx
+22:49:37 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:49:45 [vite] hmr update /src/pages/admin/Eventos.jsx
+22:49:51 [vite] hmr update /src/pages/admin/Eventos.jsx

@@ -29,10 +29,13 @@ npm run dev       # http://localhost:4000
 ```
 
 Edite `.env` para trocar `JWT_SECRET` e as credenciais padrão de admin antes de
-rodar `npm run seed`. Para o módulo de Eventos, configure também
-`GATAME_API_URL`/`GATAME_EMAIL`/`GATAME_SENHA` (credencial fixa usada para
-consultar a API de carteirinha na inscrição pública) e `PIX_CIDADE` (usada no
-QR code Pix gerado a partir da configuração cadastrada em `/admin/bancos`).
+rodar `npm run seed`. A credencial fixa do Gatame (`GATAME_URL`/`GATAME_EMAIL`/
+`GATAME_SENHA`, usada para consultar a API de carteirinha na inscrição
+pública) fica na tabela de Configurações, editável em `/admin/configuracoes`
+sem precisar reiniciar o servidor — se as variáveis equivalentes existirem no
+`.env` no momento do `npm run seed`, elas só são usadas para pré-popular essa
+tabela na primeira vez. A cidade usada no QR code Pix fica no próprio
+cadastro da conta em `/admin/bancos`.
 
 ### Frontend
 
@@ -80,8 +83,9 @@ Ver detalhes completos dos modelos e endpoints nos arquivos de rotas em
 - `POST /api/auth/login` — autenticação, retorna JWT
 - `/api/admin/*` — protegidas por JWT (`Authorization: Bearer <token>`);
   CRUD de alunos, turmas, instrutores, matrículas, faixas, tipos de evento,
-  eventos (+ listagem de inscrições) e configuração de conta Pix, além de
-  `GET /api/admin/dashboard` com contadores gerais
+  eventos (+ listagem de inscrições), configuração de conta Pix e
+  configurações gerais (tabela chave/valor, ex.: credencial do Gatame), além
+  de `GET /api/admin/dashboard` com contadores gerais
 
 ## Banco de dados
 

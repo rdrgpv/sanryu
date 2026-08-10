@@ -1,6 +1,6 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
-const { sequelize, Admin, Instrutor, Turma, Aluno, Matricula, Faixa, TipoEvento, Banco } = require('./src/models');
+const { sequelize, Admin, Instrutor, Turma, Aluno, Matricula, Faixa, TipoEvento, Banco, Configuracao } = require('./src/models');
 
 async function seed() {
   await sequelize.sync();
@@ -137,13 +137,28 @@ async function seed() {
   if (bancoCount === 0) {
     await Banco.create({
       nome: 'Conta principal',
-      chavePix: process.env.PIX_CHAVE_PADRAO || 'contato@sanryudojo.com.br',
+      chavePix: process.env.PIX_CHAVE_PADRAO || 'contato@sanryu.com.br',
       tipoChave: 'email',
       titular: 'San Ryu Dojo',
+      cidade: 'SAO PAULO',
     });
     console.log('Configuração Pix padrão criada.');
   } else {
     console.log('Configuração Pix já existe, pulando.');
+  }
+
+  const configuracaoCount = await Configuracao.count();
+
+  if (configuracaoCount === 0) {
+    await Configuracao.bulkCreate([
+      { sistema: 'SAN', parametro: 'GATAME_URL', valor: process.env.GATAME_API_URL || '', tipoParametro: 'S' },
+      { sistema: 'SAN', parametro: 'GATAME_EMAIL', valor: process.env.GATAME_EMAIL || '', tipoParametro: 'S' },
+      { sistema: 'SAN', parametro: 'GATAME_SENHA', valor: process.env.GATAME_SENHA || '', tipoParametro: 'S' },
+      { sistema: 'SAN', parametro: 'MP_ACCESS_TOKEN', valor: process.env.MP_ACCESS_TOKEN || '', tipoParametro: 'S' },
+    ]);
+    console.log('Configurações padrão criadas (edite em /admin/configuracoes).');
+  } else {
+    console.log('Configurações já existem, pulando.');
   }
 
   const alunoCount = await Aluno.count();

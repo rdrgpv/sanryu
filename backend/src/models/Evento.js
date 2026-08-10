@@ -36,6 +36,10 @@ const Evento = sequelize.define('Evento', {
     allowNull: false,
     defaultValue: false,
   },
+  banner: {
+    type: DataTypes.TEXT('long'),
+    allowNull: true,
+  },
 });
 
 module.exports = Evento;
