@@ -9,8 +9,11 @@ import InscricaoEvento from './pages/InscricaoEvento.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/admin/Dashboard.jsx';
 import Alunos from './pages/admin/Alunos.jsx';
+import AlunoForm from './pages/admin/AlunoForm.jsx';
 import Turmas from './pages/admin/Turmas.jsx';
+import TurmaForm from './pages/admin/TurmaForm.jsx';
 import Instrutores from './pages/admin/Instrutores.jsx';
+import InstrutorForm from './pages/admin/InstrutorForm.jsx';
 import Faixas from './pages/admin/Faixas.jsx';
 import TiposEvento from './pages/admin/TiposEvento.jsx';
 import EventosAdmin from './pages/admin/Eventos.jsx';
@@ -18,7 +21,6 @@ import Bancos from './pages/admin/Bancos.jsx';
 import Configuracoes from './pages/admin/Configuracoes.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import PublicLayout from './components/PublicLayout.jsx';
-import AdminLayout from './components/AdminLayout.jsx';
 
 export default function App() {
   return (

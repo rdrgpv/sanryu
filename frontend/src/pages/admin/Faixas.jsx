@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import Modal from '../../components/Modal.jsx';
 import { IconPlus } from '../../components/icons.jsx';
@@ -30,11 +31,9 @@ const estadoInicial = {
 };
 
 export default function Faixas() {
+  const navigate = useNavigate();
   const [faixas, setFaixas] = useState([]);
-  const [form, setForm] = useState(estadoInicial);
-  const [editandoId, setEditandoId] = useState(null);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [erro, setErro] = useState(null);
+  const [selecionadoId, setSelecionadoId] = useState(null);
 
   async function carregarFaixas() {
     const res = await api.get('/admin/faixas');
@@ -110,7 +109,8 @@ export default function Faixas() {
 
   async function handleRemover(id) {
     if (!window.confirm('Tem certeza que deseja excluir esta faixa?')) return;
-    await api.delete(`/admin/faixas/${id}`);
+    await api.delete(`/admin/faixas/${selecionadoId}`);
+    setSelecionadoId(null);
     carregarFaixas();
   }
 
@@ -173,35 +173,13 @@ export default function Faixas() {
               />
             </label>
 
-            <div className="form__field form__field--wide">
-              <span>Cor da faixa</span>
-              <div className="cor-picker">
-                {CORES.map((cor) => (
-                  <button
-                    key={cor.nome}
-                    type="button"
-                    className={`cor-swatch ${form.cor === cor.hex ? 'is-selected' : ''}`}
-                    style={{ background: cor.hex }}
-                    title={cor.nome}
-                    aria-label={cor.nome}
-                    onClick={() => selecionarCor(cor.hex)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="form__actions">
-              <button type="submit" className="btn btn--primary">
-                {editandoId ? 'Salvar alterações' : 'Adicionar faixa'}
-              </button>
-              <button type="button" className="btn btn--ghost" onClick={fecharModal}>
-                Cancelar
-              </button>
-            </div>
-            {erro && <p className="alert alert--error">{erro}</p>}
-          </form>
-        </Modal>
-      )}
+      <Toolbar
+        podeEditar={!!selecionadoId}
+        onNovo={() => navigate('/admin/faixas/novo')}
+        onEditar={() => navigate(`/admin/faixas/${selecionadoId}/editar`)}
+        onExcluir={handleExcluir}
+        onAtualizar={carregarFaixas}
+      />
 
       <div className="table-scroll">
         <table className="data-table">
@@ -214,12 +192,15 @@ export default function Faixas() {
               <th>Valor c/ carteirinha</th>
               <th>Valor s/ carteirinha</th>
               <th>Status</th>
-              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
             {faixas.map((faixa) => (
-              <tr key={faixa.id}>
+              <tr
+                key={faixa.id}
+                className={selecionadoId === faixa.id ? 'is-selected' : ''}
+                onClick={() => selecionarLinha(faixa.id)}
+              >
                 <td>
                   <span className="cor-swatch cor-swatch--sm" style={{ background: faixa.cor }} />
                 </td>
@@ -229,18 +210,6 @@ export default function Faixas() {
                 <td>{faixa.valorComCarteirinha != null ? `R$ ${Number(faixa.valorComCarteirinha).toFixed(2)}` : '-'}</td>
                 <td>{faixa.valorSemCarteirinha != null ? `R$ ${Number(faixa.valorSemCarteirinha).toFixed(2)}` : '-'}</td>
                 <td>{faixa.ativo ? 'Ativa' : 'Inativa'}</td>
-                <td className="data-table__actions">
-                  <button type="button" className="btn btn--small" onClick={() => iniciarEdicao(faixa)}>
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn--small btn--danger"
-                    onClick={() => handleRemover(faixa.id)}
-                  >
-                    Excluir
-                  </button>
-                </td>
               </tr>
             ))}
             {faixas.length === 0 && (
