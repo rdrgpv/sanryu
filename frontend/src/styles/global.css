@@ -93,6 +93,15 @@ button, input, select, textarea {
   flex: 1;
 }
 
+.admin-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-corpo);
+  color: var(--cor-cinza);
+}
+
 /* Belt stripe divider */
 .belt-stripe {
   height: 6px;

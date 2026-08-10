@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CRow, CCol, CCard, CCardBody, CWidgetStatsA } from '@coreui/react';
 import api from '../../services/api';
-import Card from '../../components/Card.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { IconAlunos, IconTurmas, IconInstrutores, IconMatriculas, IconPlus } from '../../components/icons.jsx';
 
 const quicklinks = [
-  { to: '/admin/alunos/novo', label: 'Novo aluno', icon: <IconAlunos /> },
-  { to: '/admin/turmas/novo', label: 'Nova turma', icon: <IconTurmas /> },
-  { to: '/admin/instrutores/novo', label: 'Novo instrutor', icon: <IconInstrutores /> },
-  { to: '/admin/faixas/novo', label: 'Nova faixa', icon: <IconPlus /> },
+  { to: '/admin/alunos/novo', label: 'Novo aluno' },
+  { to: '/admin/turmas/novo', label: 'Nova turma' },
+  { to: '/admin/instrutores/novo', label: 'Novo instrutor' },
+  { to: '/admin/faixas/novo', label: 'Nova faixa' },
 ];
 
 export default function Dashboard() {
@@ -26,31 +25,56 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="admin__title">Dashboard</h1>
-      <p className="dashboard__welcome">Bem-vindo de volta, {admin?.nome}.</p>
+      <h1 className="h3 mb-1">Dashboard</h1>
+      <p className="text-body-secondary mb-4">Bem-vindo de volta, {admin?.nome}.</p>
 
-      {erro && <p className="alert alert--error">{erro}</p>}
+      {erro && <div className="alert alert-danger">{erro}</div>}
 
       {resumo && (
-        <div className="grid grid--4">
-          <Card icon={<IconAlunos />} title="Alunos ativos" value={resumo.alunosAtivos} />
-          <Card icon={<IconTurmas />} title="Turmas" value={resumo.totalTurmas} />
-          <Card icon={<IconInstrutores />} title="Instrutores" value={resumo.totalInstrutores} />
-          <Card icon={<IconMatriculas />} title="Matrículas no mês" value={resumo.matriculasDoMes} />
-        </div>
+        <CRow className="g-3 mb-4">
+          <CCol sm={6} lg={3}>
+            <CWidgetStatsA
+              color="primary"
+              value={resumo.alunosAtivos}
+              title="Alunos ativos"
+            />
+          </CCol>
+          <CCol sm={6} lg={3}>
+            <CWidgetStatsA
+              color="info"
+              value={resumo.totalTurmas}
+              title="Turmas"
+            />
+          </CCol>
+          <CCol sm={6} lg={3}>
+            <CWidgetStatsA
+              color="warning"
+              value={resumo.totalInstrutores}
+              title="Instrutores"
+            />
+          </CCol>
+          <CCol sm={6} lg={3}>
+            <CWidgetStatsA
+              color="success"
+              value={resumo.matriculasDoMes}
+              title="Matrículas no mês"
+            />
+          </CCol>
+        </CRow>
       )}
 
-      <div className="dashboard__quicklinks">
-        <h2>Ações rápidas</h2>
-        <div className="quicklinks">
-          {quicklinks.map((link) => (
-            <Link key={link.to} to={link.to} className="quicklink">
-              {link.icon}
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      </div>
+      <CCard>
+        <CCardBody>
+          <h2 className="h5 mb-3">Ações rápidas</h2>
+          <div className="d-flex gap-2 flex-wrap">
+            {quicklinks.map((link) => (
+              <Link key={link.to} to={link.to} className="btn btn-outline-secondary">
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </CCardBody>
+      </CCard>
     </div>
   );
 }

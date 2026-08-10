@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import {
+  CCard,
+  CCardBody,
+  CForm,
+  CFormLabel,
+  CFormInput,
+  CFormCheck,
+  CRow,
+  CCol,
+  CButton,
+} from '@coreui/react';
 import api from '../../services/api';
-import { IconBack } from '../../components/icons.jsx';
 
 const CORES = [
   { nome: 'Branca', hex: '#FFFFFF' },
@@ -89,87 +99,98 @@ export default function FaixaForm() {
 
   return (
     <div>
-      <Link to="/admin/faixas" className="form-page__back">
-        <IconBack /> Voltar
+      <Link to="/admin/faixas" className="text-body-secondary text-decoration-none d-inline-block mb-2">
+        &larr; Voltar
       </Link>
-      <h1 className="admin__title">{editando ? 'Editar faixa' : 'Nova faixa'}</h1>
+      <h1 className="h3 mb-3">{editando ? 'Editar faixa' : 'Nova faixa'}</h1>
 
-      <div className="form-page">
-        <form className="form form--inline" onSubmit={handleSubmit}>
-          <label className="form__field">
-            <span>Nome</span>
-            <input name="nome" value={form.nome} onChange={handleChange} required />
-          </label>
-          <label className="form__field">
-            <span>Grau {grauObrigatorio ? '' : '(opcional)'}</span>
-            <input
-              type="number"
-              name="grau"
-              min="0"
-              value={form.grau}
-              onChange={handleChange}
-              required={grauObrigatorio}
-            />
-          </label>
-          <label className="form__field">
-            <span>Ordem</span>
-            <input type="number" name="ordem" value={form.ordem} onChange={handleChange} required />
-          </label>
-          <label className="form__field form__field--checkbox">
-            <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} />
-            <span>Ativa</span>
-          </label>
-          <label className="form__field">
-            <span>Valor do exame (com carteirinha)</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              name="valorComCarteirinha"
-              value={form.valorComCarteirinha}
-              onChange={handleChange}
-            />
-          </label>
-          <label className="form__field">
-            <span>Valor do exame (sem carteirinha)</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              name="valorSemCarteirinha"
-              value={form.valorSemCarteirinha}
-              onChange={handleChange}
-            />
-          </label>
-
-          <div className="form__field form__field--wide">
-            <span>Cor da faixa</span>
-            <div className="cor-picker">
-              {CORES.map((cor) => (
-                <button
-                  key={cor.nome}
-                  type="button"
-                  className={`cor-swatch ${form.cor === cor.hex ? 'is-selected' : ''}`}
-                  style={{ background: cor.hex }}
-                  title={cor.nome}
-                  aria-label={cor.nome}
-                  onClick={() => selecionarCor(cor.hex)}
+      <CCard>
+        <CCardBody>
+          <CForm onSubmit={handleSubmit}>
+            <CRow className="g-3">
+              <CCol md={4}>
+                <CFormLabel>Nome</CFormLabel>
+                <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Grau {grauObrigatorio ? '' : '(opcional)'}</CFormLabel>
+                <CFormInput
+                  type="number"
+                  name="grau"
+                  min="0"
+                  value={form.grau}
+                  onChange={handleChange}
+                  required={grauObrigatorio}
                 />
-              ))}
-            </div>
-          </div>
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Ordem</CFormLabel>
+                <CFormInput type="number" name="ordem" value={form.ordem} onChange={handleChange} required />
+              </CCol>
+              <CCol md={4} className="d-flex align-items-end">
+                <CFormCheck name="ativo" label="Ativa" checked={form.ativo} onChange={handleChange} />
+              </CCol>
 
-          <div className="form__actions">
-            <button type="submit" className="btn btn--primary">
-              {editando ? 'Salvar alterações' : 'Adicionar faixa'}
-            </button>
-            <Link to="/admin/faixas" className="btn btn--ghost">
-              Cancelar
-            </Link>
-          </div>
-          {erro && <p className="alert alert--error">{erro}</p>}
-        </form>
-      </div>
+              <CCol md={3}>
+                <CFormLabel>Valor do exame (com carteirinha)</CFormLabel>
+                <CFormInput
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="valorComCarteirinha"
+                  value={form.valorComCarteirinha}
+                  onChange={handleChange}
+                />
+              </CCol>
+              <CCol md={3}>
+                <CFormLabel>Valor do exame (sem carteirinha)</CFormLabel>
+                <CFormInput
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="valorSemCarteirinha"
+                  value={form.valorSemCarteirinha}
+                  onChange={handleChange}
+                />
+              </CCol>
+
+              <CCol xs={12}>
+                <CFormLabel className="d-block">Cor da faixa</CFormLabel>
+                <div className="d-flex flex-wrap gap-2">
+                  {CORES.map((cor) => (
+                    <button
+                      key={cor.nome}
+                      type="button"
+                      onClick={() => selecionarCor(cor.hex)}
+                      title={cor.nome}
+                      aria-label={cor.nome}
+                      style={{
+                        width: '2rem',
+                        height: '2rem',
+                        borderRadius: '50%',
+                        background: cor.hex,
+                        border: form.cor === cor.hex ? '2px solid #b23a2f' : '1px solid rgba(0,0,0,0.2)',
+                        boxShadow: form.cor === cor.hex ? '0 0 0 2px #fff, 0 0 0 4px #b23a2f' : 'none',
+                        cursor: 'pointer',
+                      }}
+                    />
+                  ))}
+                </div>
+              </CCol>
+            </CRow>
+
+            <div className="d-flex gap-2 mt-4">
+              <CButton type="submit" color="primary">
+                {editando ? 'Salvar alterações' : 'Adicionar faixa'}
+              </CButton>
+              <CButton as={Link} to="/admin/faixas" color="secondary" variant="outline">
+                Cancelar
+              </CButton>
+            </div>
+            {erro && <div className="alert alert-danger mt-3">{erro}</div>}
+          </CForm>
+        </CCardBody>
+      </CCard>
     </div>
   );
 }

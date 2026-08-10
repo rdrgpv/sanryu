@@ -1,0 +1,40 @@
+:root {
+  --cui-primary: #b23a2f;
+  --cui-primary-rgb: 178, 58, 47;
+  --cui-link-color: #b23a2f;
+  --cui-link-hover-color: #8e2e25;
+}
+
+.sidebar-brand img {
+  height: 36px;
+  width: auto;
+}
+
+.btn-primary {
+  --cui-btn-bg: #b23a2f;
+  --cui-btn-border-color: #b23a2f;
+  --cui-btn-hover-bg: #8e2e25;
+  --cui-btn-hover-border-color: #8e2e25;
+  --cui-btn-active-bg: #8e2e25;
+  --cui-btn-active-border-color: #8e2e25;
+}
+
+.table tbody tr {
+  cursor: pointer;
+}
+
+.table tbody tr.table-active {
+  --cui-table-active-bg: rgba(178, 58, 47, 0.12);
+}
+
+/* O global.css do site público define h1-h4 com a fonte de marca (Unbounded);
+   dentro do admin usamos a fonte padrão do sistema, igual ao resto do CoreUI. */
+.wrapper h1,
+.wrapper h2,
+.wrapper h3,
+.wrapper h4,
+.wrapper h5,
+.wrapper h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: normal;
+}

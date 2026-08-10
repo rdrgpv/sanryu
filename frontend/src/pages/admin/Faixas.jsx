@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+} from '@coreui/react';
 import api from '../../services/api';
-import Toolbar from '../../components/Toolbar.jsx';
+import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 
 function formatarValor(valor) {
   return valor != null ? `R$ ${Number(valor).toFixed(2)}` : '-';
@@ -35,9 +43,9 @@ export default function Faixas() {
 
   return (
     <div>
-      <h1 className="admin__title">Faixas</h1>
+      <h1 className="h3 mb-3">Faixas</h1>
 
-      <Toolbar
+      <AdminToolbar
         podeEditar={!!selecionadoId}
         onNovo={() => navigate('/admin/faixas/novo')}
         onEditar={() => navigate(`/admin/faixas/${selecionadoId}/editar`)}
@@ -45,45 +53,54 @@ export default function Faixas() {
         onAtualizar={carregarFaixas}
       />
 
-      <div className="table-scroll">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Cor</th>
-              <th>Nome</th>
-              <th>Grau</th>
-              <th>Ordem</th>
-              <th>Valor c/ carteirinha</th>
-              <th>Valor s/ carteirinha</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {faixas.map((faixa) => (
-              <tr
-                key={faixa.id}
-                className={selecionadoId === faixa.id ? 'is-selected' : ''}
-                onClick={() => selecionarLinha(faixa.id)}
-              >
-                <td>
-                  <span className="cor-swatch cor-swatch--sm" style={{ background: faixa.cor }} />
-                </td>
-                <td>{faixa.nome}</td>
-                <td>{faixa.grau ?? '-'}</td>
-                <td>{faixa.ordem}</td>
-                <td>{formatarValor(faixa.valorComCarteirinha)}</td>
-                <td>{formatarValor(faixa.valorSemCarteirinha)}</td>
-                <td>{faixa.ativo ? 'Ativa' : 'Inativa'}</td>
-              </tr>
-            ))}
-            {faixas.length === 0 && (
-              <tr>
-                <td colSpan={7}>Nenhuma faixa cadastrada.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <CTable hover responsive className="bg-white">
+        <CTableHead>
+          <CTableRow>
+            <CTableHeaderCell>Cor</CTableHeaderCell>
+            <CTableHeaderCell>Nome</CTableHeaderCell>
+            <CTableHeaderCell>Grau</CTableHeaderCell>
+            <CTableHeaderCell>Ordem</CTableHeaderCell>
+            <CTableHeaderCell>Valor c/ carteirinha</CTableHeaderCell>
+            <CTableHeaderCell>Valor s/ carteirinha</CTableHeaderCell>
+            <CTableHeaderCell>Status</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {faixas.map((faixa) => (
+            <CTableRow
+              key={faixa.id}
+              active={selecionadoId === faixa.id}
+              onClick={() => selecionarLinha(faixa.id)}
+            >
+              <CTableDataCell>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: '1.4rem',
+                    height: '1.4rem',
+                    borderRadius: '50%',
+                    background: faixa.cor,
+                    border: '1px solid rgba(0,0,0,0.15)',
+                  }}
+                />
+              </CTableDataCell>
+              <CTableDataCell>{faixa.nome}</CTableDataCell>
+              <CTableDataCell>{faixa.grau ?? '-'}</CTableDataCell>
+              <CTableDataCell>{faixa.ordem}</CTableDataCell>
+              <CTableDataCell>{formatarValor(faixa.valorComCarteirinha)}</CTableDataCell>
+              <CTableDataCell>{formatarValor(faixa.valorSemCarteirinha)}</CTableDataCell>
+              <CTableDataCell>{faixa.ativo ? 'Ativa' : 'Inativa'}</CTableDataCell>
+            </CTableRow>
+          ))}
+          {faixas.length === 0 && (
+            <CTableRow>
+              <CTableDataCell colSpan={7} className="text-body-secondary">
+                Nenhuma faixa cadastrada.
+              </CTableDataCell>
+            </CTableRow>
+          )}
+        </CTableBody>
+      </CTable>
     </div>
   );
 }
