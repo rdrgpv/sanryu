@@ -673,7 +673,8 @@ button, input, select, textarea {
   margin-bottom: 0.2rem;
 }
 
-.login__card .form {
+.login__card .form__field,
+.login__card .alert {
   text-align: left;
 }
 
