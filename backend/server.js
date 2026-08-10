@@ -46,7 +46,10 @@ app.listen(PORT, '0.0.0.0', async () => {
 
   try {
     await sequelize.authenticate();
-    await sequelize.sync();
+    // alter:true reconstrói tabelas via backup-table no SQLite (dialeto sem ALTER TABLE
+    // completo), o que corrompe índices únicos compostos — mantém sync() simples ali e
+    // só usa alter no MySQL (ALTER TABLE nativo, seguro para esse tipo de mudança aditiva).
+    await sequelize.sync({ alter: sequelize.getDialect() !== 'sqlite' });
     console.log('Banco de dados conectado.');
   } catch (error) {
     console.error('Erro ao conectar/sincronizar o banco de dados:', error);
