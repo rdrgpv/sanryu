@@ -1,0 +1,12 @@
+# SPA (React Router): qualquer rota que não seja um arquivo/pasta real cai no index.html,
+# senão o Apache retorna 404 ao abrir um link direto como /eventos/5 (fora da navegação da SPA).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  RewriteRule ^ index.html [L]
+</IfModule>
