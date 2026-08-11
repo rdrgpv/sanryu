@@ -11,6 +11,11 @@ const CAMPOS = [
   { parametro: 'GATAME_EMAIL', label: 'E-mail da credencial do Gatame', tipo: 'text', sensivel: false },
   { parametro: 'GATAME_SENHA', label: 'Senha da credencial do Gatame', tipo: 'text', sensivel: true },
   { parametro: 'MP_ACCESS_TOKEN', label: 'Access Token do Mercado Pago', tipo: 'text', sensivel: true },
+  { parametro: 'SMTP_HOST', label: 'Servidor SMTP (host)', tipo: 'text', sensivel: false },
+  { parametro: 'SMTP_PORT', label: 'Porta SMTP', tipo: 'text', sensivel: false },
+  { parametro: 'SMTP_USER', label: 'Usuário SMTP', tipo: 'text', sensivel: false },
+  { parametro: 'SMTP_SENHA', label: 'Senha SMTP', tipo: 'text', sensivel: true },
+  { parametro: 'SMTP_FROM', label: 'Remetente dos e-mails (ex.: San·Ryu Dojo <contato@sanryu.com.br>)', tipo: 'text', sensivel: false },
 ];
 
 const estadoInicial = CAMPOS.reduce((acc, campo) => ({ ...acc, [campo.parametro]: '' }), {});

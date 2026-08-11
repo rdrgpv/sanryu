@@ -3,6 +3,7 @@ const { Evento, TipoEvento, Banco, EventoAluno } = require('../models');
 const gatameService = require('../services/gatameService');
 const pixService = require('../services/pixService');
 const mercadoPagoService = require('../services/mercadoPagoService');
+const emailService = require('../services/emailService');
 const { calcularValorInscricao } = require('../services/valorInscricaoService');
 
 // Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
@@ -279,6 +280,9 @@ async function inscrever(req, res) {
   };
 
   const eventoAluno = pendenteSemValor ? await existente.update(dadosInscricao) : await EventoAluno.create(dadosInscricao);
+
+  // Não aguarda nem deixa falha de e-mail atrasar/derrubar a resposta — a inscrição já está concluída.
+  emailService.enviarConfirmacaoInscricao({ evento, eventoAluno });
 
   res.status(pendenteSemValor ? 200 : 201).json({ ...eventoAluno.toJSON(), aviso: resultadoValor.aviso });
 }
