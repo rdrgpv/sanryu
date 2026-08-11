@@ -32,7 +32,12 @@ export default function Eventos() {
           {!loading && !erro && (
             <div className="grid grid--3">
               {eventos.map((evento) => (
-                <Link key={evento.id} to={`/eventos/${evento.id}`} className="tile" style={{ textDecoration: 'none' }}>
+                <Link
+                  key={evento.id}
+                  to={`/eventos/${evento.slug || evento.id}`}
+                  className="tile"
+                  style={{ textDecoration: 'none' }}
+                >
                   {evento.banner && (
                     <img
                       src={evento.banner}

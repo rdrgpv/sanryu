@@ -20,6 +20,7 @@ const BANNER_TAMANHO_MAXIMO = 4 * 1024 * 1024;
 
 const estadoInicial = {
   nome: '',
+  slug: '',
   descricao: '',
   tipoEventoId: '',
   data: '',
@@ -44,6 +45,7 @@ export default function EventoForm() {
   const [form, setForm] = useState(estadoInicial);
   const [tiposEvento, setTiposEvento] = useState([]);
   const [erro, setErro] = useState(null);
+  const [linkCopiado, setLinkCopiado] = useState(false);
 
   useEffect(() => {
     api.get('/admin/tipos-evento').then((res) => setTiposEvento(res.data));
@@ -55,6 +57,7 @@ export default function EventoForm() {
       const evento = res.data;
       setForm({
         nome: evento.nome,
+        slug: evento.slug || '',
         descricao: evento.descricao || '',
         tipoEventoId: evento.tipoEventoId,
         data: paraInputDatetime(evento.data),
@@ -107,12 +110,23 @@ export default function EventoForm() {
     setForm((prev) => ({ ...prev, banner: '' }));
   }
 
+  async function handleCopiarLink(link) {
+    try {
+      await navigator.clipboard.writeText(link);
+      setLinkCopiado(true);
+      setTimeout(() => setLinkCopiado(false), 2000);
+    } catch (err) {
+      setErro('Não foi possível copiar o link. Copie manualmente.');
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setErro(null);
 
     const payload = {
       ...form,
+      slug: form.slug.trim() || null,
       tipoEventoId: Number(form.tipoEventoId),
       valor: mostrarValor && form.valor !== '' ? Number(form.valor) : null,
     };
@@ -144,6 +158,18 @@ export default function EventoForm() {
                 <CFormLabel>Nome</CFormLabel>
                 <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
               </CCol>
+              <CCol md={4}>
+                <CFormLabel>Link amigável (slug)</CFormLabel>
+                <CFormInput
+                  name="slug"
+                  value={form.slug}
+                  onChange={handleChange}
+                  placeholder="gerado automaticamente a partir do nome"
+                />
+              </CCol>
+            </CRow>
+
+            <CRow className="g-3 mt-0">
               <CCol md={4}>
                 <CFormLabel>Tipo de evento</CFormLabel>
                 <CFormSelect name="tipoEventoId" value={form.tipoEventoId} onChange={handleChange} required>
@@ -202,6 +228,24 @@ export default function EventoForm() {
                 )}
               </CCol>
             </CRow>
+
+            {editando && (
+              <div className="mt-3">
+                <CFormLabel>Link de inscrição</CFormLabel>
+                <div className="d-flex gap-2">
+                  <CFormInput readOnly value={`${window.location.origin}/eventos/${form.slug || id}`} />
+                  <CButton
+                    type="button"
+                    color="secondary"
+                    variant="outline"
+                    className="text-nowrap"
+                    onClick={() => handleCopiarLink(`${window.location.origin}/eventos/${form.slug || id}`)}
+                  >
+                    {linkCopiado ? 'Copiado!' : 'Copiar link'}
+                  </CButton>
+                </div>
+              </div>
+            )}
 
             <div className="d-flex gap-2 mt-4">
               <CButton type="submit" color="primary">

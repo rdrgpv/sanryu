@@ -1,8 +1,21 @@
+const { Op } = require('sequelize');
 const { Evento, TipoEvento, Banco, EventoAluno } = require('../models');
 const gatameService = require('../services/gatameService');
 const pixService = require('../services/pixService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const { calcularValorInscricao } = require('../services/valorInscricaoService');
+
+// Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
+function whereIdOuSlug(param) {
+  const comoNumero = Number(param);
+  const filtros = [{ slug: param }];
+
+  if (Number.isInteger(comoNumero) && String(comoNumero) === String(param)) {
+    filtros.push({ id: comoNumero });
+  }
+
+  return { [Op.or]: filtros };
+}
 
 function mapCandidato(raw) {
   return {
@@ -61,7 +74,7 @@ function tratarErroConsulta(err, res) {
 async function listarPublicados(req, res) {
   const eventos = await Evento.findAll({
     where: { publicado: true },
-    attributes: ['id', 'nome', 'descricao', 'local', 'data', 'banner'],
+    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'data', 'banner'],
     include: { model: TipoEvento, as: 'tipoEvento', attributes: ['nome'] },
     order: [['data', 'ASC']],
   });
@@ -71,8 +84,8 @@ async function listarPublicados(req, res) {
 
 async function buscarPublico(req, res) {
   const evento = await Evento.findOne({
-    where: { id: req.params.id, publicado: true },
-    attributes: ['id', 'nome', 'descricao', 'local', 'data', 'banner'],
+    where: { ...whereIdOuSlug(req.params.id), publicado: true },
+    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'data', 'banner'],
     include: { model: TipoEvento, as: 'tipoEvento', attributes: ['id', 'nome'] },
   });
 
@@ -84,7 +97,7 @@ async function buscarPublico(req, res) {
 }
 
 async function consultarCarteirinha(req, res) {
-  const evento = await Evento.findOne({ where: { id: req.params.id, publicado: true } });
+  const evento = await Evento.findOne({ where: { ...whereIdOuSlug(req.params.id), publicado: true } });
 
   if (!evento) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
@@ -111,7 +124,7 @@ async function consultarCarteirinha(req, res) {
 
 async function inscrever(req, res) {
   const evento = await Evento.findOne({
-    where: { id: req.params.id, publicado: true },
+    where: { ...whereIdOuSlug(req.params.id), publicado: true },
     include: { model: TipoEvento, as: 'tipoEvento' },
   });
 
