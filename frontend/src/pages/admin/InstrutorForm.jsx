@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormTextarea, CRow, CCol, CButton } from '@coreui/react';
+import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormSelect, CFormTextarea, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
 
 const estadoInicial = {
   nome: '',
-  faixa: 'Preta',
+  faixaId: '',
   especialidade: '',
   bio: '',
   fotoUrl: '',
@@ -16,7 +16,12 @@ export default function InstrutorForm() {
   const navigate = useNavigate();
   const editando = !!id;
   const [form, setForm] = useState(estadoInicial);
+  const [faixas, setFaixas] = useState([]);
   const [erro, setErro] = useState(null);
+
+  useEffect(() => {
+    api.get('/admin/faixas').then((res) => setFaixas(res.data));
+  }, []);
 
   useEffect(() => {
     if (!editando) return;
@@ -24,7 +29,7 @@ export default function InstrutorForm() {
       const instrutor = res.data;
       setForm({
         nome: instrutor.nome,
-        faixa: instrutor.faixa,
+        faixaId: instrutor.faixaId || '',
         especialidade: instrutor.especialidade || '',
         bio: instrutor.bio || '',
         fotoUrl: instrutor.fotoUrl || '',
@@ -41,11 +46,13 @@ export default function InstrutorForm() {
     event.preventDefault();
     setErro(null);
 
+    const payload = { ...form, faixaId: form.faixaId || null };
+
     try {
       if (editando) {
-        await api.put(`/admin/instrutores/${id}`, form);
+        await api.put(`/admin/instrutores/${id}`, payload);
       } else {
-        await api.post('/admin/instrutores', form);
+        await api.post('/admin/instrutores', payload);
       }
       navigate('/admin/instrutores');
     } catch (err) {
@@ -70,7 +77,15 @@ export default function InstrutorForm() {
               </CCol>
               <CCol md={4}>
                 <CFormLabel>Faixa</CFormLabel>
-                <CFormInput name="faixa" value={form.faixa} onChange={handleChange} />
+                <CFormSelect name="faixaId" value={form.faixaId} onChange={handleChange}>
+                  <option value="">Selecione</option>
+                  {faixas.map((faixa) => (
+                    <option key={faixa.id} value={faixa.id}>
+                      {faixa.nome}
+                      {faixa.grau ? ` ${faixa.grau}º grau` : ''}
+                    </option>
+                  ))}
+                </CFormSelect>
               </CCol>
               <CCol md={4}>
                 <CFormLabel>Especialidade</CFormLabel>

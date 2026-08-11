@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
 
-const estadoInicial = { nome: '', cobravel: false };
+const estadoInicial = { nome: '', cobravel: false, valor: '' };
 
 export default function TipoEventoForm() {
   const { id } = useParams();
@@ -15,7 +15,7 @@ export default function TipoEventoForm() {
   useEffect(() => {
     if (!editando) return;
     api.get(`/admin/tipos-evento/${id}`).then((res) => {
-      setForm({ nome: res.data.nome, cobravel: res.data.cobravel });
+      setForm({ nome: res.data.nome, cobravel: res.data.cobravel, valor: res.data.valor ?? '' });
     });
   }, [id, editando]);
 
@@ -28,11 +28,13 @@ export default function TipoEventoForm() {
     event.preventDefault();
     setErro(null);
 
+    const payload = { ...form, valor: form.cobravel && form.valor !== '' ? Number(form.valor) : null };
+
     try {
       if (editando) {
-        await api.put(`/admin/tipos-evento/${id}`, form);
+        await api.put(`/admin/tipos-evento/${id}`, payload);
       } else {
-        await api.post('/admin/tipos-evento', form);
+        await api.post('/admin/tipos-evento', payload);
       }
       navigate('/admin/tipos-evento');
     } catch (err) {
@@ -51,13 +53,26 @@ export default function TipoEventoForm() {
         <CCardBody>
           <CForm onSubmit={handleSubmit}>
             <CRow className="g-3">
-              <CCol md={6}>
+              <CCol md={5}>
                 <CFormLabel>Nome</CFormLabel>
                 <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
               </CCol>
-              <CCol md={6} className="d-flex align-items-end">
+              <CCol md={3} className="d-flex align-items-end">
                 <CFormCheck name="cobravel" label="Cobrável" checked={form.cobravel} onChange={handleChange} />
               </CCol>
+              {form.cobravel && (
+                <CCol md={4}>
+                  <CFormLabel>Valor padrão</CFormLabel>
+                  <CFormInput
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="valor"
+                    value={form.valor}
+                    onChange={handleChange}
+                  />
+                </CCol>
+              )}
             </CRow>
 
             <div className="d-flex gap-2 mt-4">

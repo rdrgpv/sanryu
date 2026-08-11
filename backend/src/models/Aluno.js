@@ -22,9 +22,9 @@ const Aluno = sequelize.define('Aluno', {
     type: DataTypes.DATEONLY,
     allowNull: true,
   },
-  faixa: {
-    type: DataTypes.STRING,
-    defaultValue: 'Branca',
+  faixaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   ativo: {
     type: DataTypes.BOOLEAN,

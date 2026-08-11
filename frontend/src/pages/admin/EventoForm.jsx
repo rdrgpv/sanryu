@@ -72,6 +72,19 @@ export default function EventoForm() {
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
+
+    // Ao escolher o tipo num evento novo, pré-preenche o valor com o padrão cadastrado
+    // no tipo — só não editando, pra não sobrescrever um valor já definido.
+    if (name === 'tipoEventoId' && !editando) {
+      const tipo = tiposEvento.find((t) => String(t.id) === value);
+      setForm((prev) => ({
+        ...prev,
+        tipoEventoId: value,
+        valor: tipo?.valor != null ? String(tipo.valor) : prev.valor,
+      }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   }
 

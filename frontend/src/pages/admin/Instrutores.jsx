@@ -66,7 +66,27 @@ export default function Instrutores() {
               onClick={() => selecionarLinha(instrutor.id)}
             >
               <CTableDataCell>{instrutor.nome}</CTableDataCell>
-              <CTableDataCell>{instrutor.faixa}</CTableDataCell>
+              <CTableDataCell>
+                {instrutor.faixa ? (
+                  <span className="d-flex align-items-center gap-2">
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: '1rem',
+                        height: '1rem',
+                        borderRadius: '50%',
+                        background: instrutor.faixa.cor,
+                        border: '1px solid rgba(0,0,0,0.15)',
+                        flexShrink: 0,
+                      }}
+                    />
+                    {instrutor.faixa.nome}
+                    {instrutor.faixa.grau ? ` ${instrutor.faixa.grau}º grau` : ''}
+                  </span>
+                ) : (
+                  '-'
+                )}
+              </CTableDataCell>
               <CTableDataCell>{instrutor.especialidade || '-'}</CTableDataCell>
               <CTableDataCell style={{ maxWidth: 320 }}>{instrutor.bio || '-'}</CTableDataCell>
             </CTableRow>

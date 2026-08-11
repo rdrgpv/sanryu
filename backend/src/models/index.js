@@ -28,6 +28,12 @@ Evento.belongsTo(TipoEvento, { foreignKey: 'tipoEventoId', as: 'tipoEvento' });
 Evento.hasMany(EventoAluno, { foreignKey: 'eventoId', as: 'inscricoes' });
 EventoAluno.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
 
+Faixa.hasMany(Aluno, { foreignKey: 'faixaId', as: 'alunos' });
+Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
+
+Faixa.hasMany(Instrutor, { foreignKey: 'faixaId', as: 'instrutores' });
+Instrutor.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
+
 module.exports = {
   sequelize,
   Admin,

@@ -1,4 +1,4 @@
-const { Aluno, Turma, Matricula } = require('../models');
+const { Aluno, Turma, Matricula, Faixa } = require('../models');
 
 async function listar(req, res) {
   const { busca } = req.query;
@@ -14,7 +14,10 @@ async function listar(req, res) {
 
   const alunos = await Aluno.findAll({
     where,
-    include: [{ model: Turma, as: 'turmas', through: { attributes: ['status', 'dataMatricula'] } }],
+    include: [
+      { model: Turma, as: 'turmas', through: { attributes: ['status', 'dataMatricula'] } },
+      { model: Faixa, as: 'faixa' },
+    ],
     order: [['nome', 'ASC']],
   });
 
@@ -23,7 +26,10 @@ async function listar(req, res) {
 
 async function buscarPorId(req, res) {
   const aluno = await Aluno.findByPk(req.params.id, {
-    include: [{ model: Turma, as: 'turmas', through: { attributes: ['status', 'dataMatricula'] } }],
+    include: [
+      { model: Turma, as: 'turmas', through: { attributes: ['status', 'dataMatricula'] } },
+      { model: Faixa, as: 'faixa' },
+    ],
   });
 
   if (!aluno) {

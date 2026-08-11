@@ -68,6 +68,7 @@ export default function TiposEvento() {
           <CTableRow>
             <CTableHeaderCell>Nome</CTableHeaderCell>
             <CTableHeaderCell>Cobrável</CTableHeaderCell>
+            <CTableHeaderCell>Valor</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
@@ -75,11 +76,12 @@ export default function TiposEvento() {
             <CTableRow key={tipo.id} active={selecionadoId === tipo.id} onClick={() => selecionarLinha(tipo.id)}>
               <CTableDataCell>{tipo.nome}</CTableDataCell>
               <CTableDataCell>{tipo.cobravel ? 'Sim' : 'Não'}</CTableDataCell>
+              <CTableDataCell>{tipo.valor != null ? `R$ ${Number(tipo.valor).toFixed(2)}` : '-'}</CTableDataCell>
             </CTableRow>
           ))}
           {tipos.length === 0 && (
             <CTableRow>
-              <CTableDataCell colSpan={2} className="text-body-secondary">
+              <CTableDataCell colSpan={3} className="text-body-secondary">
                 Nenhum tipo de evento cadastrado.
               </CTableDataCell>
             </CTableRow>

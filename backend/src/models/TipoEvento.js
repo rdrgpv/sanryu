@@ -11,6 +11,10 @@ const TipoEvento = sequelize.define('TipoEvento', {
     allowNull: false,
     defaultValue: false,
   },
+  valor: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
 });
 
 module.exports = TipoEvento;

@@ -6,9 +6,9 @@ const Instrutor = sequelize.define('Instrutor', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  faixa: {
-    type: DataTypes.STRING,
-    defaultValue: 'Preta',
+  faixaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   especialidade: {
     type: DataTypes.STRING,

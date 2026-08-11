@@ -1,12 +1,17 @@
-const { Instrutor } = require('../models');
+const { Instrutor, Faixa } = require('../models');
 
 async function listar(req, res) {
-  const instrutores = await Instrutor.findAll({ order: [['nome', 'ASC']] });
+  const instrutores = await Instrutor.findAll({
+    include: [{ model: Faixa, as: 'faixa' }],
+    order: [['nome', 'ASC']],
+  });
   res.json(instrutores);
 }
 
 async function buscarPorId(req, res) {
-  const instrutor = await Instrutor.findByPk(req.params.id);
+  const instrutor = await Instrutor.findByPk(req.params.id, {
+    include: [{ model: Faixa, as: 'faixa' }],
+  });
 
   if (!instrutor) {
     return res.status(404).json({ error: 'Instrutor não encontrado.' });

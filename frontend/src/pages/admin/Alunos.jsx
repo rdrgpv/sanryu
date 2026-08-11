@@ -130,7 +130,26 @@ export default function Alunos() {
               <CTableDataCell>{aluno.nome}</CTableDataCell>
               <CTableDataCell>{aluno.email}</CTableDataCell>
               <CTableDataCell>{aluno.telefone || '-'}</CTableDataCell>
-              <CTableDataCell>{aluno.faixa}</CTableDataCell>
+              <CTableDataCell>
+                {aluno.faixa ? (
+                  <span className="d-flex align-items-center gap-2">
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: '1rem',
+                        height: '1rem',
+                        borderRadius: '50%',
+                        background: aluno.faixa.cor,
+                        border: '1px solid rgba(0,0,0,0.15)',
+                        flexShrink: 0,
+                      }}
+                    />
+                    {aluno.faixa.nome}
+                  </span>
+                ) : (
+                  '-'
+                )}
+              </CTableDataCell>
               <CTableDataCell>{aluno.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
               <CTableDataCell>{(aluno.turmas || []).map((t) => t.nome).join(', ') || '-'}</CTableDataCell>
             </CTableRow>
