@@ -336,9 +336,19 @@ export default function InscricaoEvento() {
                       {precisaEscolherFaixa ? (
                         <div style={{ marginTop: '1rem' }}>
                           <p>Para qual faixa você vai fazer o exame?</p>
-                          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '0.75rem',
+                              flexWrap: 'wrap',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
                             {OPCOES_FAIXA_BRANCA.map((opcao) => {
                               const cor = buscarFaixaPorNome(opcao, faixas)?.cor || '#ccc';
+                              // Faixa Cinza é só para até 8 anos; acima disso, só Amarela fica disponível.
+                              const cinzaBloqueadaPelaIdade = opcao === 'Cinza' && idade !== null && idade > 8;
                               return (
                                 <button
                                   key={opcao}
@@ -350,13 +360,18 @@ export default function InscricaoEvento() {
                                     border: '1px solid rgba(17, 17, 17, 0.25)',
                                   }}
                                   onClick={() => handleConfirmar(indice, opcao, opcao)}
-                                  disabled={inscrevendo || !extrasValidos}
+                                  disabled={inscrevendo || !extrasValidos || cinzaBloqueadaPelaIdade}
                                 >
                                   {inscrevendo ? 'Confirmando...' : opcao}
                                 </button>
                               );
                             })}
                           </div>
+                          {idade !== null && idade > 8 && (
+                            <p className="tile__meta" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                              Faixa Cinza disponível apenas até 8 anos.
+                            </p>
+                          )}
                         </div>
                       ) : (
                         <button
