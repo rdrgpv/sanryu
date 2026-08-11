@@ -248,9 +248,11 @@ export default function InscricaoEvento() {
                   const idade = calcularIdade(extraDados.dataNascimento);
                   const menorDeIdade = idade !== null && idade < 18;
                   const extrasValidos =
-                    (!dadosObrigatorios || (extraDados.nome.trim() && extraDados.telefone.trim())) &&
-                    Boolean(extraDados.dataNascimento) &&
-                    (!menorDeIdade || extraDados.responsavel.trim());
+                    !dadosObrigatorios ||
+                    (extraDados.nome.trim() &&
+                      extraDados.telefone.trim() &&
+                      extraDados.dataNascimento &&
+                      (!menorDeIdade || extraDados.responsavel.trim()));
 
                   return (
                     <div key={indice} className="tile">
@@ -291,47 +293,45 @@ export default function InscricaoEvento() {
                         <a href="mailto:contato@sanryu.com.br">contato@sanryu.com.br</a>.
                       </p>
 
-                      <div className="form" style={{ marginTop: '1rem' }}>
-                        {dadosObrigatorios && (
-                          <>
-                            <label className="form__field">
-                              <span>Nome completo</span>
-                              <input
-                                value={extraDados.nome}
-                                onChange={(event) => atualizarExtra(indice, 'nome', event.target.value)}
-                                required
-                              />
-                            </label>
-                            <label className="form__field">
-                              <span>Telefone</span>
-                              <input
-                                value={extraDados.telefone}
-                                onChange={(event) => atualizarExtra(indice, 'telefone', event.target.value)}
-                                required
-                              />
-                            </label>
-                          </>
-                        )}
-                        <label className="form__field">
-                          <span>Data de nascimento</span>
-                          <input
-                            type="date"
-                            value={extraDados.dataNascimento}
-                            onChange={(event) => atualizarExtra(indice, 'dataNascimento', event.target.value)}
-                            required
-                          />
-                        </label>
-                        {menorDeIdade && (
+                      {dadosObrigatorios && (
+                        <div className="form" style={{ marginTop: '1rem' }}>
                           <label className="form__field">
-                            <span>Nome do responsável</span>
+                            <span>Nome completo</span>
                             <input
-                              value={extraDados.responsavel}
-                              onChange={(event) => atualizarExtra(indice, 'responsavel', event.target.value)}
+                              value={extraDados.nome}
+                              onChange={(event) => atualizarExtra(indice, 'nome', event.target.value)}
                               required
                             />
                           </label>
-                        )}
-                      </div>
+                          <label className="form__field">
+                            <span>Telefone</span>
+                            <input
+                              value={extraDados.telefone}
+                              onChange={(event) => atualizarExtra(indice, 'telefone', event.target.value)}
+                              required
+                            />
+                          </label>
+                          <label className="form__field">
+                            <span>Data de nascimento</span>
+                            <input
+                              type="date"
+                              value={extraDados.dataNascimento}
+                              onChange={(event) => atualizarExtra(indice, 'dataNascimento', event.target.value)}
+                              required
+                            />
+                          </label>
+                          {menorDeIdade && (
+                            <label className="form__field">
+                              <span>Nome do responsável</span>
+                              <input
+                                value={extraDados.responsavel}
+                                onChange={(event) => atualizarExtra(indice, 'responsavel', event.target.value)}
+                                required
+                              />
+                            </label>
+                          )}
+                        </div>
+                      )}
 
                       {precisaEscolherFaixa ? (
                         <div style={{ marginTop: '1rem' }}>
