@@ -24,6 +24,18 @@ function buscarFaixaPorNome(nome, faixas) {
   return faixas.find((faixa) => faixa.nome.toLowerCase() === (nome || '').toLowerCase());
 }
 
+// Texto branco ou escuro por cima da cor da faixa, conforme a luminância dela (ex.: Amarela precisa de texto escuro).
+function corTextoContraste(hex) {
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!match) return '#111';
+  const n = parseInt(match[1], 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const luminancia = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminancia > 0.6 ? '#111' : '#fff';
+}
+
 // Datas vindas da API/inputs são strings "YYYY-MM-DD" sem horário. Evita `new Date(string)` para
 // esses casos: ele interpreta como meia-noite UTC, o que "volta" um dia em fusos negativos (Brasil).
 function formatarData(valor) {
@@ -236,11 +248,9 @@ export default function InscricaoEvento() {
                   const idade = calcularIdade(extraDados.dataNascimento);
                   const menorDeIdade = idade !== null && idade < 18;
                   const extrasValidos =
-                    !dadosObrigatorios ||
-                    (extraDados.nome.trim() &&
-                      extraDados.telefone.trim() &&
-                      extraDados.dataNascimento &&
-                      (!menorDeIdade || extraDados.responsavel.trim()));
+                    (!dadosObrigatorios || (extraDados.nome.trim() && extraDados.telefone.trim())) &&
+                    Boolean(extraDados.dataNascimento) &&
+                    (!menorDeIdade || extraDados.responsavel.trim());
 
                   return (
                     <div key={indice} className="tile">
@@ -281,66 +291,71 @@ export default function InscricaoEvento() {
                         <a href="mailto:contato@sanryu.com.br">contato@sanryu.com.br</a>.
                       </p>
 
-                      {dadosObrigatorios && (
-                        <div className="form" style={{ marginTop: '1rem' }}>
-                          <label className="form__field">
-                            <span>Nome completo</span>
-                            <input
-                              value={extraDados.nome}
-                              onChange={(event) => atualizarExtra(indice, 'nome', event.target.value)}
-                              required
-                            />
-                          </label>
-                          <label className="form__field">
-                            <span>Telefone</span>
-                            <input
-                              value={extraDados.telefone}
-                              onChange={(event) => atualizarExtra(indice, 'telefone', event.target.value)}
-                              required
-                            />
-                          </label>
-                          <label className="form__field">
-                            <span>Data de nascimento</span>
-                            <input
-                              type="date"
-                              value={extraDados.dataNascimento}
-                              onChange={(event) => atualizarExtra(indice, 'dataNascimento', event.target.value)}
-                              required
-                            />
-                          </label>
-                          {menorDeIdade && (
+                      <div className="form" style={{ marginTop: '1rem' }}>
+                        {dadosObrigatorios && (
+                          <>
                             <label className="form__field">
-                              <span>Nome do responsável</span>
+                              <span>Nome completo</span>
                               <input
-                                value={extraDados.responsavel}
-                                onChange={(event) => atualizarExtra(indice, 'responsavel', event.target.value)}
+                                value={extraDados.nome}
+                                onChange={(event) => atualizarExtra(indice, 'nome', event.target.value)}
                                 required
                               />
                             </label>
-                          )}
-                        </div>
-                      )}
+                            <label className="form__field">
+                              <span>Telefone</span>
+                              <input
+                                value={extraDados.telefone}
+                                onChange={(event) => atualizarExtra(indice, 'telefone', event.target.value)}
+                                required
+                              />
+                            </label>
+                          </>
+                        )}
+                        <label className="form__field">
+                          <span>Data de nascimento</span>
+                          <input
+                            type="date"
+                            value={extraDados.dataNascimento}
+                            onChange={(event) => atualizarExtra(indice, 'dataNascimento', event.target.value)}
+                            required
+                          />
+                        </label>
+                        {menorDeIdade && (
+                          <label className="form__field">
+                            <span>Nome do responsável</span>
+                            <input
+                              value={extraDados.responsavel}
+                              onChange={(event) => atualizarExtra(indice, 'responsavel', event.target.value)}
+                              required
+                            />
+                          </label>
+                        )}
+                      </div>
 
                       {precisaEscolherFaixa ? (
                         <div style={{ marginTop: '1rem' }}>
                           <p>Para qual faixa você vai fazer o exame?</p>
                           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                            {OPCOES_FAIXA_BRANCA.map((opcao) => (
-                              <span key={opcao} style={{ display: 'flex', alignItems: 'center' }}>
+                            {OPCOES_FAIXA_BRANCA.map((opcao) => {
+                              const cor = buscarFaixaPorNome(opcao, faixas)?.cor || '#ccc';
+                              return (
                                 <button
+                                  key={opcao}
                                   type="button"
-                                  className="btn btn--primary"
+                                  className="btn"
+                                  style={{
+                                    background: cor,
+                                    color: corTextoContraste(cor),
+                                    border: '1px solid rgba(17, 17, 17, 0.25)',
+                                  }}
                                   onClick={() => handleConfirmar(indice, opcao, opcao)}
                                   disabled={inscrevendo || !extrasValidos}
                                 >
                                   {inscrevendo ? 'Confirmando...' : opcao}
                                 </button>
-                                <span
-                                  className="faixa-retangulo"
-                                  style={{ background: buscarFaixaPorNome(opcao, faixas)?.cor || '#ccc' }}
-                                />
-                              </span>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       ) : (

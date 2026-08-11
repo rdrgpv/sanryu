@@ -159,41 +159,50 @@ async function inscrever(req, res) {
   }
 
   const candidato = mapCandidato(candidatoRaw);
+  const faltaDadosBasicos = precisaDadosExtras(candidato);
 
-  if (precisaDadosExtras(candidato)) {
-    const nome = (dadosExtras?.nome || '').trim();
-    const telefone = (dadosExtras?.telefone || '').trim();
-    const dataNascimento = (dadosExtras?.dataNascimento || '').trim();
+  const nome = faltaDadosBasicos ? (dadosExtras?.nome || '').trim() : candidato.nome;
+  const telefone = faltaDadosBasicos ? (dadosExtras?.telefone || '').trim() : candidato.telefone;
 
-    if (!nome || !telefone || !dataNascimento) {
-      return res.status(400).json({
-        error: 'Informe nome, telefone e data de nascimento para continuar.',
-        precisaDadosExtras: true,
-      });
-    }
-
-    const idade = calcularIdade(dataNascimento);
-
-    if (idade === null) {
-      return res.status(400).json({ error: 'Data de nascimento inválida.', precisaDadosExtras: true });
-    }
-
-    const menorDeIdade = idade < 18;
-    const responsavel = (dadosExtras?.responsavel || '').trim();
-
-    if (menorDeIdade && !responsavel) {
-      return res.status(400).json({
-        error: 'Para menores de idade, informe o nome do responsável.',
-        precisaDadosExtras: true,
-        menorDeIdade: true,
-      });
-    }
-
-    candidato.nome = nome;
-    candidato.dataNascimento = dataNascimento;
-    candidato.telefone = telefone;
-    candidato.responsavel = menorDeIdade ? responsavel : null;
+  if (faltaDadosBasicos && (!nome || !telefone)) {
+    return res.status(400).json({
+      error: 'Informe nome e telefone para continuar.',
+      precisaDadosExtras: true,
+    });
   }
+
+  // Data de nascimento e responsável (p/ menores) são sempre exigidos, independente da origem dos
+  // dados — a carteirinha (gatame) nem sempre traz nascimento, e a idade define o valor legal do cadastro.
+  const dataNascimento = (dadosExtras?.dataNascimento || candidato.dataNascimento || '').trim();
+
+  if (!dataNascimento) {
+    return res.status(400).json({
+      error: 'Informe a data de nascimento para continuar.',
+      precisaDadosExtras: true,
+    });
+  }
+
+  const idade = calcularIdade(dataNascimento);
+
+  if (idade === null) {
+    return res.status(400).json({ error: 'Data de nascimento inválida.', precisaDadosExtras: true });
+  }
+
+  const menorDeIdade = idade < 18;
+  const responsavel = (dadosExtras?.responsavel || '').trim();
+
+  if (menorDeIdade && !responsavel) {
+    return res.status(400).json({
+      error: 'Para menores de idade, informe o nome do responsável.',
+      precisaDadosExtras: true,
+      menorDeIdade: true,
+    });
+  }
+
+  candidato.nome = nome || candidato.nome;
+  candidato.dataNascimento = dataNascimento;
+  candidato.telefone = telefone || null;
+  candidato.responsavel = menorDeIdade ? responsavel : null;
 
   const resultadoValor = await calcularValorInscricao({
     evento,
