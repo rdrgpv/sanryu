@@ -423,6 +423,7 @@ export default function InscricaoEvento() {
                         <div style={{ marginTop: '1rem' }}>
                           <p>Escaneie o QR code abaixo para pagar via Pix:</p>
                           <img src={resultado.qrcodePix} alt="QR code Pix" style={{ maxWidth: 260 }} />
+                          <p className="tile__meta">Este QR code tem validade de 24 horas.</p>
                           {resultado.pixCopiaCola && (
                             <div style={{ marginTop: '1rem' }}>
                               <button type="button" className="btn btn--ghost" onClick={handleCopiarPix}>
