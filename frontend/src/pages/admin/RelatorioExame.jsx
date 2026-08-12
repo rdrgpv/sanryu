@@ -63,6 +63,21 @@ const CURRICULO_POR_FAIXA = {
       },
     ],
   },
+  azul: {
+    categorias: [
+      { titulo: 'SOCOS', itens: ['Morote Zuki', 'Sanbon Zuki', 'Hirabasami'] },
+      { titulo: 'DEFESAS', itens: ['Morote Uke', 'Chudan Haito Uke', 'Juji Uke', 'Mikazuki Geri'] },
+      { titulo: 'CHUTES', itens: ['Fumikomi', 'Kingeri', 'Keri Age'] },
+      {
+        titulo: 'NAGE-WAZA',
+        itens: ['Koshi Nage', 'Sode Tsurikomi Goshi', 'Obi Harai Goshi', 'Ko Uchi Gake Makikomi', 'Kuchiki Taoshi'],
+      },
+      {
+        titulo: 'NE-WAZA',
+        itens: ['Makura Kesa Gatame', 'Kata Gatame', 'Ashi Garami', 'Sode Guruma Jime', 'Jigoku Jime'],
+      },
+    ],
+  },
 };
 
 function normalizarFaixa(nome) {
