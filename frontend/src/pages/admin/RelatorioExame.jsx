@@ -93,6 +93,27 @@ const CURRICULO_POR_FAIXA = {
       },
     ],
   },
+  roxa: {
+    // A partir da Roxa o currículo deixa de ter Socos/Defesas/Chutes — só Nage-Waza e Ne-Waza.
+    categorias: [
+      {
+        titulo: 'NAGE-WAZA',
+        itens: [
+          'Tobi Juji Gatame',
+          'Tobi Sankaku Jime',
+          'Yoko Tomoe Juji Gatame',
+          'Sumi Gaeshi',
+          'Sasae Tsurikomi Ashi',
+          'Te Guruma',
+          'Kuzure Kata Guruma',
+        ],
+      },
+      {
+        titulo: 'NE-WAZA',
+        itens: ['Nihon Ude Gatame', 'Hasame Hishigi', 'Ushiro Kubi Gatame', 'Hiraken Jime', 'Atama Jime', 'Hiza Jime'],
+      },
+    ],
+  },
 };
 
 function normalizarFaixa(nome) {
