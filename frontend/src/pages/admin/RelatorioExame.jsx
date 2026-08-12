@@ -221,24 +221,64 @@ function capacidadePagina(faixa) {
   return normalizarFaixa(faixa) === 'preta' ? FICHAS_POR_PAGINA_PRETA : FICHAS_POR_PAGINA;
 }
 
-// Agrupa em páginas por faixa: nunca mistura duas faixas diferentes na mesma folha (mesmo que
-// venham intercaladas na lista) e, dentro de uma mesma faixa, respeita a capacidade dela (2 fichas
-// de Preta por página, 5 das demais).
-function agruparEmPaginas(itens) {
+// Faixas etárias pra agrupar dentro de uma mesma faixa de graduação: até 8, 9 a 13, 14 ou mais.
+const FAIXAS_ETARIAS = [
+  { chave: 'ate-8', ordem: 0, teste: (idade) => idade <= 8 },
+  { chave: '9-13', ordem: 1, teste: (idade) => idade >= 9 && idade <= 13 },
+  { chave: '14-mais', ordem: 2, teste: (idade) => idade >= 14 },
+];
+
+function faixaEtaria(idade) {
+  if (idade == null) return null;
+  return FAIXAS_ETARIAS.find((faixa) => faixa.teste(idade))?.chave ?? null;
+}
+
+function ordemFaixaEtaria(chave) {
+  return FAIXAS_ETARIAS.find((faixa) => faixa.chave === chave)?.ordem ?? 99;
+}
+
+// Agrupa em páginas por faixa de graduação + faixa etária: nunca mistura faixas diferentes, nem
+// idades de grupos etários diferentes (até 8 / 9 a 13 / 14+), na mesma folha — mesmo que venham
+// intercaladas na lista. Dentro de um mesmo grupo, respeita a capacidade da faixa (2 fichas de
+// Preta por página, 5 das demais). `ordemPorFaixa` (de /admin/faixas) ordena as faixas antes de
+// paginar; faixas sem cadastro vão pro final, na ordem em que apareceram.
+function agruparEmPaginas(itens, ordemPorFaixa) {
+  const ordenados = [...itens].sort((a, b) => {
+    const faixaA = normalizarFaixa(a.faixa);
+    const faixaB = normalizarFaixa(b.faixa);
+
+    // Faixas diferentes nunca são "iguais" na ordenação, mesmo com ordem empatada/ausente —
+    // senão o desempate por idade abaixo passaria a valer entre faixas, misturando tudo.
+    if (faixaA !== faixaB) {
+      const ordemA = ordemPorFaixa[faixaA] ?? Infinity;
+      const ordemB = ordemPorFaixa[faixaB] ?? Infinity;
+      if (ordemA !== ordemB) return ordemA - ordemB;
+      return faixaA.localeCompare(faixaB);
+    }
+
+    const etariaA = ordemFaixaEtaria(faixaEtaria(calcularIdade(a.dataNascimento)));
+    const etariaB = ordemFaixaEtaria(faixaEtaria(calcularIdade(b.dataNascimento)));
+    return etariaA - etariaB;
+  });
+
   const paginas = [];
   let atual = [];
   let faixaAtual = null;
+  let etariaAtual = null;
 
-  itens.forEach((item) => {
+  ordenados.forEach((item) => {
     const faixaItem = normalizarFaixa(item.faixa);
+    const etariaItem = faixaEtaria(calcularIdade(item.dataNascimento));
     const capacidade = capacidadePagina(item.faixa);
 
     if (atual.length === 0) {
       faixaAtual = faixaItem;
-    } else if (faixaItem !== faixaAtual || atual.length >= capacidade) {
+      etariaAtual = etariaItem;
+    } else if (faixaItem !== faixaAtual || etariaItem !== etariaAtual || atual.length >= capacidade) {
       paginas.push(atual);
       atual = [];
       faixaAtual = faixaItem;
+      etariaAtual = etariaItem;
     }
 
     atual.push(item);
@@ -370,16 +410,20 @@ export default function RelatorioExame() {
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
   const [coresPorFaixa, setCoresPorFaixa] = useState({});
+  const [ordemPorFaixa, setOrdemPorFaixa] = useState({});
 
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
     api.get(`/admin/eventos/${id}/inscricoes`).then((res) => setInscricoes(res.data));
     api.get('/admin/faixas').then((res) => {
-      const mapa = {};
+      const cores = {};
+      const ordens = {};
       res.data.forEach((faixa) => {
-        mapa[normalizarFaixa(faixa.nome)] = faixa.cor;
+        cores[normalizarFaixa(faixa.nome)] = faixa.cor;
+        ordens[normalizarFaixa(faixa.nome)] = faixa.ordem;
       });
-      setCoresPorFaixa(mapa);
+      setCoresPorFaixa(cores);
+      setOrdemPorFaixa(ordens);
     });
   }, [id]);
 
@@ -399,7 +443,7 @@ export default function RelatorioExame() {
         {inscricoes.length === 0 && <p className="text-body-secondary">Nenhuma inscrição confirmada para este evento.</p>}
       </div>
 
-      {agruparEmPaginas(inscricoes).map((pagina, indice) => (
+      {agruparEmPaginas(inscricoes, ordemPorFaixa).map((pagina, indice) => (
         <div key={indice} className="ficha-exame-pagina">
           {pagina.map((inscricao) => (
             <FichaExame key={inscricao.id} inscricao={inscricao} corFaixa={coresPorFaixa[normalizarFaixa(inscricao.faixa)]} />
