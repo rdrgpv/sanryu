@@ -39,7 +39,12 @@
   letter-spacing: normal;
 }
 
-/* Ficha de exame (relatório impresso) — ~5 fichas por página, não uma por página */
+/* Ficha de exame (relatório impresso) — ~5 fichas por página A4, não uma por página */
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
 .ficha-exame-pagina {
   page-break-after: always;
 }
@@ -67,15 +72,20 @@
   font-size: 0.9rem;
 }
 
-.ficha-exame__cabecalho {
+.ficha-exame__cabecalho,
+.ficha-exame__categoria {
   background: #fdf2d0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.ficha-exame__cabecalho {
   font-size: 1rem;
   padding: 0.6rem;
 }
 
 .ficha-exame__categoria {
   text-align: center;
-  background: #fdf2d0;
 }
 
 @media print {
@@ -85,5 +95,22 @@
 
   .wrapper {
     margin-left: 0 !important;
+  }
+
+  /* Compacta bem mais que a versão em tela — é o que precisa caber ~5 fichas numa folha A4. */
+  .ficha-exame {
+    margin-bottom: 0.3rem;
+  }
+
+  .ficha-exame__tabela td,
+  .ficha-exame__tabela th {
+    padding: 0.1rem 0.35rem;
+    font-size: 0.65rem;
+    line-height: 1.15;
+  }
+
+  .ficha-exame__cabecalho {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.35rem;
   }
 }
