@@ -10,7 +10,7 @@ import {
   CButton,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle, cilCloudDownload } from '@coreui/icons';
+import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint } from '@coreui/icons';
 import api from '../../services/api';
 
 const COLUNAS_EXPORTACAO = [
@@ -107,10 +107,22 @@ export default function EventoInscricoes() {
       </Link>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="h3 mb-0">Inscrições{evento ? ` — ${evento.nome}` : ''}</h1>
-        <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0}>
-          <CIcon icon={cilCloudDownload} className="me-1" />
-          Exportar CSV
-        </CButton>
+        <div className="d-flex gap-2">
+          <CButton
+            as={Link}
+            to={`/admin/eventos/${id}/relatorio-exame`}
+            color="secondary"
+            variant="outline"
+            disabled={inscricoes.length === 0}
+          >
+            <CIcon icon={cilPrint} className="me-1" />
+            Fichas de exame
+          </CButton>
+          <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0}>
+            <CIcon icon={cilCloudDownload} className="me-1" />
+            Exportar CSV
+          </CButton>
+        </div>
       </div>
 
       <CTable hover responsive className="bg-white">

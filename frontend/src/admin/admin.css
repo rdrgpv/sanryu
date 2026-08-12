@@ -38,3 +38,49 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: normal;
 }
+
+/* Ficha de exame (relatório impresso) */
+.ficha-exame {
+  page-break-after: always;
+  margin-bottom: 1.5rem;
+}
+
+.ficha-exame:last-child {
+  page-break-after: auto;
+}
+
+.ficha-exame__tabela {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #111;
+}
+
+.ficha-exame__tabela td,
+.ficha-exame__tabela th {
+  border: 1px solid #111;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+
+.ficha-exame__cabecalho {
+  background: #fdf2d0;
+  font-size: 1rem;
+  padding: 0.6rem;
+}
+
+.ficha-exame__categoria {
+  text-align: center;
+  background: #fdf2d0;
+}
+
+@media print {
+  .sidebar {
+    display: none !important;
+  }
+
+  .wrapper {
+    margin-left: 0 !important;
+  }
+}
