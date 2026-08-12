@@ -78,6 +78,21 @@ const CURRICULO_POR_FAIXA = {
       },
     ],
   },
+  verde: {
+    categorias: [
+      { titulo: 'SOCOS', itens: ['Nihon Nukite', 'Yoko Zuki', 'Yama Zuki'] },
+      { titulo: 'DEFESAS', itens: ['Kakuto', 'Mawashi Uke', 'Kake Uke'] },
+      { titulo: 'CHUTES', itens: ['Nidan Geri', 'Mae Tobi Geri', 'Yoko Tobi Geri'] },
+      {
+        titulo: 'NAGE-WAZA',
+        itens: ['Uchii Makikomi', 'O Soto Makikomi', 'Harai Makikomi', 'Hane Goshi', 'Tomoe Nage', 'Tawara Gaeshi', 'Kani Hasami'],
+      },
+      {
+        titulo: 'NE-WAZA',
+        itens: ['Nihon Kata Gatame', 'Sankaku Ashi Hishigi', 'Kakato Hishigi', 'Ashi Jime', 'Tsukomi Jime'],
+      },
+    ],
+  },
 };
 
 function normalizarFaixa(nome) {
