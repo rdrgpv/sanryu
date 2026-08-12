@@ -9,6 +9,15 @@ import api from '../../services/api';
 // Cadastrado direto aqui pois é conteúdo fixo do método, sem tela de admin — vai sendo completado
 // faixa por faixa conforme o conteúdo chega.
 const CURRICULO_POR_FAIXA = {
+  cinza: {
+    // Cinza é a etapa anterior à Amarela (mesma origem Branca) — sem Nage-Waza ainda.
+    categorias: [
+      { titulo: 'SOCOS', itens: ['Jodan Zuki', 'Chudan Zuki', 'Gedan Zuki', 'Ura Zuki', 'Uraken', 'Tetsui'] },
+      { titulo: 'DEFESAS', itens: ['Jodan Age Uke', 'Chudan Yoko Uke', 'Chudan Yoko Uchi', 'Gedan Barai'] },
+      { titulo: 'CHUTES', itens: ['Mae Geri', 'Yoko Geri', 'Mawashi Geri'] },
+      { titulo: 'NE-WAZA', itens: ['Hon Kesa Gatame', 'Tate Shiho Gatame', 'Juji Gatame'] },
+    ],
+  },
   amarela: {
     categorias: [
       { titulo: 'SOCOS', itens: ['Jodan Zuki', 'Chudan Zuki', 'Gedan Zuki', 'Ura Zuki', 'Uraken', 'Tetsui'] },
