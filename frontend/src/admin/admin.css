@@ -54,7 +54,8 @@
 }
 
 .ficha-exame {
-  margin-bottom: 1rem;
+  margin-bottom: 0.3rem;
+  max-width: 794px;
 }
 
 .ficha-exame__tabela {
@@ -66,10 +67,11 @@
 .ficha-exame__tabela td,
 .ficha-exame__tabela th {
   border: 1px solid #111;
-  padding: 0.4rem 0.6rem;
+  padding: 0.1rem 0.35rem;
   text-align: left;
   vertical-align: top;
-  font-size: 0.9rem;
+  font-size: 0.65rem;
+  line-height: 1.15;
 }
 
 .ficha-exame__cabecalho,
@@ -80,8 +82,8 @@
 }
 
 .ficha-exame__cabecalho {
-  font-size: 1rem;
-  padding: 0.6rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.35rem;
 }
 
 .ficha-exame__categoria {
@@ -95,22 +97,5 @@
 
   .wrapper {
     margin-left: 0 !important;
-  }
-
-  /* Compacta bem mais que a versão em tela — é o que precisa caber ~5 fichas numa folha A4. */
-  .ficha-exame {
-    margin-bottom: 0.3rem;
-  }
-
-  .ficha-exame__tabela td,
-  .ficha-exame__tabela th {
-    padding: 0.1rem 0.35rem;
-    font-size: 0.65rem;
-    line-height: 1.15;
-  }
-
-  .ficha-exame__cabecalho {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.35rem;
   }
 }
