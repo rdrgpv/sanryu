@@ -24,6 +24,22 @@ function buscarFaixaPorNome(nome, faixas) {
   return faixas.find((faixa) => faixa.nome.toLowerCase() === (nome || '').toLowerCase());
 }
 
+// Máscara progressiva (11) 99999-9999 (celular) ou (11) 9999-9999 (fixo), conforme a quantidade de dígitos digitados.
+function formatarTelefone(valor) {
+  const digitos = (valor || '').replace(/\D/g, '').slice(0, 11);
+
+  if (!digitos) return '';
+  if (digitos.length <= 2) return `(${digitos}`;
+
+  const ddd = digitos.slice(0, 2);
+  const resto = digitos.slice(2);
+
+  if (resto.length <= 4) return `(${ddd}) ${resto}`;
+
+  const tamanhoPrefixo = digitos.length > 10 ? 5 : 4;
+  return `(${ddd}) ${resto.slice(0, tamanhoPrefixo)}-${resto.slice(tamanhoPrefixo)}`;
+}
+
 // Texto branco ou escuro por cima da cor da faixa, conforme a luminância dela (ex.: Amarela precisa de texto escuro).
 function corTextoContraste(hex) {
   const match = /^#?([0-9a-f]{6})$/i.exec(hex || '');
@@ -250,9 +266,15 @@ export default function InscricaoEvento() {
                   const extrasValidos =
                     !dadosObrigatorios ||
                     (extraDados.nome.trim() &&
-                      extraDados.telefone.trim() &&
                       extraDados.dataNascimento &&
                       (!menorDeIdade || extraDados.responsavel.trim()));
+
+                  const camposFaltando = [];
+                  if (dadosObrigatorios) {
+                    if (!extraDados.nome.trim()) camposFaltando.push('nome completo');
+                    if (!extraDados.dataNascimento) camposFaltando.push('data de nascimento');
+                    if (menorDeIdade && !extraDados.responsavel.trim()) camposFaltando.push('nome do responsável');
+                  }
 
                   return (
                     <div key={indice} className="tile">
@@ -306,9 +328,11 @@ export default function InscricaoEvento() {
                           <label className="form__field">
                             <span>Telefone</span>
                             <input
+                              type="tel"
+                              inputMode="numeric"
+                              placeholder="(11) 99999-9999"
                               value={extraDados.telefone}
-                              onChange={(event) => atualizarExtra(indice, 'telefone', event.target.value)}
-                              required
+                              onChange={(event) => atualizarExtra(indice, 'telefone', formatarTelefone(event.target.value))}
                             />
                           </label>
                           <label className="form__field">
@@ -331,6 +355,12 @@ export default function InscricaoEvento() {
                             </label>
                           )}
                         </div>
+                      )}
+
+                      {camposFaltando.length > 0 && (
+                        <p className="alert alert--error" style={{ marginTop: '0.75rem' }}>
+                          Preencha {camposFaltando.join(', ')} para continuar.
+                        </p>
                       )}
 
                       {precisaEscolherFaixa ? (

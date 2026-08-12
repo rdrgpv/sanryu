@@ -179,9 +179,9 @@ async function inscrever(req, res) {
     const telefone = (dadosExtras?.telefone || '').trim();
     const dataNascimento = (dadosExtras?.dataNascimento || '').trim();
 
-    if (!nome || !telefone || !dataNascimento) {
+    if (!nome || !dataNascimento) {
       return res.status(400).json({
-        error: 'Informe nome, telefone e data de nascimento para continuar.',
+        error: 'Informe nome e data de nascimento para continuar.',
         precisaDadosExtras: true,
       });
     }
@@ -205,7 +205,7 @@ async function inscrever(req, res) {
 
     candidato.nome = nome;
     candidato.dataNascimento = dataNascimento;
-    candidato.telefone = telefone;
+    candidato.telefone = telefone || null;
     candidato.responsavel = menorDeIdade ? responsavel : null;
   }
 
