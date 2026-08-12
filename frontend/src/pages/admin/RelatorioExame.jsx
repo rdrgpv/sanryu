@@ -39,6 +39,16 @@ function normalizarFaixa(nome) {
   return (nome || '').trim().toLowerCase();
 }
 
+const FICHAS_POR_PAGINA = 5;
+
+function agruparEmPaginas(itens, tamanho) {
+  const paginas = [];
+  for (let i = 0; i < itens.length; i += tamanho) {
+    paginas.push(itens.slice(i, i + tamanho));
+  }
+  return paginas;
+}
+
 // Datas "YYYY-MM-DD" sem horário — evita `new Date(string)`, que interpreta como meia-noite UTC e
 // pode "voltar" um dia em fusos negativos (Brasil).
 function calcularIdade(dataNascimento) {
@@ -146,8 +156,12 @@ export default function RelatorioExame() {
         {inscricoes.length === 0 && <p className="text-body-secondary">Nenhuma inscrição confirmada para este evento.</p>}
       </div>
 
-      {inscricoes.map((inscricao) => (
-        <FichaExame key={inscricao.id} inscricao={inscricao} />
+      {agruparEmPaginas(inscricoes, FICHAS_POR_PAGINA).map((pagina, indice) => (
+        <div key={indice} className="ficha-exame-pagina">
+          {pagina.map((inscricao) => (
+            <FichaExame key={inscricao.id} inscricao={inscricao} />
+          ))}
+        </div>
       ))}
     </div>
   );

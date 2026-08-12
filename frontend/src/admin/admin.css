@@ -39,14 +39,17 @@
   letter-spacing: normal;
 }
 
-/* Ficha de exame (relatório impresso) */
-.ficha-exame {
+/* Ficha de exame (relatório impresso) — ~5 fichas por página, não uma por página */
+.ficha-exame-pagina {
   page-break-after: always;
-  margin-bottom: 1.5rem;
 }
 
-.ficha-exame:last-child {
+.ficha-exame-pagina:last-child {
   page-break-after: auto;
+}
+
+.ficha-exame {
+  margin-bottom: 1rem;
 }
 
 .ficha-exame__tabela {
