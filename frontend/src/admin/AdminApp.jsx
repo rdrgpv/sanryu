@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Dashboard from '../pages/admin/Dashboard.jsx';
 import Alunos from '../pages/admin/Alunos.jsx';
@@ -17,10 +18,25 @@ import Bancos from '../pages/admin/Bancos.jsx';
 import BancoForm from '../pages/admin/BancoForm.jsx';
 import Configuracoes from '../pages/admin/Configuracoes.jsx';
 import AdminRoute from '../components/AdminRoute.jsx';
-import '@coreui/coreui/dist/css/coreui.min.css';
-import './admin.css';
+import coreuiCssUrl from '@coreui/coreui/dist/css/coreui.min.css?url';
+import adminCssUrl from './admin.css?url';
 
 export default function AdminApp() {
+  // O CSS do admin (CoreUI/Bootstrap) só pode existir enquanto o painel está montado — importado
+  // estaticamente, o <link> injetado pelo Vite nunca sai do <head>, e um redirecionamento pra
+  // /login (sessão expirada) herda os estilos do Bootstrap por cima dos da página pública.
+  useEffect(() => {
+    const links = [coreuiCssUrl, adminCssUrl].map((href) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
+      return link;
+    });
+
+    return () => links.forEach((link) => link.remove());
+  }, []);
+
   return (
     <Routes>
       <Route index element={<AdminRoute><Dashboard /></AdminRoute>} />
