@@ -33,6 +33,21 @@ const CURRICULO_POR_FAIXA = {
       },
     ],
   },
+  laranja: {
+    categorias: [
+      { titulo: 'SOCOS', itens: ['Nukite', 'Mawashi Shuto', 'Haito', 'Empi', 'Gyaku Zuki'] },
+      { titulo: 'DEFESAS', itens: ['Jodan Hiza Uke', 'Shuto Uke', 'Gedan Shuto Uke'] },
+      { titulo: 'CHUTES', itens: ['Shimo Mawashi Geri', 'Tensho Mawashi Geri', 'Ura Mawashi Geri'] },
+      {
+        titulo: 'NAGE-WAZA',
+        itens: ['De Ashi Barai', 'Harai Goshi', 'Yama Arashi', 'Yoko Otoshi', 'Yoko Gake', 'Morote Gari', 'Tatte Hishigi'],
+      },
+      {
+        titulo: 'NE-WAZA',
+        itens: ['Yoko Shiho Gatame', 'Kami Shiho Gatame', 'Kubi Gatame', 'Ashi Hishigi', 'Okuri Eri Jime', 'Kataha Jime'],
+      },
+    ],
+  },
 };
 
 function normalizarFaixa(nome) {
