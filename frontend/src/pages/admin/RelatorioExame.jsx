@@ -202,6 +202,18 @@ function normalizarFaixa(nome) {
   return (nome || '').trim().toLowerCase();
 }
 
+// Texto branco ou escuro por cima da cor da faixa, conforme a luminância dela.
+function corTextoContraste(hex) {
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!match) return '#111';
+  const n = parseInt(match[1], 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const luminancia = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminancia > 0.6 ? '#111' : '#fff';
+}
+
 const FICHAS_POR_PAGINA = 5;
 const FICHAS_POR_PAGINA_PRETA = 2; // ficha bem maior (2 blocos de categorias) — só cabem 2 numa folha A4
 
@@ -209,22 +221,24 @@ function capacidadePagina(faixa) {
   return normalizarFaixa(faixa) === 'preta' ? FICHAS_POR_PAGINA_PRETA : FICHAS_POR_PAGINA;
 }
 
-// Agrupa em páginas respeitando a capacidade de cada faixa — nunca mistura Preta (ficha grande)
-// com as demais (fichas compactas) na mesma folha, mesmo que venham intercaladas na lista.
+// Agrupa em páginas por faixa: nunca mistura duas faixas diferentes na mesma folha (mesmo que
+// venham intercaladas na lista) e, dentro de uma mesma faixa, respeita a capacidade dela (2 fichas
+// de Preta por página, 5 das demais).
 function agruparEmPaginas(itens) {
   const paginas = [];
   let atual = [];
-  let capacidadeAtual = null;
+  let faixaAtual = null;
 
   itens.forEach((item) => {
-    const capacidadeItem = capacidadePagina(item.faixa);
+    const faixaItem = normalizarFaixa(item.faixa);
+    const capacidade = capacidadePagina(item.faixa);
 
     if (atual.length === 0) {
-      capacidadeAtual = capacidadeItem;
-    } else if (atual.length >= capacidadeAtual || capacidadeItem !== capacidadeAtual) {
+      faixaAtual = faixaItem;
+    } else if (faixaItem !== faixaAtual || atual.length >= capacidade) {
       paginas.push(atual);
       atual = [];
-      capacidadeAtual = capacidadeItem;
+      faixaAtual = faixaItem;
     }
 
     atual.push(item);
@@ -289,18 +303,19 @@ function BlocoCategorias({ categorias, rodapeColunas }) {
   );
 }
 
-function FichaExame({ inscricao }) {
+function FichaExame({ inscricao, corFaixa }) {
   const idade = calcularIdade(inscricao.dataNascimento);
   const curriculo = CURRICULO_POR_FAIXA[normalizarFaixa(inscricao.faixa)];
   const blocos = curriculo ? curriculo.blocos || [curriculo.categorias] : [];
   const colunasCabecalho = blocos[0]?.length || 1;
+  const estiloCabecalho = corFaixa ? { background: corFaixa, color: corTextoContraste(corFaixa) } : undefined;
 
   return (
     <div className="ficha-exame">
       <table className="ficha-exame__tabela">
         <tbody>
           <tr>
-            <td colSpan={colunasCabecalho} className="ficha-exame__cabecalho">
+            <td colSpan={colunasCabecalho} className="ficha-exame__cabecalho" style={estiloCabecalho}>
               <strong>Nome:</strong> {inscricao.nome || '-'}
               <span className="ms-4">
                 <strong>Idade:</strong> {idade != null ? `${idade} anos` : '-'}
@@ -354,10 +369,18 @@ export default function RelatorioExame() {
   const { id } = useParams();
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
+  const [coresPorFaixa, setCoresPorFaixa] = useState({});
 
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
     api.get(`/admin/eventos/${id}/inscricoes`).then((res) => setInscricoes(res.data));
+    api.get('/admin/faixas').then((res) => {
+      const mapa = {};
+      res.data.forEach((faixa) => {
+        mapa[normalizarFaixa(faixa.nome)] = faixa.cor;
+      });
+      setCoresPorFaixa(mapa);
+    });
   }, [id]);
 
   return (
@@ -379,7 +402,7 @@ export default function RelatorioExame() {
       {agruparEmPaginas(inscricoes).map((pagina, indice) => (
         <div key={indice} className="ficha-exame-pagina">
           {pagina.map((inscricao) => (
-            <FichaExame key={inscricao.id} inscricao={inscricao} />
+            <FichaExame key={inscricao.id} inscricao={inscricao} corFaixa={coresPorFaixa[normalizarFaixa(inscricao.faixa)]} />
           ))}
         </div>
       ))}
