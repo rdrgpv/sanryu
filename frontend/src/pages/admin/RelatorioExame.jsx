@@ -114,6 +114,41 @@ const CURRICULO_POR_FAIXA = {
       },
     ],
   },
+  marrom: {
+    categorias: [
+      {
+        titulo: 'NAGE-WAZA',
+        itens: [
+          'Seoi Nage Hizamazuki',
+          'Eri Seoi Nage',
+          'Seoi Uchi Mata',
+          'Seoi Hane Goshi',
+          'Yoko Wakare',
+          'Sode Guruma',
+          'Nidan Gake',
+          'Obi Otoshi',
+          'Hiza Guruma',
+          'Ushiro Ura Nage',
+        ],
+      },
+      {
+        titulo: 'NE-WAZA',
+        itens: [
+          'Ude Nigiri',
+          'Ushiro Sankaku Jime',
+          'Ushiro Ude Garami',
+          'Ushiro Do Gatame',
+          'Tate Eri Jime',
+          'Tate Sankaku Ashi Hishigi',
+          'Haisoku Jime',
+          'Nidan Sode Jime',
+          'Shuto Jime',
+          'Hiji Jime',
+          'Kata Jime',
+        ],
+      },
+    ],
+  },
 };
 
 function normalizarFaixa(nome) {
