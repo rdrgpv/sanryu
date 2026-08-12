@@ -149,6 +149,44 @@ const CURRICULO_POR_FAIXA = {
       },
     ],
   },
+  preta: {
+    // Ficha maior (2 blocos de 3 categorias) — só 2 fichas por página, ver capacidadePagina().
+    blocos: [
+      [
+        { titulo: 'SOCOS', itens: ['Tobi Gyaku Zuki', 'Kumade', 'Nihon Mawashi Tetsui', 'Gyaku Mawashi Empi Uchi', 'Ushiro Empi'] },
+        { titulo: 'DEFESAS', itens: ['Haishu Uke', 'Kakiwake Uke', 'Osae Uke', 'Kosa Uke', 'Nihon Gedan Hiraken Uke'] },
+        {
+          titulo: 'CHUTES',
+          itens: ['Uchi Mawashi Geri', 'Otoshi Mawashi Geri', 'Kakato Otoshi Geri', 'Nihon Geri', 'Tobi Ushiro Geri', 'Mawashi Kaiten Geri'],
+        },
+      ],
+      [
+        {
+          titulo: 'NAGE-WAZA',
+          itens: ['Ko Soto Gari', 'Okuri Ashi Barai', 'Ashi Barai', 'Ushiro Goshi', 'Kata Otoshi', 'Yoko Guruma', 'Kuzure Tomoe Nage', 'Sode Otoshi'],
+        },
+        {
+          titulo: 'NE-WAZA',
+          itens: [
+            'Kuzure Kami Shiho Gatame',
+            'Hiza Hishigi',
+            'Gyaku Kakato Hishigi',
+            'Hara Gatame',
+            'Katate Jime',
+            'Obi Jime',
+            'Seiken Jime',
+            'Kuzure Okuri Eri Jime',
+            'Ude Sankaku Jime',
+            'Tate Sankaku Jime',
+          ],
+        },
+        {
+          titulo: 'KAESHI-WAZA',
+          itens: ['De Ashi Barai/ Juji Gatame', 'Mawashi Geri/ Harai Goshi', 'Tetsui/ Ippon Seoi Nage'],
+        },
+      ],
+    ],
+  },
 };
 
 function normalizarFaixa(nome) {
@@ -156,12 +194,35 @@ function normalizarFaixa(nome) {
 }
 
 const FICHAS_POR_PAGINA = 5;
+const FICHAS_POR_PAGINA_PRETA = 2; // ficha bem maior (2 blocos de categorias) — só cabem 2 numa folha A4
 
-function agruparEmPaginas(itens, tamanho) {
+function capacidadePagina(faixa) {
+  return normalizarFaixa(faixa) === 'preta' ? FICHAS_POR_PAGINA_PRETA : FICHAS_POR_PAGINA;
+}
+
+// Agrupa em páginas respeitando a capacidade de cada faixa — nunca mistura Preta (ficha grande)
+// com as demais (fichas compactas) na mesma folha, mesmo que venham intercaladas na lista.
+function agruparEmPaginas(itens) {
   const paginas = [];
-  for (let i = 0; i < itens.length; i += tamanho) {
-    paginas.push(itens.slice(i, i + tamanho));
-  }
+  let atual = [];
+  let capacidadeAtual = null;
+
+  itens.forEach((item) => {
+    const capacidadeItem = capacidadePagina(item.faixa);
+
+    if (atual.length === 0) {
+      capacidadeAtual = capacidadeItem;
+    } else if (atual.length >= capacidadeAtual || capacidadeItem !== capacidadeAtual) {
+      paginas.push(atual);
+      atual = [];
+      capacidadeAtual = capacidadeItem;
+    }
+
+    atual.push(item);
+  });
+
+  if (atual.length > 0) paginas.push(atual);
+
   return paginas;
 }
 
@@ -184,17 +245,53 @@ function calcularIdade(dataNascimento) {
   return idade;
 }
 
+// Um bloco = uma linha de títulos de categoria + as linhas de itens debaixo. A ficha da Preta tem
+// dois blocos empilhados (Socos/Defesas/Chutes e depois Nage-Waza/Ne-Waza/Kaeshi-Waza); as demais
+// faixas têm só um.
+function BlocoCategorias({ categorias, rodapeColunas }) {
+  const maxLinhas = Math.max(...categorias.map((categoria) => categoria.itens.length));
+
+  return (
+    <>
+      <tr>
+        {categorias.map((categoria) => (
+          <th key={categoria.titulo} className="ficha-exame__categoria">
+            {categoria.titulo}
+          </th>
+        ))}
+      </tr>
+      {Array.from({ length: maxLinhas }).map((_, linha) => (
+        <tr key={linha}>
+          {categorias.map((categoria) => (
+            <td key={categoria.titulo}>{categoria.itens[linha] ? `( ) ${categoria.itens[linha]}` : ''}</td>
+          ))}
+        </tr>
+      ))}
+      {rodapeColunas && (
+        <tr>
+          {categorias.map((categoria, indice) => (
+            <td key={categoria.titulo}>
+              <strong>{rodapeColunas[indice] || ''}</strong>
+            </td>
+          ))}
+        </tr>
+      )}
+    </>
+  );
+}
+
 function FichaExame({ inscricao }) {
   const idade = calcularIdade(inscricao.dataNascimento);
   const curriculo = CURRICULO_POR_FAIXA[normalizarFaixa(inscricao.faixa)];
-  const maxLinhas = curriculo ? Math.max(...curriculo.categorias.map((categoria) => categoria.itens.length)) : 0;
+  const blocos = curriculo ? curriculo.blocos || [curriculo.categorias] : [];
+  const colunasCabecalho = blocos[0]?.length || 1;
 
   return (
     <div className="ficha-exame">
       <table className="ficha-exame__tabela">
         <tbody>
           <tr>
-            <td colSpan={curriculo?.categorias.length || 1} className="ficha-exame__cabecalho">
+            <td colSpan={colunasCabecalho} className="ficha-exame__cabecalho">
               <strong>Nome:</strong> {inscricao.nome || '-'}
               <span className="ms-4">
                 <strong>Idade:</strong> {idade != null ? `${idade} anos` : '-'}
@@ -206,35 +303,33 @@ function FichaExame({ inscricao }) {
           </tr>
 
           {curriculo ? (
-            <>
-              <tr>
-                {curriculo.categorias.map((categoria) => (
-                  <th key={categoria.titulo} className="ficha-exame__categoria">
-                    {categoria.titulo}
-                  </th>
-                ))}
-              </tr>
-              {Array.from({ length: maxLinhas }).map((_, linha) => (
-                <tr key={linha}>
-                  {curriculo.categorias.map((categoria) => (
-                    <td key={categoria.titulo}>{categoria.itens[linha] ? `( ) ${categoria.itens[linha]}` : ''}</td>
-                  ))}
+            blocos.length > 1 ? (
+              // Múltiplos blocos (Preta): rodapé KATA/UKEMIS/OBS em colunas, só no último bloco.
+              blocos.map((categorias, indice) => (
+                <BlocoCategorias
+                  key={indice}
+                  categorias={categorias}
+                  rodapeColunas={indice === blocos.length - 1 ? ['KATA:', 'UKEMIS:', 'OBS:'] : null}
+                />
+              ))
+            ) : (
+              <>
+                <BlocoCategorias categorias={blocos[0]} />
+                <tr>
+                  <td colSpan={colunasCabecalho}>
+                    <strong>KATA:</strong> _______________________________
+                    <span className="ms-4">
+                      <strong>UKEMIS:</strong> _______________________________
+                    </span>
+                  </td>
                 </tr>
-              ))}
-              <tr>
-                <td colSpan={curriculo.categorias.length}>
-                  <strong>KATA:</strong> _______________________________
-                  <span className="ms-4">
-                    <strong>UKEMIS:</strong> _______________________________
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={curriculo.categorias.length}>
-                  <strong>Obs:</strong>
-                </td>
-              </tr>
-            </>
+                <tr>
+                  <td colSpan={colunasCabecalho}>
+                    <strong>Obs:</strong>
+                  </td>
+                </tr>
+              </>
+            )
           ) : (
             <tr>
               <td className="text-body-secondary">Currículo da faixa "{inscricao.faixa || '-'}" ainda não cadastrado neste relatório.</td>
@@ -272,7 +367,7 @@ export default function RelatorioExame() {
         {inscricoes.length === 0 && <p className="text-body-secondary">Nenhuma inscrição confirmada para este evento.</p>}
       </div>
 
-      {agruparEmPaginas(inscricoes, FICHAS_POR_PAGINA).map((pagina, indice) => (
+      {agruparEmPaginas(inscricoes).map((pagina, indice) => (
         <div key={indice} className="ficha-exame-pagina">
           {pagina.map((inscricao) => (
             <FichaExame key={inscricao.id} inscricao={inscricao} />
