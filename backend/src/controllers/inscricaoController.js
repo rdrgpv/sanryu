@@ -62,6 +62,52 @@ function calcularIdade(dataNascimento) {
   return idade;
 }
 
+const VALIDADE_QR_CODE_MS = 24 * 60 * 60 * 1000;
+
+// Gera um novo pagamento Pix (Mercado Pago dinâmico, com fallback pro QR estático de /admin/bancos)
+// — usado tanto numa inscrição nova quanto ao regenerar o QR code de uma pendência expirada.
+async function gerarPagamentoPix({ valor, evento, email }) {
+  let qrcodePix = null;
+  let pixCopiaCola = null;
+  let mpPaymentId = null;
+
+  const pagamentoMp = await mercadoPagoService
+    .criarPagamentoPix({
+      valor,
+      descricao: `Inscrição - ${evento.nome}`,
+      email,
+      referenciaExterna: `EVT${evento.id}-${Date.now()}`,
+    })
+    .catch((err) => {
+      console.error('Erro ao criar pagamento Pix via Mercado Pago, caindo para QR estático:', err.message);
+      return null;
+    });
+
+  if (pagamentoMp) {
+    qrcodePix = pagamentoMp.qrcodeBase64;
+    pixCopiaCola = pagamentoMp.pixCopiaCola;
+    mpPaymentId = pagamentoMp.paymentId;
+  } else {
+    // Fallback: Mercado Pago não configurado (ou falhou) — usa a chave Pix estática de /admin/bancos.
+    const banco = await Banco.findOne({ order: [['id', 'ASC']] });
+
+    if (banco) {
+      pixCopiaCola = pixService.gerarPayload({
+        chavePix: banco.chavePix,
+        nomeRecebedor: banco.titular,
+        cidade: banco.cidade,
+        valor,
+        txid: `EVT${evento.id}${Date.now()}`,
+      });
+      qrcodePix = await pixService.gerarQrCodeBase64(pixCopiaCola);
+    } else {
+      console.error('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
+    }
+  }
+
+  return { qrcodePix, pixCopiaCola, mpPaymentId };
+}
+
 function tratarErroConsulta(err, res) {
   if (err.interno) {
     console.error(err);
@@ -133,7 +179,7 @@ async function inscrever(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const { email, indice, faixaEscolhida, dadosExtras } = req.body;
+  const { email, indice, faixaEscolhida, dadosExtras, gerarNovoQrCode } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -147,6 +193,28 @@ async function inscrever(req, res) {
   const pendenteSemValor = existente && existente.valorCobrado == null && existente.statusPagamento === 'pendente';
 
   if (existente && !pendenteSemValor) {
+    if (gerarNovoQrCode) {
+      if (existente.statusPagamento === 'pago') {
+        return res.status(400).json({ error: 'Esta inscrição já está paga; não há QR code para gerar.', jaInscrito: true });
+      }
+
+      const geradoHaMenosDe24h = Date.now() - new Date(existente.createdAt).getTime() < VALIDADE_QR_CODE_MS;
+
+      if (geradoHaMenosDe24h) {
+        return res.status(400).json({
+          error: 'O QR code atual ainda está dentro do prazo de validade de 24 horas.',
+          jaInscrito: true,
+        });
+      }
+
+      const novoPagamento = await gerarPagamentoPix({ valor: existente.valorCobrado, evento, email });
+      await existente.update({ ...novoPagamento, statusPagamento: 'pendente' });
+
+      emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: existente });
+
+      return res.status(200).json({ ...existente.toJSON(), jaInscrito: true, qrCodeRenovado: true });
+    }
+
     return res.status(200).json({ ...existente.toJSON(), jaInscrito: true });
   }
 
@@ -225,39 +293,7 @@ async function inscrever(req, res) {
   let mpPaymentId = null;
 
   if (resultadoValor.valor && Number(resultadoValor.valor) > 0) {
-    const pagamentoMp = await mercadoPagoService
-      .criarPagamentoPix({
-        valor: resultadoValor.valor,
-        descricao: `Inscrição - ${evento.nome}`,
-        email,
-        referenciaExterna: `EVT${evento.id}-${Date.now()}`,
-      })
-      .catch((err) => {
-        console.error('Erro ao criar pagamento Pix via Mercado Pago, caindo para QR estático:', err.message);
-        return null;
-      });
-
-    if (pagamentoMp) {
-      qrcodePix = pagamentoMp.qrcodeBase64;
-      pixCopiaCola = pagamentoMp.pixCopiaCola;
-      mpPaymentId = pagamentoMp.paymentId;
-    } else {
-      // Fallback: Mercado Pago não configurado (ou falhou) — usa a chave Pix estática de /admin/bancos.
-      const banco = await Banco.findOne({ order: [['id', 'ASC']] });
-
-      if (banco) {
-        pixCopiaCola = pixService.gerarPayload({
-          chavePix: banco.chavePix,
-          nomeRecebedor: banco.titular,
-          cidade: banco.cidade,
-          valor: resultadoValor.valor,
-          txid: `EVT${evento.id}${Date.now()}`,
-        });
-        qrcodePix = await pixService.gerarQrCodeBase64(pixCopiaCola);
-      } else {
-        console.error('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
-      }
-    }
+    ({ qrcodePix, pixCopiaCola, mpPaymentId } = await gerarPagamentoPix({ valor: resultadoValor.valor, evento, email }));
   }
 
   const dadosInscricao = {

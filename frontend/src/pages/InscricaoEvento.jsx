@@ -68,6 +68,11 @@ function paraInputDate(valor) {
   return match ? match[0] : '';
 }
 
+function qrGeradoHaMaisDe24h(criadoEm) {
+  if (!criadoEm) return false;
+  return Date.now() - new Date(criadoEm).getTime() >= 24 * 60 * 60 * 1000;
+}
+
 function calcularIdade(dataNascimento) {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dataNascimento || '');
   if (!match) return null;
@@ -104,6 +109,7 @@ export default function InscricaoEvento() {
   const [novaFaixaConfirmada, setNovaFaixaConfirmada] = useState(null);
   const [copiado, setCopiado] = useState(false);
   const [mostrarQrCode, setMostrarQrCode] = useState(false);
+  const [gerandoNovoQrCode, setGerandoNovoQrCode] = useState(false);
 
   useEffect(() => {
     api
@@ -182,6 +188,21 @@ export default function InscricaoEvento() {
       setTimeout(() => setCopiado(false), 2000);
     } catch (err) {
       setErro('Não foi possível copiar o código. Copie manualmente o QR code exibido.');
+    }
+  }
+
+  async function handleGerarNovoQrCode() {
+    setErro(null);
+    setGerandoNovoQrCode(true);
+
+    try {
+      const res = await api.post(`/eventos/${id}/inscricoes`, { email, gerarNovoQrCode: true });
+      setResultado(res.data);
+      setMostrarQrCode(true);
+    } catch (err) {
+      setErro(err.response?.data?.error || 'Não foi possível gerar um novo QR code agora. Tente novamente.');
+    } finally {
+      setGerandoNovoQrCode(false);
     }
   }
 
@@ -469,6 +490,18 @@ export default function InscricaoEvento() {
                           <p>Escaneie o QR code abaixo para pagar via Pix:</p>
                           <img src={resultado.qrcodePix} alt="QR code Pix" style={{ maxWidth: 260 }} />
                           <p className="tile__meta">Este QR code tem validade de 24 horas.</p>
+                          {resultado.jaInscrito && qrGeradoHaMaisDe24h(resultado.createdAt) && (
+                            <div style={{ marginTop: '0.75rem' }}>
+                              <button
+                                type="button"
+                                className="btn btn--ghost"
+                                onClick={handleGerarNovoQrCode}
+                                disabled={gerandoNovoQrCode}
+                              >
+                                {gerandoNovoQrCode ? 'Gerando novo QR code...' : 'Gerar novo QR code'}
+                              </button>
+                            </div>
+                          )}
                           {resultado.pixCopiaCola && (
                             <div style={{ marginTop: '1rem' }}>
                               <button type="button" className="btn btn--ghost" onClick={handleCopiarPix}>
