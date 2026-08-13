@@ -126,6 +126,10 @@ export default function EventoForm() {
 
     const payload = {
       ...form,
+      // O input datetime-local devolve uma string "ingênua" (sem timezone). Sem essa conversão,
+      // o horário digitado (hora local do navegador) era enviado como se já fosse UTC e o servidor
+      // (rodando em UTC) gravava 3h adiantado em relação ao horário de Brasília digitado.
+      data: form.data ? new Date(form.data).toISOString() : form.data,
       slug: form.slug.trim() || null,
       tipoEventoId: Number(form.tipoEventoId),
       valor: mostrarValor && form.valor !== '' ? Number(form.valor) : null,
