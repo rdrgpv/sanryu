@@ -245,7 +245,7 @@ export default function InscricaoEvento() {
           {naoApto && (
             <p className="alert alert--error">
               Não localizamos seus dados de carteirinha para o e-mail informado. Verifique o e-mail digitado ou
-              entre em contato com o dojo.
+              verifique seu cadastro no Morganti University.
             </p>
           )}
 
