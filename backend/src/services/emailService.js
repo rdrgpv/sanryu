@@ -41,6 +41,7 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
     }
 
     const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+    const copiaPara = await configService.obterValor('SMTP_BCC');
 
     const anexos = [];
     let imagemQrHtml = '';
@@ -88,6 +89,7 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
     const info = await transportador.sendMail({
       from: remetente,
       to: eventoAluno.email,
+      bcc: copiaPara || undefined,
       subject: `Inscrição confirmada — ${evento.nome}`,
       html,
       attachments: anexos,

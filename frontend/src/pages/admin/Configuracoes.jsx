@@ -16,6 +16,7 @@ const CAMPOS = [
   { parametro: 'SMTP_USER', label: 'Usuário SMTP', tipo: 'text', sensivel: false },
   { parametro: 'SMTP_SENHA', label: 'Senha SMTP', tipo: 'text', sensivel: true },
   { parametro: 'SMTP_FROM', label: 'Remetente dos e-mails (ex.: San·Ryu Dojo <contato@sanryu.com.br>)', tipo: 'text', sensivel: false },
+  { parametro: 'SMTP_BCC', label: 'Cópia oculta dos e-mails enviados (opcional)', tipo: 'text', sensivel: false },
 ];
 
 const estadoInicial = CAMPOS.reduce((acc, campo) => ({ ...acc, [campo.parametro]: '' }), {});
