@@ -161,7 +161,7 @@ async function inscrever(req, res) {
   if (!resultado.apto) {
     return res.status(404).json({
       apto: false,
-      error: 'Não localizamos seus dados de carteirinha. Verifique o e-mail informado ou entre em contato com o dojo.',
+      error: 'Não localizamos seus dados de carteirinha. Verifique o e-mail informado ou verifique seu cadastro no Morganti University.',
     });
   }
 
