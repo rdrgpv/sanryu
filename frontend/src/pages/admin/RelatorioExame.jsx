@@ -256,9 +256,17 @@ function agruparEmPaginas(itens, ordemPorFaixa) {
       return faixaA.localeCompare(faixaB);
     }
 
-    const etariaA = ordemFaixaEtaria(faixaEtaria(calcularIdade(a.dataNascimento)));
-    const etariaB = ordemFaixaEtaria(faixaEtaria(calcularIdade(b.dataNascimento)));
-    return etariaA - etariaB;
+    const idadeA = calcularIdade(a.dataNascimento);
+    const idadeB = calcularIdade(b.dataNascimento);
+    const etariaA = ordemFaixaEtaria(faixaEtaria(idadeA));
+    const etariaB = ordemFaixaEtaria(faixaEtaria(idadeB));
+    if (etariaA !== etariaB) return etariaA - etariaB;
+
+    // Mesma faixa e mesma faixa etária: ordena por idade exata (crescente); sem data de
+    // nascimento vai pro final do grupo.
+    if (idadeA == null) return idadeB == null ? 0 : 1;
+    if (idadeB == null) return -1;
+    return idadeA - idadeB;
   });
 
   const paginas = [];
