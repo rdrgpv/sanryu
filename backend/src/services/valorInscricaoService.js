@@ -12,6 +12,26 @@ async function buscarFaixaPorNome(nome) {
   return Faixa.findOne({ where: where(fn('LOWER', col('nome')), nome.trim().toLowerCase()) });
 }
 
+// "Tem carteirinha" pra fins de valor exige número E validade em dia — sem data de validade (ou já
+// vencida) conta como sem carteirinha. Datas "YYYY-MM-DD" sem horário: evita `new Date(string)`, que
+// interpreta como meia-noite UTC e pode "voltar" um dia em fusos negativos como o do Brasil.
+function carteirinhaValida(candidato) {
+  if (!candidato.numeroCarteirinha || !candidato.validadeCarteirinha) {
+    return false;
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(candidato.validadeCarteirinha);
+
+  if (!match) {
+    return false;
+  }
+
+  const [, anoStr, mesStr, diaStr] = match;
+  const fimDoDia = new Date(Number(anoStr), Number(mesStr) - 1, Number(diaStr), 23, 59, 59, 999);
+
+  return fimDoDia.getTime() >= Date.now();
+}
+
 // Mesma lógica de progressão usada na tela pública (por "ordem", só faixas ativas) — repetida aqui
 // porque o cálculo de valor precisa da faixa de destino de forma confiável no servidor, sem depender
 // do que o navegador mandar (evita tanto bug de exibição quanto manipulação do valor pelo cliente).
@@ -78,7 +98,7 @@ async function calcularValorInscricao({ evento, tipoEvento, candidato, faixaEsco
     };
   }
 
-  const temCarteirinha = Boolean(candidato.numeroCarteirinha);
+  const temCarteirinha = carteirinhaValida(candidato);
   const valor = temCarteirinha ? faixaCadastrada.valorComCarteirinha : faixaCadastrada.valorSemCarteirinha;
 
   return { valor, statusPagamento: calcularPagamento(valor), faixaAtual, faixaUsada: nomeFaixaParaValor };
