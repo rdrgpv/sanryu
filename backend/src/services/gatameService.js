@@ -26,11 +26,11 @@ async function consultarAluno(emailAluno) {
 
   for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa += 1) {
     try {
-      const resposta = await axios.post(apiUrl, {
-        email,
-        senha,
-        email_aluno: emailAluno,
-      });
+      const resposta = await axios.post(
+        apiUrl,
+        { email, senha, email_aluno: emailAluno },
+        { timeout: 15000 }
+      );
 
       if (resposta.data?.sucesso) {
         // "origem" vem no nível raiz da resposta (não por item de "dados"), então é replicada em cada candidato.

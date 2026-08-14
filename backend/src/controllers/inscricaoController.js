@@ -277,52 +277,60 @@ async function inscrever(req, res) {
     candidato.responsavel = menorDeIdade ? responsavel : null;
   }
 
-  const resultadoValor = await calcularValorInscricao({
-    evento,
-    tipoEvento: evento.tipoEvento,
-    candidato,
-    faixaEscolhida,
-  });
+  // A partir daqui não há mais validação de entrada (só cálculo/gravação/pagamento) — sem esse
+  // try/catch, qualquer exceção aqui (ex.: Mercado Pago/Pix, banco de dados) derrubava a promise
+  // da rota sem nunca responder, e o front ficava esperando até dar timeout com uma mensagem genérica.
+  try {
+    const resultadoValor = await calcularValorInscricao({
+      evento,
+      tipoEvento: evento.tipoEvento,
+      candidato,
+      faixaEscolhida,
+    });
 
-  if (resultadoValor.erroValidacao) {
-    return res.status(400).json({ error: resultadoValor.erroValidacao, opcoesFaixa: resultadoValor.opcoesFaixa });
+    if (resultadoValor.erroValidacao) {
+      return res.status(400).json({ error: resultadoValor.erroValidacao, opcoesFaixa: resultadoValor.opcoesFaixa });
+    }
+
+    let qrcodePix = null;
+    let pixCopiaCola = null;
+    let mpPaymentId = null;
+
+    if (resultadoValor.valor && Number(resultadoValor.valor) > 0) {
+      ({ qrcodePix, pixCopiaCola, mpPaymentId } = await gerarPagamentoPix({ valor: resultadoValor.valor, evento, email }));
+    }
+
+    const dadosInscricao = {
+      eventoId: evento.id,
+      email,
+      nome: candidato.nome,
+      faixa: resultadoValor.faixaUsada || candidato.faixa,
+      faixaAtual: resultadoValor.faixaAtual || candidato.faixa,
+      dataNascimento: candidato.dataNascimento,
+      telefone: candidato.telefone || null,
+      responsavel: candidato.responsavel || null,
+      numeroCarteirinha: candidato.numeroCarteirinha,
+      validadeCarteirinha: candidato.validadeCarteirinha,
+      carteirinhaValida: resultadoValor.carteirinhaValida ?? null,
+      origemDados: candidato.origem,
+      apto: true,
+      valorCobrado: resultadoValor.valor,
+      statusPagamento: resultadoValor.statusPagamento,
+      qrcodePix,
+      pixCopiaCola,
+      mpPaymentId,
+    };
+
+    const eventoAluno = pendenteSemValor ? await existente.update(dadosInscricao) : await EventoAluno.create(dadosInscricao);
+
+    // Não aguarda nem deixa falha de e-mail atrasar/derrubar a resposta — a inscrição já está concluída.
+    emailService.enviarConfirmacaoInscricao({ evento, eventoAluno });
+
+    res.status(pendenteSemValor ? 200 : 201).json({ ...eventoAluno.toJSON(), aviso: resultadoValor.aviso });
+  } catch (err) {
+    console.error('Erro ao processar inscrição:', err);
+    res.status(500).json({ error: 'Não foi possível concluir sua inscrição. Tente novamente em instantes.' });
   }
-
-  let qrcodePix = null;
-  let pixCopiaCola = null;
-  let mpPaymentId = null;
-
-  if (resultadoValor.valor && Number(resultadoValor.valor) > 0) {
-    ({ qrcodePix, pixCopiaCola, mpPaymentId } = await gerarPagamentoPix({ valor: resultadoValor.valor, evento, email }));
-  }
-
-  const dadosInscricao = {
-    eventoId: evento.id,
-    email,
-    nome: candidato.nome,
-    faixa: resultadoValor.faixaUsada || candidato.faixa,
-    faixaAtual: resultadoValor.faixaAtual || candidato.faixa,
-    dataNascimento: candidato.dataNascimento,
-    telefone: candidato.telefone || null,
-    responsavel: candidato.responsavel || null,
-    numeroCarteirinha: candidato.numeroCarteirinha,
-    validadeCarteirinha: candidato.validadeCarteirinha,
-    carteirinhaValida: resultadoValor.carteirinhaValida ?? null,
-    origemDados: candidato.origem,
-    apto: true,
-    valorCobrado: resultadoValor.valor,
-    statusPagamento: resultadoValor.statusPagamento,
-    qrcodePix,
-    pixCopiaCola,
-    mpPaymentId,
-  };
-
-  const eventoAluno = pendenteSemValor ? await existente.update(dadosInscricao) : await EventoAluno.create(dadosInscricao);
-
-  // Não aguarda nem deixa falha de e-mail atrasar/derrubar a resposta — a inscrição já está concluída.
-  emailService.enviarConfirmacaoInscricao({ evento, eventoAluno });
-
-  res.status(pendenteSemValor ? 200 : 201).json({ ...eventoAluno.toJSON(), aviso: resultadoValor.aviso });
 }
 
 module.exports = { listarPublicados, buscarPublico, consultarCarteirinha, inscrever };

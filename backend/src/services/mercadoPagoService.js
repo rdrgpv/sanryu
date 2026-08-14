@@ -31,6 +31,7 @@ async function criarPagamentoPix({ valor, descricao, email, referenciaExterna })
         Authorization: `Bearer ${accessToken}`,
         'X-Idempotency-Key': crypto.randomBytes(16).toString('hex'),
       },
+      timeout: 15000,
     }
   );
 
@@ -64,6 +65,7 @@ async function consultarPagamento(paymentId) {
 
   const resposta = await axios.get(`${MP_API_URL}/${paymentId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
+    timeout: 15000,
   });
 
   return { statusMp: resposta.data.status, statusPagamento: mapearStatusPagamento(resposta.data.status) };
