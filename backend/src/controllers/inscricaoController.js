@@ -307,6 +307,7 @@ async function inscrever(req, res) {
     responsavel: candidato.responsavel || null,
     numeroCarteirinha: candidato.numeroCarteirinha,
     validadeCarteirinha: candidato.validadeCarteirinha,
+    carteirinhaValida: resultadoValor.carteirinhaValida ?? null,
     origemDados: candidato.origem,
     apto: true,
     valorCobrado: resultadoValor.valor,

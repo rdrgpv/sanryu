@@ -156,7 +156,12 @@ export default function EventoInscricoes() {
                 <CTableDataCell>{formatarData(inscricao.dataNascimento)}</CTableDataCell>
                 <CTableDataCell>{inscricao.responsavel || '-'}</CTableDataCell>
                 <CTableDataCell>{inscricao.numeroCarteirinha || '-'}</CTableDataCell>
-                <CTableDataCell>{formatarData(inscricao.validadeCarteirinha)}</CTableDataCell>
+                <CTableDataCell>
+                  {formatarData(inscricao.validadeCarteirinha)}
+                  {inscricao.carteirinhaValida === false && (
+                    <div className="text-danger small">Aluno sem carteirinha válida</div>
+                  )}
+                </CTableDataCell>
                 <CTableDataCell>{inscricao.origemDados || '-'}</CTableDataCell>
                 <CTableDataCell>{inscricao.apto ? 'Sim' : 'Não'}</CTableDataCell>
                 <CTableDataCell>

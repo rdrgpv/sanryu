@@ -46,6 +46,12 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // Null quando não se aplica (evento não é Exame de Faixa) — só true/false quando o valor foi
+  // calculado com base em ter (ou não) carteirinha válida (número + validade em dia).
+  carteirinhaValida: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+  },
   origemDados: {
     type: DataTypes.STRING,
     allowNull: true,

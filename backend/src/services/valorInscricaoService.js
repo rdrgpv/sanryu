@@ -101,7 +101,13 @@ async function calcularValorInscricao({ evento, tipoEvento, candidato, faixaEsco
   const temCarteirinha = carteirinhaValida(candidato);
   const valor = temCarteirinha ? faixaCadastrada.valorComCarteirinha : faixaCadastrada.valorSemCarteirinha;
 
-  return { valor, statusPagamento: calcularPagamento(valor), faixaAtual, faixaUsada: nomeFaixaParaValor };
+  return {
+    valor,
+    statusPagamento: calcularPagamento(valor),
+    faixaAtual,
+    faixaUsada: nomeFaixaParaValor,
+    carteirinhaValida: temCarteirinha,
+  };
 }
 
 module.exports = { calcularValorInscricao, TIPO_EXAME_DE_FAIXA_ID, OPCOES_FAIXA_BRANCA };
