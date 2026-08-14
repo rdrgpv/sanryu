@@ -17,7 +17,12 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // "faixa" é a faixa de DESTINO (a que a pessoa vai fazer o exame); faixaAtual é a que ela já tem.
   faixa: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  faixaAtual: {
     type: DataTypes.STRING,
     allowNull: true,
   },

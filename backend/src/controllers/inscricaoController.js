@@ -301,6 +301,7 @@ async function inscrever(req, res) {
     email,
     nome: candidato.nome,
     faixa: resultadoValor.faixaUsada || candidato.faixa,
+    faixaAtual: resultadoValor.faixaAtual || candidato.faixa,
     dataNascimento: candidato.dataNascimento,
     telefone: candidato.telefone || null,
     responsavel: candidato.responsavel || null,

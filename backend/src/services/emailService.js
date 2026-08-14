@@ -77,7 +77,8 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
         <li><strong>Nome:</strong> ${eventoAluno.nome}</li>
         <li><strong>Email:</strong> ${eventoAluno.email}</li>
         ${eventoAluno.telefone ? `<li><strong>Telefone:</strong> ${eventoAluno.telefone}</li>` : ''}
-        ${eventoAluno.faixa ? `<li><strong>Faixa:</strong> ${eventoAluno.faixa}</li>` : ''}
+        ${eventoAluno.faixaAtual ? `<li><strong>Faixa atual:</strong> ${eventoAluno.faixaAtual}</li>` : ''}
+        ${eventoAluno.faixa ? `<li><strong>Faixa que vai:</strong> ${eventoAluno.faixa}</li>` : ''}
         ${eventoAluno.responsavel ? `<li><strong>Responsável:</strong> ${eventoAluno.responsavel}</li>` : ''}
       </ul>
       ${linhaValor}
