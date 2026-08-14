@@ -42,6 +42,30 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Erro interno do servidor.' });
 });
 
+// sequelize.sync() sincroniza as tabelas em ordem de dependência (FK), mas para no primeiro erro —
+// uma tabela com problema (ex.: índice único conflitante) travava a sincronização de TODAS as
+// tabelas seguintes na ordem, mesmo sem relação nenhuma com o problema. Aqui, se o sync em lote
+// falhar, cai pra sincronizar tabela por tabela (mesma ordem seguraque o sync() usa por baixo dos
+// panos) e segue adiante mesmo se uma falhar, em vez de abortar tudo.
+async function sincronizarBanco(options) {
+  try {
+    await sequelize.sync(options);
+  } catch (erroEmLote) {
+    logErro('sequelize.sync() em lote falhou, tentando tabela por tabela:', erroEmLote);
+
+    const modelosOrdenados = sequelize.modelManager.getModelsTopoSortedByForeignKey();
+    const ordemSegura = modelosOrdenados ? [...modelosOrdenados].reverse() : sequelize.modelManager.models;
+
+    for (const model of ordemSegura) {
+      try {
+        await model.sync(options);
+      } catch (erroModelo) {
+        logErro(`Falha ao sincronizar a tabela "${model.name}":`, erroModelo);
+      }
+    }
+  }
+}
+
 app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Servidor San·Ryu Dojo rodando em http://0.0.0.0:${PORT}`);
 
@@ -50,7 +74,7 @@ app.listen(PORT, '0.0.0.0', async () => {
     // alter:true reconstrói tabelas via backup-table no SQLite (dialeto sem ALTER TABLE
     // completo), o que corrompe índices únicos compostos — mantém sync() simples ali e
     // só usa alter no MySQL (ALTER TABLE nativo, seguro para esse tipo de mudança aditiva).
-    await sequelize.sync({ alter: sequelize.getDialect() !== 'sqlite' });
+    await sincronizarBanco({ alter: sequelize.getDialect() !== 'sqlite' });
     console.log('Banco de dados conectado.');
   } catch (error) {
     logErro('Erro ao conectar/sincronizar o banco de dados:', error);
