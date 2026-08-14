@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const configService = require('./configService');
+const { logErro } = require('../utils/logger');
 
 // Credenciais SMTP ficam em Configurações (sistema SAN), mesmo padrão do Gatame/Mercado Pago —
 // podem ser trocadas sem reiniciar o servidor.
@@ -36,7 +37,7 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
     const transportador = await obterTransportador();
 
     if (!transportador) {
-      console.error('SMTP não configurado (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_SENHA) em Configurações; e-mail de confirmação não enviado.');
+      logErro('SMTP não configurado (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_SENHA) em Configurações; e-mail de confirmação não enviado.');
       return;
     }
 
@@ -98,7 +99,7 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
 
     console.log('E-mail de confirmação de inscrição enviado:', info.messageId);
   } catch (err) {
-    console.error('Erro ao enviar e-mail de confirmação de inscrição:', err.message);
+    logErro('Erro ao enviar e-mail de confirmação de inscrição:', err);
   }
 }
 

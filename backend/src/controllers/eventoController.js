@@ -1,6 +1,7 @@
 const { Evento, TipoEvento, EventoAluno } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
+const { logErro } = require('../utils/logger');
 
 // Aplica a regra de valor do item 2: só é permitido usar o campo "valor" do evento
 // quando o tipo é cobrável e diferente de Exame de Faixa (cujo valor vem da faixa).
@@ -109,11 +110,11 @@ async function verificarPagamento(req, res) {
     res.json(inscricao);
   } catch (err) {
     if (err.interno) {
-      console.error(err);
+      logErro('Erro de configuração ao consultar pagamento no Mercado Pago:', err);
       return res.status(500).json({ error: 'Erro de configuração ao consultar o Mercado Pago.' });
     }
 
-    console.error(err);
+    logErro('Erro ao consultar status do pagamento no Mercado Pago:', err);
     res.status(502).json({ error: 'Não foi possível consultar o status do pagamento agora. Tente novamente.' });
   }
 }

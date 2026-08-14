@@ -1,5 +1,6 @@
 const axios = require('axios');
 const configService = require('./configService');
+const { logErro } = require('../utils/logger');
 
 const MAX_TENTATIVAS = 3;
 const ESPERA_BASE_MS = 1000;
@@ -18,7 +19,7 @@ async function consultarAluno(emailAluno) {
   ]);
 
   if (!apiUrl || !email || !senha) {
-    console.error('Configuração do Gatame incompleta (GATAME_URL/GATAME_EMAIL/GATAME_SENHA) em Configurações.');
+    logErro('Configuração do Gatame incompleta (GATAME_URL/GATAME_EMAIL/GATAME_SENHA) em Configurações.');
     const erroConfig = new Error('Erro de configuração ao consultar API de carteirinha.');
     erroConfig.interno = true;
     throw erroConfig;
@@ -48,7 +49,7 @@ async function consultarAluno(emailAluno) {
       }
 
       if (status === 401 || status === 403) {
-        console.error(`Credencial fixa do Gatame rejeitada pela API (status ${status}). Verifique GATAME_EMAIL/GATAME_SENHA em Configurações.`);
+        logErro(`Credencial fixa do Gatame rejeitada pela API (status ${status}). Verifique GATAME_EMAIL/GATAME_SENHA em Configurações.`);
         const erroConfig = new Error('Erro de configuração ao consultar API de carteirinha.');
         erroConfig.interno = true;
         throw erroConfig;

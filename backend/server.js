@@ -6,6 +6,7 @@ const authRoutes = require('./src/routes/auth');
 const publicRoutes = require('./src/routes/public');
 const adminRoutes = require('./src/routes/admin');
 const seed = require('./seed');
+const { logErro } = require('./src/utils/logger');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -27,7 +28,7 @@ app.post('/api/_seed', async (req, res) => {
     await seed();
     res.json({ message: 'Seed executado com sucesso.' });
   } catch (error) {
-    console.error('Erro ao rodar seed via rota temporária:', error);
+    logErro('Erro ao rodar seed via rota temporária:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -37,7 +38,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error(err);
+  logErro('Erro não tratado numa rota:', err);
   res.status(500).json({ error: 'Erro interno do servidor.' });
 });
 
@@ -52,6 +53,6 @@ app.listen(PORT, '0.0.0.0', async () => {
     await sequelize.sync({ alter: sequelize.getDialect() !== 'sqlite' });
     console.log('Banco de dados conectado.');
   } catch (error) {
-    console.error('Erro ao conectar/sincronizar o banco de dados:', error);
+    logErro('Erro ao conectar/sincronizar o banco de dados:', error);
   }
 });

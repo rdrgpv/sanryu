@@ -5,6 +5,7 @@ const pixService = require('../services/pixService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
 const { calcularValorInscricao } = require('../services/valorInscricaoService');
+const { logErro } = require('../utils/logger');
 
 // Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
 function whereIdOuSlug(param) {
@@ -79,7 +80,7 @@ async function gerarPagamentoPix({ valor, evento, email }) {
       referenciaExterna: `EVT${evento.id}-${Date.now()}`,
     })
     .catch((err) => {
-      console.error('Erro ao criar pagamento Pix via Mercado Pago, caindo para QR estático:', err.message);
+      logErro('Erro ao criar pagamento Pix via Mercado Pago, caindo para QR estático:', err);
       return null;
     });
 
@@ -101,7 +102,7 @@ async function gerarPagamentoPix({ valor, evento, email }) {
       });
       qrcodePix = await pixService.gerarQrCodeBase64(pixCopiaCola);
     } else {
-      console.error('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
+      logErro('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
     }
   }
 
@@ -110,11 +111,11 @@ async function gerarPagamentoPix({ valor, evento, email }) {
 
 function tratarErroConsulta(err, res) {
   if (err.interno) {
-    console.error(err);
+    logErro('Erro de configuração ao consultar dados de carteirinha:', err);
     return res.status(500).json({ error: 'Erro interno ao consultar dados de carteirinha. Tente novamente mais tarde.' });
   }
 
-  console.error(err);
+  logErro('Erro ao consultar dados de carteirinha:', err);
   return res.status(502).json({ error: 'Não foi possível consultar seus dados no momento. Tente novamente em instantes.' });
 }
 
@@ -328,7 +329,7 @@ async function inscrever(req, res) {
 
     res.status(pendenteSemValor ? 200 : 201).json({ ...eventoAluno.toJSON(), aviso: resultadoValor.aviso });
   } catch (err) {
-    console.error('Erro ao processar inscrição:', err);
+    logErro('Erro ao processar inscrição:', err);
     res.status(500).json({ error: 'Não foi possível concluir sua inscrição. Tente novamente em instantes.' });
   }
 }
