@@ -76,14 +76,24 @@ export default function Pedidos() {
         onExcluir={handleExcluir}
         onAtualizar={carregarPedidos}
         extra={
-          <CButton
-            color="secondary"
-            variant="outline"
-            disabled={!selecionado || !['P', 'C'].includes(selecionado.situacao)}
-            onClick={handleEntregar}
-          >
-            Entregar
-          </CButton>
+          <>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={selecionado?.situacao !== 'P'}
+              onClick={() => navigate(`/admin/pedidos/${selecionadoId}/gerar-pedido-compra`)}
+            >
+              Gerar pedido de compra
+            </CButton>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionado || !['P', 'C'].includes(selecionado.situacao)}
+              onClick={handleEntregar}
+            >
+              Entregar
+            </CButton>
+          </>
         }
       />
 

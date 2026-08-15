@@ -17,6 +17,8 @@ const produtoVariacaoController = require('../controllers/produtoVariacaoControl
 const tipoPersonalizacaoController = require('../controllers/tipoPersonalizacaoController');
 const estoqueMovimentacaoController = require('../controllers/estoqueMovimentacaoController');
 const pedidoController = require('../controllers/pedidoController');
+const fornecedorController = require('../controllers/fornecedorController');
+const pedidoCompraController = require('../controllers/pedidoCompraController');
 
 const router = express.Router();
 
@@ -122,5 +124,19 @@ router.put('/pedidos/:id', pedidoController.atualizar);
 router.delete('/pedidos/:id', pedidoController.remover);
 router.post('/pedidos/:id/entregar', pedidoController.entregar);
 router.get('/pedidos/:id/itens-pendentes-compra', pedidoController.itensPendentesCompra);
+
+router.get('/fornecedores', fornecedorController.listar);
+router.post('/fornecedores', fornecedorController.criar);
+router.get('/fornecedores/:id', fornecedorController.buscarPorId);
+router.put('/fornecedores/:id', fornecedorController.atualizar);
+router.delete('/fornecedores/:id', fornecedorController.remover);
+
+router.get('/pedidos-compra', pedidoCompraController.listar);
+router.get('/pedidos-compra/:id', pedidoCompraController.buscarPorId);
+router.put('/pedidos-compra/:id', pedidoCompraController.atualizar);
+router.delete('/pedidos-compra/:id', pedidoCompraController.remover);
+router.post('/pedidos/:id/gerar-pedido-compra', pedidoCompraController.gerar);
+router.post('/pedidos-compra/:id/receber-itens', pedidoCompraController.receberItens);
+router.post('/pedidos-compra/:id/marcar-encomendado', pedidoCompraController.marcarComoEncomendado);
 
 module.exports = router;

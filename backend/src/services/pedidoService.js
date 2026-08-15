@@ -93,17 +93,4 @@ async function entregar(pedido, transaction) {
   await pedido.update({ situacao: 'F', dataEntrega: new Date() }, { transaction });
 }
 
-// Fase 2: stub (ainda não existe PedidoItemCompra) — pendente = quantidade inteira do item. O
-// formato do retorno já é o definitivo; a Fase 3 troca só a implementação, sem tocar em
-// controller/rota.
-async function calcularItensPendentesCompra(pedido) {
-  const itens = await PedidoItem.findAll({ where: { pedidoId: pedido.id } });
-  return itens.map((i) => ({
-    pedidoItemId: i.id,
-    produtoVariacaoId: i.produtoVariacaoId,
-    quantidade: i.quantidade,
-    pendente: i.quantidade,
-  }));
-}
-
-module.exports = { salvarItens, recalcularTotais, entregar, calcularItensPendentesCompra };
+module.exports = { salvarItens, recalcularTotais, entregar };

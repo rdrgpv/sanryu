@@ -1,5 +1,6 @@
 const { sequelize, Pedido, PedidoItem, PedidoItemPersonalizacao, ProdutoVariacao, Produto, Cor, Tamanho, TipoPersonalizacao } = require('../models');
 const pedidoService = require('../services/pedidoService');
+const pedidoCompraService = require('../services/pedidoCompraService');
 
 const INCLUDE_ITENS = {
   model: PedidoItem,
@@ -143,7 +144,7 @@ async function itensPendentesCompra(req, res) {
     return res.status(404).json({ error: 'Pedido não encontrado.' });
   }
 
-  res.json(await pedidoService.calcularItensPendentesCompra(pedido));
+  res.json(await pedidoCompraService.calcularItensPendentesCompra(pedido));
 }
 
 module.exports = { listar, buscarPorId, criar, atualizar, remover, entregar, itensPendentesCompra };

@@ -34,6 +34,8 @@ const linksLoja = [
   { to: '/admin/tamanhos', label: 'Tamanhos' },
   { to: '/admin/tipos-personalizacao', label: 'Tipos de Personalização' },
   { to: '/admin/pedidos', label: 'Pedidos' },
+  { to: '/admin/fornecedores', label: 'Fornecedores' },
+  { to: '/admin/pedidos-compra', label: 'Pedidos de Compra' },
 ];
 
 const linksSistema = [{ to: '/admin/configuracoes', label: 'Configurações' }];

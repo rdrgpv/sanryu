@@ -31,6 +31,11 @@ import ProdutoVariacaoForm from '../pages/admin/ProdutoVariacaoForm.jsx';
 import ProdutoVariacaoMovimentacoes from '../pages/admin/ProdutoVariacaoMovimentacoes.jsx';
 import Pedidos from '../pages/admin/Pedidos.jsx';
 import PedidoForm from '../pages/admin/PedidoForm.jsx';
+import Fornecedores from '../pages/admin/Fornecedores.jsx';
+import FornecedorForm from '../pages/admin/FornecedorForm.jsx';
+import PedidosCompra from '../pages/admin/PedidosCompra.jsx';
+import PedidoCompraDetalhe from '../pages/admin/PedidoCompraDetalhe.jsx';
+import GerarPedidoCompra from '../pages/admin/GerarPedidoCompra.jsx';
 import AdminRoute from '../components/AdminRoute.jsx';
 import coreuiCssUrl from '@coreui/coreui/dist/css/coreui.min.css?url';
 import adminCssUrl from './admin.css?url';
@@ -111,6 +116,14 @@ export default function AdminApp() {
       <Route path="pedidos" element={<AdminRoute><Pedidos /></AdminRoute>} />
       <Route path="pedidos/novo" element={<AdminRoute><PedidoForm /></AdminRoute>} />
       <Route path="pedidos/:id/editar" element={<AdminRoute><PedidoForm /></AdminRoute>} />
+      <Route path="pedidos/:id/gerar-pedido-compra" element={<AdminRoute><GerarPedidoCompra /></AdminRoute>} />
+
+      <Route path="fornecedores" element={<AdminRoute><Fornecedores /></AdminRoute>} />
+      <Route path="fornecedores/novo" element={<AdminRoute><FornecedorForm /></AdminRoute>} />
+      <Route path="fornecedores/:id/editar" element={<AdminRoute><FornecedorForm /></AdminRoute>} />
+
+      <Route path="pedidos-compra" element={<AdminRoute><PedidosCompra /></AdminRoute>} />
+      <Route path="pedidos-compra/:id" element={<AdminRoute><PedidoCompraDetalhe /></AdminRoute>} />
     </Routes>
   );
 }

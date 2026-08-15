@@ -19,6 +19,10 @@ const EstoqueMovimentacao = require('./EstoqueMovimentacao');
 const Pedido = require('./Pedido');
 const PedidoItem = require('./PedidoItem');
 const PedidoItemPersonalizacao = require('./PedidoItemPersonalizacao');
+const Fornecedor = require('./Fornecedor');
+const PedidoCompra = require('./PedidoCompra');
+const PedidoCompraItem = require('./PedidoCompraItem');
+const PedidoItemCompra = require('./PedidoItemCompra');
 
 Instrutor.hasMany(Turma, { foreignKey: 'instrutorId', as: 'turmas' });
 Turma.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
@@ -70,6 +74,24 @@ PedidoItemPersonalizacao.belongsTo(TipoPersonalizacao, { foreignKey: 'tipoPerson
 PedidoItem.hasMany(EstoqueMovimentacao, { foreignKey: 'pedidoItemId', as: 'movimentacoes' });
 EstoqueMovimentacao.belongsTo(PedidoItem, { foreignKey: 'pedidoItemId', as: 'pedidoItem' });
 
+Fornecedor.hasMany(PedidoCompra, { foreignKey: 'fornecedorId', as: 'pedidosCompra' });
+PedidoCompra.belongsTo(Fornecedor, { foreignKey: 'fornecedorId', as: 'fornecedor' });
+
+PedidoCompra.hasMany(PedidoCompraItem, { foreignKey: 'pedidoCompraId', as: 'itens', onDelete: 'CASCADE' });
+PedidoCompraItem.belongsTo(PedidoCompra, { foreignKey: 'pedidoCompraId', as: 'pedidoCompra' });
+
+ProdutoVariacao.hasMany(PedidoCompraItem, { foreignKey: 'produtoVariacaoId', as: 'pedidoCompraItens' });
+PedidoCompraItem.belongsTo(ProdutoVariacao, { foreignKey: 'produtoVariacaoId', as: 'produtoVariacao' });
+
+PedidoItem.hasMany(PedidoItemCompra, { foreignKey: 'pedidoItemId', as: 'alocacoes' });
+PedidoItemCompra.belongsTo(PedidoItem, { foreignKey: 'pedidoItemId', as: 'pedidoItem' });
+
+PedidoCompraItem.hasMany(PedidoItemCompra, { foreignKey: 'pedidoCompraItemId', as: 'alocacoes' });
+PedidoItemCompra.belongsTo(PedidoCompraItem, { foreignKey: 'pedidoCompraItemId', as: 'pedidoCompraItem' });
+
+PedidoCompraItem.hasMany(EstoqueMovimentacao, { foreignKey: 'pedidoCompraItemId', as: 'movimentacoes' });
+EstoqueMovimentacao.belongsTo(PedidoCompraItem, { foreignKey: 'pedidoCompraItemId', as: 'pedidoCompraItem' });
+
 module.exports = {
   sequelize,
   Admin,
@@ -92,4 +114,8 @@ module.exports = {
   Pedido,
   PedidoItem,
   PedidoItemPersonalizacao,
+  Fornecedor,
+  PedidoCompra,
+  PedidoCompraItem,
+  PedidoItemCompra,
 };
