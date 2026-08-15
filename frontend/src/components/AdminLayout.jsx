@@ -33,6 +33,7 @@ const linksLoja = [
   { to: '/admin/cores', label: 'Cores' },
   { to: '/admin/tamanhos', label: 'Tamanhos' },
   { to: '/admin/tipos-personalizacao', label: 'Tipos de Personalização' },
+  { to: '/admin/pedidos', label: 'Pedidos' },
 ];
 
 const linksSistema = [{ to: '/admin/configuracoes', label: 'Configurações' }];

@@ -16,6 +16,7 @@ const tamanhoController = require('../controllers/tamanhoController');
 const produtoVariacaoController = require('../controllers/produtoVariacaoController');
 const tipoPersonalizacaoController = require('../controllers/tipoPersonalizacaoController');
 const estoqueMovimentacaoController = require('../controllers/estoqueMovimentacaoController');
+const pedidoController = require('../controllers/pedidoController');
 
 const router = express.Router();
 
@@ -113,5 +114,13 @@ router.get('/estoque-movimentacoes', estoqueMovimentacaoController.listar);
 router.post('/estoque-movimentacoes', estoqueMovimentacaoController.criar);
 router.put('/estoque-movimentacoes/:id', estoqueMovimentacaoController.atualizar);
 router.delete('/estoque-movimentacoes/:id', estoqueMovimentacaoController.remover);
+
+router.get('/pedidos', pedidoController.listar);
+router.post('/pedidos', pedidoController.criar);
+router.get('/pedidos/:id', pedidoController.buscarPorId);
+router.put('/pedidos/:id', pedidoController.atualizar);
+router.delete('/pedidos/:id', pedidoController.remover);
+router.post('/pedidos/:id/entregar', pedidoController.entregar);
+router.get('/pedidos/:id/itens-pendentes-compra', pedidoController.itensPendentesCompra);
 
 module.exports = router;

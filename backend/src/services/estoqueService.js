@@ -1,3 +1,5 @@
+const { Op, fn, col } = require('sequelize');
+
 // "E" (Entrada) e "A" (Ajuste) somam ao saldo; "S" (Saída) subtrai. quantidade é sempre positiva,
 // quem decide o sinal é o tipo do movimento.
 const SINAL = { E: 1, S: -1, A: 1 };
@@ -11,10 +13,24 @@ async function aplicarMovimento(produtoVariacao, tipoMovimentacao, quantidade, t
   await produtoVariacao.save({ transaction });
 }
 
-// Estoque reservado = soma de PedidoItem.quantidade em pedidos ainda não entregues/cancelados.
-// Sem Pedido nesta fase ainda — devolve vazio (tratado como 0 pelo chamador).
-async function calcularReservado() {
-  return {};
+// Estoque reservado = soma de PedidoItem.quantidade em pedidos ainda não entregues/cancelados
+// (situacao fora de F/E) — nunca persistido, calculado ao vivo a cada leitura. require tardio
+// (não no topo do arquivo) porque models/index.js não referencia services — evita qualquer
+// possibilidade de dependência circular se isso mudar no futuro.
+async function calcularReservado(produtoVariacaoIds) {
+  if (!produtoVariacaoIds || produtoVariacaoIds.length === 0) return {};
+
+  const { PedidoItem, Pedido } = require('../models');
+
+  const linhas = await PedidoItem.findAll({
+    attributes: ['produtoVariacaoId', [fn('SUM', col('PedidoItem.quantidade')), 'total']],
+    where: { produtoVariacaoId: { [Op.in]: produtoVariacaoIds } },
+    include: [{ model: Pedido, as: 'pedido', attributes: [], where: { situacao: { [Op.notIn]: ['F', 'E'] } } }],
+    group: ['PedidoItem.produtoVariacaoId'],
+    raw: true,
+  });
+
+  return Object.fromEntries(linhas.map((l) => [l.produtoVariacaoId, Number(l.total)]));
 }
 
 // Mescla quantidadeReservada/saldoDisponivel no payload de uma ou mais ProdutoVariacao.

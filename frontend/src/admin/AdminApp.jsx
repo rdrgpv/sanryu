@@ -29,6 +29,8 @@ import TipoPersonalizacaoForm from '../pages/admin/TipoPersonalizacaoForm.jsx';
 import ProdutoVariacoes from '../pages/admin/ProdutoVariacoes.jsx';
 import ProdutoVariacaoForm from '../pages/admin/ProdutoVariacaoForm.jsx';
 import ProdutoVariacaoMovimentacoes from '../pages/admin/ProdutoVariacaoMovimentacoes.jsx';
+import Pedidos from '../pages/admin/Pedidos.jsx';
+import PedidoForm from '../pages/admin/PedidoForm.jsx';
 import AdminRoute from '../components/AdminRoute.jsx';
 import coreuiCssUrl from '@coreui/coreui/dist/css/coreui.min.css?url';
 import adminCssUrl from './admin.css?url';
@@ -105,6 +107,10 @@ export default function AdminApp() {
       <Route path="produto-variacoes/novo" element={<AdminRoute><ProdutoVariacaoForm /></AdminRoute>} />
       <Route path="produto-variacoes/:id/editar" element={<AdminRoute><ProdutoVariacaoForm /></AdminRoute>} />
       <Route path="produto-variacoes/:id/movimentacoes" element={<AdminRoute><ProdutoVariacaoMovimentacoes /></AdminRoute>} />
+
+      <Route path="pedidos" element={<AdminRoute><Pedidos /></AdminRoute>} />
+      <Route path="pedidos/novo" element={<AdminRoute><PedidoForm /></AdminRoute>} />
+      <Route path="pedidos/:id/editar" element={<AdminRoute><PedidoForm /></AdminRoute>} />
     </Routes>
   );
 }

@@ -16,6 +16,9 @@ const Tamanho = require('./Tamanho');
 const ProdutoVariacao = require('./ProdutoVariacao');
 const TipoPersonalizacao = require('./TipoPersonalizacao');
 const EstoqueMovimentacao = require('./EstoqueMovimentacao');
+const Pedido = require('./Pedido');
+const PedidoItem = require('./PedidoItem');
+const PedidoItemPersonalizacao = require('./PedidoItemPersonalizacao');
 
 Instrutor.hasMany(Turma, { foreignKey: 'instrutorId', as: 'turmas' });
 Turma.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
@@ -52,6 +55,21 @@ ProdutoVariacao.belongsTo(Tamanho, { foreignKey: 'tamanhoId', as: 'tamanho' });
 ProdutoVariacao.hasMany(EstoqueMovimentacao, { foreignKey: 'produtoVariacaoId', as: 'movimentacoes' });
 EstoqueMovimentacao.belongsTo(ProdutoVariacao, { foreignKey: 'produtoVariacaoId', as: 'produtoVariacao' });
 
+Pedido.hasMany(PedidoItem, { foreignKey: 'pedidoId', as: 'itens', onDelete: 'CASCADE' });
+PedidoItem.belongsTo(Pedido, { foreignKey: 'pedidoId', as: 'pedido' });
+
+ProdutoVariacao.hasMany(PedidoItem, { foreignKey: 'produtoVariacaoId', as: 'pedidoItens' });
+PedidoItem.belongsTo(ProdutoVariacao, { foreignKey: 'produtoVariacaoId', as: 'produtoVariacao' });
+
+PedidoItem.hasMany(PedidoItemPersonalizacao, { foreignKey: 'pedidoItemId', as: 'personalizacoes', onDelete: 'CASCADE' });
+PedidoItemPersonalizacao.belongsTo(PedidoItem, { foreignKey: 'pedidoItemId', as: 'pedidoItem' });
+
+TipoPersonalizacao.hasMany(PedidoItemPersonalizacao, { foreignKey: 'tipoPersonalizacaoId', as: 'itensPersonalizados' });
+PedidoItemPersonalizacao.belongsTo(TipoPersonalizacao, { foreignKey: 'tipoPersonalizacaoId', as: 'tipoPersonalizacao' });
+
+PedidoItem.hasMany(EstoqueMovimentacao, { foreignKey: 'pedidoItemId', as: 'movimentacoes' });
+EstoqueMovimentacao.belongsTo(PedidoItem, { foreignKey: 'pedidoItemId', as: 'pedidoItem' });
+
 module.exports = {
   sequelize,
   Admin,
@@ -71,4 +89,7 @@ module.exports = {
   ProdutoVariacao,
   TipoPersonalizacao,
   EstoqueMovimentacao,
+  Pedido,
+  PedidoItem,
+  PedidoItemPersonalizacao,
 };
