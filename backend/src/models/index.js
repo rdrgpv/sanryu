@@ -10,6 +10,12 @@ const Evento = require('./Evento');
 const Banco = require('./Banco');
 const EventoAluno = require('./EventoAluno');
 const Configuracao = require('./Configuracao');
+const Produto = require('./Produto');
+const Cor = require('./Cor');
+const Tamanho = require('./Tamanho');
+const ProdutoVariacao = require('./ProdutoVariacao');
+const TipoPersonalizacao = require('./TipoPersonalizacao');
+const EstoqueMovimentacao = require('./EstoqueMovimentacao');
 
 Instrutor.hasMany(Turma, { foreignKey: 'instrutorId', as: 'turmas' });
 Turma.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
@@ -34,6 +40,18 @@ Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
 Faixa.hasMany(Instrutor, { foreignKey: 'faixaId', as: 'instrutores' });
 Instrutor.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
 
+Produto.hasMany(ProdutoVariacao, { foreignKey: 'produtoId', as: 'variacoes' });
+ProdutoVariacao.belongsTo(Produto, { foreignKey: 'produtoId', as: 'produto' });
+
+Cor.hasMany(ProdutoVariacao, { foreignKey: 'corId', as: 'variacoes' });
+ProdutoVariacao.belongsTo(Cor, { foreignKey: 'corId', as: 'cor' });
+
+Tamanho.hasMany(ProdutoVariacao, { foreignKey: 'tamanhoId', as: 'variacoes' });
+ProdutoVariacao.belongsTo(Tamanho, { foreignKey: 'tamanhoId', as: 'tamanho' });
+
+ProdutoVariacao.hasMany(EstoqueMovimentacao, { foreignKey: 'produtoVariacaoId', as: 'movimentacoes' });
+EstoqueMovimentacao.belongsTo(ProdutoVariacao, { foreignKey: 'produtoVariacaoId', as: 'produtoVariacao' });
+
 module.exports = {
   sequelize,
   Admin,
@@ -47,4 +65,10 @@ module.exports = {
   Banco,
   EventoAluno,
   Configuracao,
+  Produto,
+  Cor,
+  Tamanho,
+  ProdutoVariacao,
+  TipoPersonalizacao,
+  EstoqueMovimentacao,
 };

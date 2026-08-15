@@ -10,6 +10,12 @@ const tipoEventoController = require('../controllers/tipoEventoController');
 const eventoController = require('../controllers/eventoController');
 const bancoController = require('../controllers/bancoController');
 const configuracaoController = require('../controllers/configuracaoController');
+const produtoController = require('../controllers/produtoController');
+const corController = require('../controllers/corController');
+const tamanhoController = require('../controllers/tamanhoController');
+const produtoVariacaoController = require('../controllers/produtoVariacaoController');
+const tipoPersonalizacaoController = require('../controllers/tipoPersonalizacaoController');
+const estoqueMovimentacaoController = require('../controllers/estoqueMovimentacaoController');
 
 const router = express.Router();
 
@@ -72,5 +78,40 @@ router.put('/configuracoes/lote', configuracaoController.salvarLote);
 router.get('/configuracoes/:id', configuracaoController.buscarPorId);
 router.put('/configuracoes/:id', configuracaoController.atualizar);
 router.delete('/configuracoes/:id', configuracaoController.remover);
+
+router.get('/produtos', produtoController.listar);
+router.post('/produtos', produtoController.criar);
+router.get('/produtos/:id', produtoController.buscarPorId);
+router.put('/produtos/:id', produtoController.atualizar);
+router.delete('/produtos/:id', produtoController.remover);
+
+router.get('/cores', corController.listar);
+router.post('/cores', corController.criar);
+router.get('/cores/:id', corController.buscarPorId);
+router.put('/cores/:id', corController.atualizar);
+router.delete('/cores/:id', corController.remover);
+
+router.get('/tamanhos', tamanhoController.listar);
+router.post('/tamanhos', tamanhoController.criar);
+router.get('/tamanhos/:id', tamanhoController.buscarPorId);
+router.put('/tamanhos/:id', tamanhoController.atualizar);
+router.delete('/tamanhos/:id', tamanhoController.remover);
+
+router.get('/produto-variacoes', produtoVariacaoController.listar);
+router.post('/produto-variacoes', produtoVariacaoController.criar);
+router.get('/produto-variacoes/:id', produtoVariacaoController.buscarPorId);
+router.put('/produto-variacoes/:id', produtoVariacaoController.atualizar);
+router.delete('/produto-variacoes/:id', produtoVariacaoController.remover);
+
+router.get('/tipos-personalizacao', tipoPersonalizacaoController.listar);
+router.post('/tipos-personalizacao', tipoPersonalizacaoController.criar);
+router.get('/tipos-personalizacao/:id', tipoPersonalizacaoController.buscarPorId);
+router.put('/tipos-personalizacao/:id', tipoPersonalizacaoController.atualizar);
+router.delete('/tipos-personalizacao/:id', tipoPersonalizacaoController.remover);
+
+router.get('/estoque-movimentacoes', estoqueMovimentacaoController.listar);
+router.post('/estoque-movimentacoes', estoqueMovimentacaoController.criar);
+router.put('/estoque-movimentacoes/:id', estoqueMovimentacaoController.atualizar);
+router.delete('/estoque-movimentacoes/:id', estoqueMovimentacaoController.remover);
 
 module.exports = router;

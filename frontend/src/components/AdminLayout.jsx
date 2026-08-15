@@ -27,6 +27,14 @@ const linksEventos = [
   { to: '/admin/bancos', label: 'Configuração Pix' },
 ];
 
+const linksLoja = [
+  { to: '/admin/produtos', label: 'Produtos' },
+  { to: '/admin/produto-variacoes', label: 'Variações (SKUs)' },
+  { to: '/admin/cores', label: 'Cores' },
+  { to: '/admin/tamanhos', label: 'Tamanhos' },
+  { to: '/admin/tipos-personalizacao', label: 'Tipos de Personalização' },
+];
+
 const linksSistema = [{ to: '/admin/configuracoes', label: 'Configurações' }];
 
 export default function AdminLayout({ children }) {
@@ -66,6 +74,14 @@ export default function AdminLayout({ children }) {
           ))}
           <CNavTitle>Eventos</CNavTitle>
           {linksEventos.map((link) => (
+            <CNavItem key={link.to}>
+              <CNavLink as={NavLink} to={link.to}>
+                {link.label}
+              </CNavLink>
+            </CNavItem>
+          ))}
+          <CNavTitle>Loja</CNavTitle>
+          {linksLoja.map((link) => (
             <CNavItem key={link.to}>
               <CNavLink as={NavLink} to={link.to}>
                 {link.label}
