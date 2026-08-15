@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
+import { formatarTelefone } from '../../utils/formato.js';
 
 const estadoInicial = { nome: '', cnpjCpf: '', telefone: '', email: '', ativo: true };
 
@@ -19,7 +20,7 @@ export default function FornecedorForm() {
       setForm({
         nome: fornecedor.nome,
         cnpjCpf: fornecedor.cnpjCpf || '',
-        telefone: fornecedor.telefone || '',
+        telefone: formatarTelefone(fornecedor.telefone),
         email: fornecedor.email || '',
         ativo: fornecedor.ativo,
       });
@@ -29,6 +30,10 @@ export default function FornecedorForm() {
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  function handleTelefoneChange(event) {
+    setForm((prev) => ({ ...prev, telefone: formatarTelefone(event.target.value) }));
   }
 
   async function handleSubmit(event) {
@@ -68,7 +73,7 @@ export default function FornecedorForm() {
               </CCol>
               <CCol md={2}>
                 <CFormLabel>Telefone</CFormLabel>
-                <CFormInput name="telefone" value={form.telefone} onChange={handleChange} />
+                <CFormInput name="telefone" value={form.telefone} onChange={handleTelefoneChange} placeholder="(11) 98888-7777" />
               </CCol>
               <CCol md={2} className="d-flex align-items-end">
                 <CFormCheck name="ativo" label="Ativo" checked={form.ativo} onChange={handleChange} />

@@ -10,7 +10,7 @@ import {
   CButton,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilList } from '@coreui/icons';
+import { cilList, cilClone } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import { formatarMoeda } from '../../utils/formato.js';
@@ -56,15 +56,26 @@ export default function ProdutoVariacoes() {
         onExcluir={handleExcluir}
         onAtualizar={carregarVariacoes}
         extra={
-          <CButton
-            color="secondary"
-            variant="outline"
-            disabled={!selecionadoId}
-            onClick={() => navigate(`/admin/produto-variacoes/${selecionadoId}/movimentacoes`)}
-          >
-            <CIcon icon={cilList} className="me-1" />
-            Movimentações
-          </CButton>
+          <>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionadoId}
+              onClick={() => navigate(`/admin/produto-variacoes/novo?duplicarDe=${selecionadoId}`)}
+            >
+              <CIcon icon={cilClone} className="me-1" />
+              Duplicar
+            </CButton>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionadoId}
+              onClick={() => navigate(`/admin/produto-variacoes/${selecionadoId}/movimentacoes`)}
+            >
+              <CIcon icon={cilList} className="me-1" />
+              Movimentações
+            </CButton>
+          </>
         }
       />
 

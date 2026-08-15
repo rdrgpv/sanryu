@@ -24,7 +24,7 @@ import {
   CModalFooter,
 } from '@coreui/react';
 import api from '../../services/api';
-import { formatarMoeda } from '../../utils/formato.js';
+import { formatarMoeda, formatarTelefone } from '../../utils/formato.js';
 
 const estadoInicial = {
   nomeCliente: '',
@@ -76,7 +76,7 @@ export default function PedidoForm() {
       const pedido = res.data;
       setForm({
         nomeCliente: pedido.nomeCliente,
-        telefoneCliente: pedido.telefoneCliente || '',
+        telefoneCliente: formatarTelefone(pedido.telefoneCliente),
         emailCliente: pedido.emailCliente || '',
         dataPrevistaEntrega: pedido.dataPrevistaEntrega || '',
         valorDesconto: pedido.valorDesconto || '',
@@ -110,6 +110,10 @@ export default function PedidoForm() {
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function handleTelefoneChange(event) {
+    setForm((prev) => ({ ...prev, telefoneCliente: formatarTelefone(event.target.value) }));
   }
 
   const valorProdutos = itens.reduce((soma, item) => soma + Number(item.valorTotal || 0), 0);
@@ -279,7 +283,7 @@ export default function PedidoForm() {
               </CCol>
               <CCol md={3}>
                 <CFormLabel>Telefone</CFormLabel>
-                <CFormInput name="telefoneCliente" value={form.telefoneCliente} onChange={handleChange} />
+                <CFormInput name="telefoneCliente" value={form.telefoneCliente} onChange={handleTelefoneChange} placeholder="(11) 98888-7777" />
               </CCol>
               <CCol md={3}>
                 <CFormLabel>Email</CFormLabel>

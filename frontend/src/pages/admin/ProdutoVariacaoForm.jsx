@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormSelect, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
 
@@ -15,6 +15,8 @@ const estadoInicial = {
 export default function ProdutoVariacaoForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const duplicarDe = searchParams.get('duplicarDe');
   const editando = !!id;
   const [form, setForm] = useState(estadoInicial);
   const [codigo, setCodigo] = useState(null);
@@ -30,20 +32,38 @@ export default function ProdutoVariacaoForm() {
   }, []);
 
   useEffect(() => {
-    if (!editando) return;
-    api.get(`/admin/produto-variacoes/${id}`).then((res) => {
-      const variacao = res.data;
-      setForm({
-        produtoId: variacao.produtoId,
-        corId: variacao.corId ?? '',
-        tamanhoId: variacao.tamanhoId ?? '',
-        valorCusto: variacao.valorCusto ?? '',
-        valorVenda: variacao.valorVenda ?? '',
-        ativo: variacao.ativo,
+    if (editando) {
+      api.get(`/admin/produto-variacoes/${id}`).then((res) => {
+        const variacao = res.data;
+        setForm({
+          produtoId: variacao.produtoId,
+          corId: variacao.corId ?? '',
+          tamanhoId: variacao.tamanhoId ?? '',
+          valorCusto: variacao.valorCusto ?? '',
+          valorVenda: variacao.valorVenda ?? '',
+          ativo: variacao.ativo,
+        });
+        setCodigo(variacao.codigo);
       });
-      setCodigo(variacao.codigo);
-    });
-  }, [id, editando]);
+      return;
+    }
+
+    // Duplicar: copia produto/cor/valores da variação de origem, mas deixa o tamanho em branco —
+    // fluxo comum é criar a mesma cor em vários tamanhos, um de cada vez.
+    if (duplicarDe) {
+      api.get(`/admin/produto-variacoes/${duplicarDe}`).then((res) => {
+        const variacao = res.data;
+        setForm({
+          produtoId: variacao.produtoId,
+          corId: variacao.corId ?? '',
+          tamanhoId: '',
+          valorCusto: variacao.valorCusto ?? '',
+          valorVenda: variacao.valorVenda ?? '',
+          ativo: true,
+        });
+      });
+    }
+  }, [id, editando, duplicarDe]);
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -80,7 +100,7 @@ export default function ProdutoVariacaoForm() {
       <Link to="/admin/produto-variacoes" className="text-body-secondary text-decoration-none d-inline-block mb-2">
         &larr; Voltar
       </Link>
-      <h1 className="h3 mb-3">{editando ? 'Editar variação' : 'Nova variação'}</h1>
+      <h1 className="h3 mb-3">{editando ? 'Editar variação' : duplicarDe ? 'Duplicar variação' : 'Nova variação'}</h1>
 
       <CCard>
         <CCardBody>
