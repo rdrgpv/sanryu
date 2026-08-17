@@ -12,6 +12,7 @@ async function listar(req, res) {
   const where = {};
   if (req.query.ativo !== undefined) where.ativo = req.query.ativo === 'true';
   if (req.query.produtoId) where.produtoId = req.query.produtoId;
+  if (req.query.comEstoque === 'true') where.quantidadeEstoque = { [Op.gt]: 0 };
 
   const variacoes = await ProdutoVariacao.findAll({ where, include: INCLUDES, order: [['id', 'ASC']] });
   res.json(await estoqueService.anexarSaldos(variacoes));

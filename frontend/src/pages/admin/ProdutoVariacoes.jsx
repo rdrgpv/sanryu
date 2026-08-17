@@ -8,6 +8,7 @@ import {
   CTableBody,
   CTableDataCell,
   CButton,
+  CFormCheck,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilList, cilClone } from '@coreui/icons';
@@ -19,15 +20,17 @@ export default function ProdutoVariacoes() {
   const navigate = useNavigate();
   const [variacoes, setVariacoes] = useState([]);
   const [selecionadoId, setSelecionadoId] = useState(null);
+  const [comEstoque, setComEstoque] = useState(false);
 
   async function carregarVariacoes() {
-    const res = await api.get('/admin/produto-variacoes');
+    const res = await api.get('/admin/produto-variacoes', { params: comEstoque ? { comEstoque: true } : {} });
     setVariacoes(res.data);
   }
 
   useEffect(() => {
     carregarVariacoes();
-  }, []);
+    setSelecionadoId(null);
+  }, [comEstoque]);
 
   function selecionarLinha(id) {
     setSelecionadoId((atual) => (atual === id ? null : id));
@@ -77,6 +80,14 @@ export default function ProdutoVariacoes() {
             </CButton>
           </>
         }
+      />
+
+      <CFormCheck
+        className="mb-3"
+        id="comEstoque"
+        label="Mostrar só com estoque"
+        checked={comEstoque}
+        onChange={(event) => setComEstoque(event.target.checked)}
       />
 
       <CTable hover responsive className="bg-white">
