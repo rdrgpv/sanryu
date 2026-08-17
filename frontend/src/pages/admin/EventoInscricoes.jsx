@@ -10,7 +10,7 @@ import {
   CButton,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint } from '@coreui/icons';
+import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend } from '@coreui/icons';
 import api from '../../services/api';
 import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
 
@@ -50,7 +50,9 @@ export default function EventoInscricoes() {
   const { id } = useParams();
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
+  const [notificando, setNotificando] = useState(false);
 
+  const pendentes = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pendente');
   const pagas = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pago');
   const totalRecebido = pagas.reduce((soma, inscricao) => soma + Number(inscricao.valorCobrado || 0), 0);
   const totalTaxas = pagas
@@ -77,6 +79,21 @@ export default function EventoInscricoes() {
       setInscricoes((prev) => prev.map((inscricao) => (inscricao.id === inscricaoId ? res.data : inscricao)));
     } catch (err) {
       window.alert(err.response?.data?.error || 'Não foi possível verificar o pagamento agora.');
+    }
+  }
+
+  async function handleNotificarPendentes() {
+    if (pendentes.length === 0) return;
+    if (!window.confirm(`Enviar lembrete de pagamento pendente para ${pendentes.length} inscrito(s)?`)) return;
+
+    setNotificando(true);
+    try {
+      const res = await api.post(`/admin/eventos/${id}/notificar-pendentes`);
+      window.alert(`${res.data.enviados} lembrete(s) enviado(s).`);
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível enviar os lembretes agora.');
+    } finally {
+      setNotificando(false);
     }
   }
 
@@ -136,6 +153,10 @@ export default function EventoInscricoes() {
           <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0}>
             <CIcon icon={cilCloudDownload} className="me-1" />
             Exportar CSV
+          </CButton>
+          <CButton color="secondary" variant="outline" onClick={handleNotificarPendentes} disabled={pendentes.length === 0 || notificando}>
+            <CIcon icon={cilSend} className="me-1" />
+            {notificando ? 'Enviando...' : `Notificar pendentes (${pendentes.length})`}
           </CButton>
         </div>
       </div>

@@ -104,4 +104,63 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao };
+// Lembrete pra quem já está inscrito mas ainda não pagou — reenvia o QR code/Pix copia-cola que já
+// está gravado na inscrição (não gera um novo; se estiver vencido, a pessoa pode gerar um novo pela
+// própria página pública de inscrição). Mesmo padrão da confirmação: nunca lança.
+async function enviarLembretePagamentoPendente({ evento, eventoAluno }) {
+  try {
+    const transportador = await obterTransportador();
+
+    if (!transportador) {
+      logErro('SMTP não configurado (SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_SENHA) em Configurações; lembrete de pagamento não enviado.');
+      return;
+    }
+
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+    const copiaPara = await configService.obterValor('SMTP_BCC');
+
+    const anexos = [];
+    let imagemQrHtml = '';
+
+    if (eventoAluno.qrcodePix) {
+      anexos.push({
+        filename: 'qrcode-pix.png',
+        content: base64DoDataUri(eventoAluno.qrcodePix),
+        encoding: 'base64',
+        cid: 'qrcodepix',
+      });
+      imagemQrHtml = '<p><img src="cid:qrcodepix" alt="QR code Pix" style="max-width:260px;" /></p>';
+    }
+
+    const linhaPix = eventoAluno.pixCopiaCola
+      ? `<p><strong>Pix Copia e Cola:</strong></p>
+         <p style="word-break:break-all;font-family:monospace;background:#f5f5f5;padding:8px;border-radius:4px;">${eventoAluno.pixCopiaCola}</p>
+         <p><em>Se o QR code/código Pix estiver vencido (validade de 24 horas), acesse novamente o link de inscrição do evento e clique em "Gerar novo QR code".</em></p>`
+      : '<p>Acesse novamente o link de inscrição do evento pra gerar seu QR code de pagamento.</p>';
+
+    const html = `
+      <h2>Lembrete: pagamento pendente — ${evento.nome}</h2>
+      <p>Olá, ${eventoAluno.nome}!</p>
+      <p>Notamos que sua inscrição no evento <strong>${evento.nome}</strong> ainda está com o pagamento pendente.</p>
+      ${eventoAluno.valorCobrado != null ? `<p><strong>Valor:</strong> R$ ${Number(eventoAluno.valorCobrado).toFixed(2)}</p>` : ''}
+      ${imagemQrHtml}
+      ${linhaPix}
+      <p>Qualquer dúvida, é só responder este e-mail.</p>
+    `;
+
+    const info = await transportador.sendMail({
+      from: remetente,
+      to: eventoAluno.email,
+      bcc: copiaPara || undefined,
+      subject: `Lembrete: pagamento pendente — ${evento.nome}`,
+      html,
+      attachments: anexos,
+    });
+
+    console.log('E-mail de lembrete de pagamento pendente enviado:', info.messageId);
+  } catch (err) {
+    logErro('Erro ao enviar e-mail de lembrete de pagamento pendente:', err);
+  }
+}
+
+module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente };

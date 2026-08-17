@@ -1,6 +1,7 @@
 const { Evento, TipoEvento, EventoAluno } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
+const emailService = require('../services/emailService');
 const { logErro } = require('../utils/logger');
 
 // Aplica a regra de valor do item 2: só é permitido usar o campo "valor" do evento
@@ -119,4 +120,25 @@ async function verificarPagamento(req, res) {
   }
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, listarInscricoes, verificarPagamento };
+// Reenvia o lembrete de pagamento pra todo mundo com statusPagamento "pendente" nesse evento.
+// Aguarda todos os envios (diferente da confirmação na inscrição pública, que não espera) — aqui
+// quem clicou é o admin, que quer saber quantos foram enviados de verdade.
+async function notificarPendentes(req, res) {
+  const evento = await Evento.findByPk(req.params.id);
+
+  if (!evento) {
+    return res.status(404).json({ error: 'Evento não encontrado.' });
+  }
+
+  const pendentes = await EventoAluno.findAll({ where: { eventoId: evento.id, statusPagamento: 'pendente' } });
+
+  if (pendentes.length === 0) {
+    return res.json({ enviados: 0 });
+  }
+
+  await Promise.all(pendentes.map((eventoAluno) => emailService.enviarLembretePagamentoPendente({ evento, eventoAluno })));
+
+  res.json({ enviados: pendentes.length });
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover, listarInscricoes, verificarPagamento, notificarPendentes };
