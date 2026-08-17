@@ -2,6 +2,7 @@ const { Evento, TipoEvento, EventoAluno } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
+const { qrExpirado, gerarPagamentoPix } = require('../services/pagamentoInscricaoService');
 const { logErro } = require('../utils/logger');
 
 // Aplica a regra de valor do item 2: só é permitido usar o campo "valor" do evento
@@ -120,9 +121,11 @@ async function verificarPagamento(req, res) {
   }
 }
 
-// Reenvia o lembrete de pagamento pra todo mundo com statusPagamento "pendente" nesse evento.
-// Aguarda todos os envios (diferente da confirmação na inscrição pública, que não espera) — aqui
-// quem clicou é o admin, que quer saber quantos foram enviados de verdade.
+// Reenvia o lembrete de pagamento pra todo mundo com statusPagamento "pendente" nesse evento. Se o
+// QR code/Pix já passou das 24h de validade (o normal, já que ninguém manda lembrete minutos depois
+// da inscrição), gera um novo pagamento antes de enviar — do contrário a pessoa receberia um QR
+// morto. Aguarda todos os envios (diferente da confirmação na inscrição pública, que não espera) —
+// aqui quem clicou é o admin, que quer saber quantos foram enviados de verdade.
 async function notificarPendentes(req, res) {
   const evento = await Evento.findByPk(req.params.id);
 
@@ -136,7 +139,16 @@ async function notificarPendentes(req, res) {
     return res.json({ enviados: 0 });
   }
 
-  await Promise.all(pendentes.map((eventoAluno) => emailService.enviarLembretePagamentoPendente({ evento, eventoAluno })));
+  await Promise.all(
+    pendentes.map(async (eventoAluno) => {
+      if (Number(eventoAluno.valorCobrado) > 0 && qrExpirado(eventoAluno)) {
+        const novoPagamento = await gerarPagamentoPix({ valor: eventoAluno.valorCobrado, evento, email: eventoAluno.email });
+        await eventoAluno.update(novoPagamento);
+      }
+
+      await emailService.enviarLembretePagamentoPendente({ evento, eventoAluno });
+    })
+  );
 
   res.json({ enviados: pendentes.length });
 }

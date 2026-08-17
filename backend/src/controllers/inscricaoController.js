@@ -1,10 +1,9 @@
 const { Op } = require('sequelize');
-const { Evento, TipoEvento, Banco, EventoAluno } = require('../models');
+const { Evento, TipoEvento, EventoAluno } = require('../models');
 const gatameService = require('../services/gatameService');
-const pixService = require('../services/pixService');
-const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
 const { calcularValorInscricao, TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
+const { qrExpirado, gerarPagamentoPix } = require('../services/pagamentoInscricaoService');
 const { logErro } = require('../utils/logger');
 
 // Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
@@ -68,52 +67,6 @@ function calcularIdade(dataNascimento) {
   }
 
   return idade;
-}
-
-const VALIDADE_QR_CODE_MS = 24 * 60 * 60 * 1000;
-
-// Gera um novo pagamento Pix (Mercado Pago dinâmico, com fallback pro QR estático de /admin/bancos)
-// — usado tanto numa inscrição nova quanto ao regenerar o QR code de uma pendência expirada.
-async function gerarPagamentoPix({ valor, evento, email }) {
-  let qrcodePix = null;
-  let pixCopiaCola = null;
-  let mpPaymentId = null;
-
-  const pagamentoMp = await mercadoPagoService
-    .criarPagamentoPix({
-      valor,
-      descricao: `Inscrição - ${evento.nome}`,
-      email,
-      referenciaExterna: `EVT${evento.id}-${Date.now()}`,
-    })
-    .catch((err) => {
-      logErro('Erro ao criar pagamento Pix via Mercado Pago, caindo para QR estático:', err);
-      return null;
-    });
-
-  if (pagamentoMp) {
-    qrcodePix = pagamentoMp.qrcodeBase64;
-    pixCopiaCola = pagamentoMp.pixCopiaCola;
-    mpPaymentId = pagamentoMp.paymentId;
-  } else {
-    // Fallback: Mercado Pago não configurado (ou falhou) — usa a chave Pix estática de /admin/bancos.
-    const banco = await Banco.findOne({ order: [['id', 'ASC']] });
-
-    if (banco) {
-      pixCopiaCola = pixService.gerarPayload({
-        chavePix: banco.chavePix,
-        nomeRecebedor: banco.titular,
-        cidade: banco.cidade,
-        valor,
-        txid: `EVT${evento.id}${Date.now()}`,
-      });
-      qrcodePix = await pixService.gerarQrCodeBase64(pixCopiaCola);
-    } else {
-      logErro('Nenhuma configuração de conta Pix cadastrada (tabela banco); QR code não gerado.');
-    }
-  }
-
-  return { qrcodePix, pixCopiaCola, mpPaymentId };
 }
 
 function tratarErroConsulta(err, res) {
@@ -206,9 +159,7 @@ async function inscrever(req, res) {
         return res.status(400).json({ error: 'Esta inscrição já está paga; não há QR code para gerar.', jaInscrito: true });
       }
 
-      const geradoHaMenosDe24h = Date.now() - new Date(existente.createdAt).getTime() < VALIDADE_QR_CODE_MS;
-
-      if (geradoHaMenosDe24h) {
+      if (!qrExpirado(existente)) {
         return res.status(400).json({
           error: 'O QR code atual ainda está dentro do prazo de validade de 24 horas.',
           jaInscrito: true,
