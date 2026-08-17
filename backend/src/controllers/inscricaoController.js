@@ -26,6 +26,7 @@ function mapCandidato(raw) {
     dataNascimento: raw.data_nascimento || null,
     numeroCarteirinha: raw.numero_carteirinha || null,
     validadeCarteirinha: raw.validade_carteirinha || null,
+    tamanhoFaixa: raw.tamanho_faixa || null,
     origem: raw.origem,
     email: raw.email || null,
   };
@@ -35,6 +36,12 @@ function mapCandidato(raw) {
 // casos, a pessoa precisa confirmar/completar esses dados manualmente na inscrição.
 function precisaDadosExtras(candidato) {
   return candidato.origem !== 'gatame' || !candidato.faixa;
+}
+
+// Tamanho da faixa: quando vem do Gatame, confia no dado da integração e nunca pede de novo. Só
+// pede manualmente pra quem não veio de lá (a integração ainda não cobre esses casos).
+function precisaTamanhoFaixa(candidato) {
+  return candidato.origem !== 'gatame';
 }
 
 // Extrai ano/mês/dia direto da string (formato YYYY-MM-DD, usado tanto pela API do Gatame quanto
@@ -278,12 +285,19 @@ async function inscrever(req, res) {
     candidato.responsavel = menorDeIdade ? responsavel : null;
   }
 
-  // Tamanho da faixa física (ex.: A1) é pedido pra todo mundo que se inscreve num Exame de Faixa,
-  // independente da origem dos dados — o Gatame ainda não manda essa informação.
-  const tamanhoFaixaTratado = (tamanhoFaixa || '').trim().slice(0, 2).toUpperCase();
+  // Tamanho da faixa física (ex.: A1): quando vem do Gatame, usa o valor da integração direto e
+  // nunca pede de novo. Só pede manualmente (e valida) pra quem não veio de lá.
+  const ehExameDeFaixa = evento.tipoEvento.id === TIPO_EXAME_DE_FAIXA_ID;
+  let tamanhoFaixaFinal = candidato.tamanhoFaixa || null;
 
-  if (evento.tipoEvento.id === TIPO_EXAME_DE_FAIXA_ID && !tamanhoFaixaTratado) {
-    return res.status(400).json({ error: 'Informe o tamanho da faixa.', precisaTamanhoFaixa: true });
+  if (ehExameDeFaixa && precisaTamanhoFaixa(candidato)) {
+    const tamanhoFaixaTratado = (tamanhoFaixa || '').trim().slice(0, 2).toUpperCase();
+
+    if (!tamanhoFaixaTratado) {
+      return res.status(400).json({ error: 'Informe o tamanho da faixa.', precisaTamanhoFaixa: true });
+    }
+
+    tamanhoFaixaFinal = tamanhoFaixaTratado;
   }
 
   // A partir daqui não há mais validação de entrada (só cálculo/gravação/pagamento) — sem esse
@@ -320,7 +334,7 @@ async function inscrever(req, res) {
       responsavel: candidato.responsavel || null,
       numeroCarteirinha: candidato.numeroCarteirinha,
       validadeCarteirinha: candidato.validadeCarteirinha,
-      tamanhoFaixa: tamanhoFaixaTratado || null,
+      tamanhoFaixa: tamanhoFaixaFinal,
       carteirinhaValida: resultadoValor.carteirinhaValida ?? null,
       origemDados: candidato.origem,
       apto: true,

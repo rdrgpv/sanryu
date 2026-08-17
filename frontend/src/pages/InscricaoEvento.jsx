@@ -13,6 +13,12 @@ function precisaDadosExtras(candidato) {
   return candidato.origem !== 'gatame' || !candidato.faixa;
 }
 
+// Tamanho da faixa: quando vem do Gatame, confia no dado da integração e nunca pede de novo. Só
+// pede manualmente pra quem não veio de lá.
+function precisaTamanhoFaixa(candidato) {
+  return candidato.origem !== 'gatame';
+}
+
 // Usa o cadastro de Faixas (ordenado por "ordem") pra achar a próxima faixa da graduação.
 function proximaFaixa(nomeAtual, faixas) {
   const indice = faixas.findIndex((faixa) => faixa.nome.toLowerCase() === (nomeAtual || '').toLowerCase());
@@ -283,6 +289,7 @@ export default function InscricaoEvento() {
                   const precisaEscolherFaixa = ehExameDeFaixa && atual.toLowerCase() === 'branca';
                   const proxima = ehExameDeFaixa && !precisaEscolherFaixa ? proximaFaixa(atual, faixas) : null;
                   const dadosObrigatorios = precisaDadosExtras(candidato);
+                  const tamanhoObrigatorio = ehExameDeFaixa && precisaTamanhoFaixa(candidato);
                   const extraDados = extras[indice] || { nome: '', telefone: '', dataNascimento: '', responsavel: '', tamanhoFaixa: '' };
                   const idade = calcularIdade(extraDados.dataNascimento);
                   const menorDeIdade = idade !== null && idade < 18;
@@ -291,7 +298,7 @@ export default function InscricaoEvento() {
                       (extraDados.nome.trim() &&
                         extraDados.dataNascimento &&
                         (!menorDeIdade || extraDados.responsavel.trim()))) &&
-                    (!ehExameDeFaixa || extraDados.tamanhoFaixa.trim());
+                    (!tamanhoObrigatorio || extraDados.tamanhoFaixa.trim());
 
                   const camposFaltando = [];
                   if (dadosObrigatorios) {
@@ -299,7 +306,7 @@ export default function InscricaoEvento() {
                     if (!extraDados.dataNascimento) camposFaltando.push('data de nascimento');
                     if (menorDeIdade && !extraDados.responsavel.trim()) camposFaltando.push('nome do responsável');
                   }
-                  if (ehExameDeFaixa && !extraDados.tamanhoFaixa.trim()) camposFaltando.push('tamanho da faixa');
+                  if (tamanhoObrigatorio && !extraDados.tamanhoFaixa.trim()) camposFaltando.push('tamanho da faixa');
 
                   return (
                     <div key={indice} className="tile">
@@ -315,6 +322,9 @@ export default function InscricaoEvento() {
                       )}
                       {formatarData(candidato.validadeCarteirinha) && (
                         <p className="tile__meta">Validade da carteirinha: {formatarData(candidato.validadeCarteirinha)}</p>
+                      )}
+                      {candidato.tamanhoFaixa && (
+                        <p className="tile__meta">Tamanho da faixa: {candidato.tamanhoFaixa}</p>
                       )}
 
                       {ehExameDeFaixa && (
@@ -340,7 +350,7 @@ export default function InscricaoEvento() {
                         <a href="mailto:contato@sanryu.com.br">contato@sanryu.com.br</a>.
                       </p>
 
-                      {ehExameDeFaixa && (
+                      {tamanhoObrigatorio && (
                         <div className="form" style={{ marginTop: '1rem' }}>
                           <label className="form__field">
                             <span>Tamanho da faixa</span>
