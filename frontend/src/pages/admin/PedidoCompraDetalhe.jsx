@@ -19,7 +19,7 @@ import {
   CBadge,
 } from '@coreui/react';
 import api from '../../services/api';
-import { formatarMoeda } from '../../utils/formato.js';
+import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 
 const SITUACOES = {
   P: { label: 'Pendente', cor: 'secondary' },
@@ -142,7 +142,7 @@ export default function PedidoCompraDetalhe() {
               <CCol md={3}>
                 <CFormLabel>Recebido em</CFormLabel>
                 <CFormInput
-                  value={pedidoCompra.dataRecebimento ? new Date(pedidoCompra.dataRecebimento).toLocaleString('pt-BR') : '-'}
+                  value={formatarDataHora(pedidoCompra.dataRecebimento)}
                   disabled
                   readOnly
                 />

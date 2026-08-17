@@ -19,18 +19,13 @@ import {
   CCardBody,
 } from '@coreui/react';
 import api from '../../services/api';
+import { formatarDataHora } from '../../utils/formato.js';
 
 const TIPOS = [
   { codigo: 'E', label: 'Entrada' },
   { codigo: 'S', label: 'Saída' },
   { codigo: 'A', label: 'Ajuste' },
 ];
-
-// Movimentações não têm hora "pura" — dataMovimentacao é DATE de verdade (com hora), então
-// new Date(iso) aqui é seguro (não é uma string "YYYY-MM-DD" bare).
-function formatarDataHora(iso) {
-  return iso ? new Date(iso).toLocaleString('pt-BR') : '-';
-}
 
 const formularioInicial = { tipoMovimentacao: 'E', quantidade: '', documentoOrigem: '', observacao: '' };
 

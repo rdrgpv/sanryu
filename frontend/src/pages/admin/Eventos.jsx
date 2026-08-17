@@ -13,6 +13,7 @@ import CIcon from '@coreui/icons-react';
 import { cilList } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import { formatarDataHora } from '../../utils/formato.js';
 
 export default function Eventos() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function Eventos() {
               </CTableDataCell>
               <CTableDataCell>{evento.nome}</CTableDataCell>
               <CTableDataCell>{evento.tipoEvento?.nome || '-'}</CTableDataCell>
-              <CTableDataCell>{new Date(evento.data).toLocaleString('pt-BR')}</CTableDataCell>
+              <CTableDataCell>{formatarDataHora(evento.data)}</CTableDataCell>
               <CTableDataCell>{evento.local || '-'}</CTableDataCell>
               <CTableDataCell>{evento.status}</CTableDataCell>
               <CTableDataCell>{evento.valor != null ? `R$ ${Number(evento.valor).toFixed(2)}` : '-'}</CTableDataCell>

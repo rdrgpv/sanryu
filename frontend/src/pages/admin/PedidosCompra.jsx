@@ -12,7 +12,7 @@ import {
 } from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
-import { formatarMoeda } from '../../utils/formato.js';
+import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 
 const SITUACOES = {
   P: { label: 'Pendente', cor: 'secondary' },
@@ -137,7 +137,7 @@ export default function PedidosCompra() {
               onClick={() => selecionarLinha(pedidoCompra.id)}
             >
               <CTableDataCell>{pedidoCompra.fornecedor?.nome || '-'}</CTableDataCell>
-              <CTableDataCell>{new Date(pedidoCompra.dataPedido).toLocaleString('pt-BR')}</CTableDataCell>
+              <CTableDataCell>{formatarDataHora(pedidoCompra.dataPedido)}</CTableDataCell>
               <CTableDataCell>
                 <CBadge color={SITUACOES[pedidoCompra.situacao]?.cor || 'secondary'}>
                   {SITUACOES[pedidoCompra.situacao]?.label || pedidoCompra.situacao}

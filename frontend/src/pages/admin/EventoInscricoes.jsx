@@ -12,6 +12,7 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint } from '@coreui/icons';
 import api from '../../services/api';
+import { formatarDataHora } from '../../utils/formato.js';
 
 const COLUNAS_EXPORTACAO = [
   'Nome',
@@ -80,7 +81,7 @@ export default function EventoInscricoes() {
       inscricao.apto ? 'Sim' : 'Não',
       inscricao.valorCobrado != null ? Number(inscricao.valorCobrado).toFixed(2).replace('.', ',') : '',
       inscricao.statusPagamento || '',
-      new Date(inscricao.createdAt).toLocaleString('pt-BR'),
+      formatarDataHora(inscricao.createdAt),
     ]);
 
     const escapar = (valor) => `"${String(valor).replace(/"/g, '""')}"`;
@@ -182,7 +183,7 @@ export default function EventoInscricoes() {
                     '-'
                   )}
                 </CTableDataCell>
-                <CTableDataCell>{new Date(inscricao.createdAt).toLocaleString('pt-BR')}</CTableDataCell>
+                <CTableDataCell>{formatarDataHora(inscricao.createdAt)}</CTableDataCell>
                 <CTableDataCell>
                   {inscricao.mpPaymentId ? (
                     <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
