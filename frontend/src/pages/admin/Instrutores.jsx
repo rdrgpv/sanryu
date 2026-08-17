@@ -54,6 +54,7 @@ export default function Instrutores() {
           <CTableRow>
             <CTableHeaderCell>Nome</CTableHeaderCell>
             <CTableHeaderCell>Faixa</CTableHeaderCell>
+            <CTableHeaderCell>Email</CTableHeaderCell>
             <CTableHeaderCell>Especialidade</CTableHeaderCell>
             <CTableHeaderCell>Bio</CTableHeaderCell>
           </CTableRow>
@@ -87,13 +88,14 @@ export default function Instrutores() {
                   '-'
                 )}
               </CTableDataCell>
+              <CTableDataCell>{instrutor.email || '-'}</CTableDataCell>
               <CTableDataCell>{instrutor.especialidade || '-'}</CTableDataCell>
               <CTableDataCell style={{ maxWidth: 320 }}>{instrutor.bio || '-'}</CTableDataCell>
             </CTableRow>
           ))}
           {instrutores.length === 0 && (
             <CTableRow>
-              <CTableDataCell colSpan={4} className="text-body-secondary">
+              <CTableDataCell colSpan={5} className="text-body-secondary">
                 Nenhum instrutor cadastrado.
               </CTableDataCell>
             </CTableRow>

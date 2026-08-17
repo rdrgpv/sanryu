@@ -10,6 +10,10 @@ const Instrutor = sequelize.define('Instrutor', {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   especialidade: {
     type: DataTypes.STRING,
     allowNull: true,

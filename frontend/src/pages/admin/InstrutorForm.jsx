@@ -6,6 +6,7 @@ import api from '../../services/api';
 const estadoInicial = {
   nome: '',
   faixaId: '',
+  email: '',
   especialidade: '',
   bio: '',
   fotoUrl: '',
@@ -30,6 +31,7 @@ export default function InstrutorForm() {
       setForm({
         nome: instrutor.nome,
         faixaId: instrutor.faixaId || '',
+        email: instrutor.email || '',
         especialidade: instrutor.especialidade || '',
         bio: instrutor.bio || '',
         fotoUrl: instrutor.fotoUrl || '',
@@ -90,6 +92,10 @@ export default function InstrutorForm() {
               <CCol md={4}>
                 <CFormLabel>Especialidade</CFormLabel>
                 <CFormInput name="especialidade" value={form.especialidade} onChange={handleChange} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Email</CFormLabel>
+                <CFormInput type="email" name="email" value={form.email} onChange={handleChange} />
               </CCol>
               <CCol md={6}>
                 <CFormLabel>Foto (URL)</CFormLabel>
