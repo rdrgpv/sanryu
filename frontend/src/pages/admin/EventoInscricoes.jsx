@@ -30,6 +30,11 @@ const COLUNAS_EXPORTACAO = [
   'Inscrito em',
 ];
 
+// Taxa cobrada pelo Mercado Pago sobre pagamentos Pix recebidos por ele — só se aplica a
+// inscrições pagas via Mercado Pago de verdade (mpPaymentId setado); o QR estático de /admin/bancos
+// (fallback quando o MP não está configurado) não passa por essa taxa.
+const TAXA_MERCADO_PAGO = 0.0099;
+
 // Datas de nascimento/validade de carteirinha são strings "YYYY-MM-DD" sem horário — evita
 // `new Date(string)`, que interpreta como meia-noite UTC e "volta" um dia em fusos negativos (Brasil).
 function formatarData(valor) {
@@ -45,9 +50,12 @@ export default function EventoInscricoes() {
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
 
-  const totalRecebido = inscricoes
-    .filter((inscricao) => inscricao.statusPagamento === 'pago')
-    .reduce((soma, inscricao) => soma + Number(inscricao.valorCobrado || 0), 0);
+  const pagas = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pago');
+  const totalRecebido = pagas.reduce((soma, inscricao) => soma + Number(inscricao.valorCobrado || 0), 0);
+  const totalTaxas = pagas
+    .filter((inscricao) => inscricao.mpPaymentId)
+    .reduce((soma, inscricao) => soma + Number(inscricao.valorCobrado || 0) * TAXA_MERCADO_PAGO, 0);
+  const totalLiquido = totalRecebido - totalTaxas;
 
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
@@ -131,6 +139,8 @@ export default function EventoInscricoes() {
       </div>
       <p className="text-body-secondary mb-3">
         Total recebido: <strong>{formatarMoeda(totalRecebido)}</strong>
+        <span className="mx-2">·</span>
+        Total líquido (descontada a taxa de 0,99% do Mercado Pago): <strong>{formatarMoeda(totalLiquido)}</strong>
       </p>
 
       <div style={{ overflowX: 'auto', maxWidth: '100%' }} className="bg-white rounded">
