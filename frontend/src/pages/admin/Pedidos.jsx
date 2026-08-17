@@ -9,6 +9,11 @@ import {
   CTableDataCell,
   CButton,
   CBadge,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
 } from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
@@ -21,10 +26,17 @@ const SITUACOES = {
   E: { label: 'Cancelado', cor: 'danger' },
 };
 
+function rotuloVariacao(v) {
+  if (!v) return '-';
+  return [v.produto?.descricao, v.cor?.descricao, v.tamanho?.descricao].filter(Boolean).join(' — ');
+}
+
 export default function Pedidos() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [selecionadoId, setSelecionadoId] = useState(null);
+  const [detalhe, setDetalhe] = useState(null);
+  const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
 
   async function carregarPedidos() {
     const res = await api.get('/admin/pedidos');
@@ -64,6 +76,19 @@ export default function Pedidos() {
     }
   }
 
+  async function abrirDetalhe() {
+    if (!selecionadoId) return;
+    setCarregandoDetalhe(true);
+    try {
+      const res = await api.get(`/admin/pedidos/${selecionadoId}`);
+      setDetalhe(res.data);
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível carregar os detalhes do pedido.');
+    } finally {
+      setCarregandoDetalhe(false);
+    }
+  }
+
   return (
     <div>
       <h1 className="h3 mb-3">Pedidos</h1>
@@ -77,6 +102,9 @@ export default function Pedidos() {
         onAtualizar={carregarPedidos}
         extra={
           <>
+            <CButton color="secondary" variant="outline" disabled={!selecionadoId} onClick={abrirDetalhe}>
+              Detalhe
+            </CButton>
             <CButton
               color="secondary"
               variant="outline"
@@ -132,6 +160,122 @@ export default function Pedidos() {
           )}
         </CTableBody>
       </CTable>
+
+      <CModal visible={!!detalhe || carregandoDetalhe} onClose={() => setDetalhe(null)} size="lg">
+        <CModalHeader>
+          <CModalTitle>Pedido {detalhe ? `#${detalhe.id}` : ''}</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {!detalhe ? (
+            <p className="text-body-secondary mb-0">Carregando...</p>
+          ) : (
+            <>
+              <div className="d-flex align-items-center gap-2 mb-3">
+                <CBadge color={SITUACOES[detalhe.situacao]?.cor || 'secondary'}>
+                  {SITUACOES[detalhe.situacao]?.label || detalhe.situacao}
+                </CBadge>
+                <span className="text-body-secondary small">{formatarDataHora(detalhe.dataPedido)}</span>
+              </div>
+
+              <p className="mb-1">
+                <strong>Cliente:</strong> {detalhe.nomeCliente}
+              </p>
+              {detalhe.telefoneCliente && (
+                <p className="mb-1">
+                  <strong>Telefone:</strong> {detalhe.telefoneCliente}
+                </p>
+              )}
+              {detalhe.emailCliente && (
+                <p className="mb-1">
+                  <strong>Email:</strong> {detalhe.emailCliente}
+                </p>
+              )}
+              {detalhe.dataPrevistaEntrega && (
+                <p className="mb-1">
+                  <strong>Previsão de entrega:</strong> {detalhe.dataPrevistaEntrega}
+                </p>
+              )}
+              {detalhe.observacao && (
+                <p className="mb-1">
+                  <strong>Observação:</strong> {detalhe.observacao}
+                </p>
+              )}
+
+              <hr className="my-3" />
+
+              <CTable bordered small className="bg-white">
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Variação</CTableHeaderCell>
+                    <CTableHeaderCell>Qtd</CTableHeaderCell>
+                    <CTableHeaderCell>Valor unit.</CTableHeaderCell>
+                    <CTableHeaderCell>Valor total</CTableHeaderCell>
+                    <CTableHeaderCell>Personalizações</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {(detalhe.itens || []).map((item) => (
+                    <CTableRow key={item.id}>
+                      <CTableDataCell>{rotuloVariacao(item.produtoVariacao)}</CTableDataCell>
+                      <CTableDataCell>{item.quantidade}</CTableDataCell>
+                      <CTableDataCell>{formatarMoeda(item.valorUnitario)}</CTableDataCell>
+                      <CTableDataCell>{formatarMoeda(item.valorTotal)}</CTableDataCell>
+                      <CTableDataCell>
+                        {(item.personalizacoes || []).length === 0
+                          ? '-'
+                          : item.personalizacoes.map((p) => (
+                              <div key={p.id} className="small">
+                                {p.tipoPersonalizacao?.descricao || 'Personalização'}
+                                {p.textoPersonalizado ? `: ${p.textoPersonalizado}` : ''} ({formatarMoeda(p.valor)})
+                              </div>
+                            ))}
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))}
+                  {(detalhe.itens || []).length === 0 && (
+                    <CTableRow>
+                      <CTableDataCell colSpan={5} className="text-body-secondary">
+                        Nenhum item.
+                      </CTableDataCell>
+                    </CTableRow>
+                  )}
+                </CTableBody>
+              </CTable>
+
+              <div className="d-flex justify-content-end">
+                <div style={{ minWidth: 240 }}>
+                  <div className="d-flex justify-content-between">
+                    <span>Produtos</span>
+                    <span>{formatarMoeda(detalhe.valorProdutos)}</span>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span>Personalizações</span>
+                    <span>{formatarMoeda(detalhe.valorPersonalizacoes)}</span>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span>Desconto</span>
+                    <span>-{formatarMoeda(detalhe.valorDesconto)}</span>
+                  </div>
+                  <div className="d-flex justify-content-between fw-bold">
+                    <span>Total</span>
+                    <span>{formatarMoeda(detalhe.valorTotal)}</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" variant="outline" onClick={() => setDetalhe(null)}>
+            Fechar
+          </CButton>
+          {detalhe && (
+            <CButton color="primary" onClick={() => navigate(`/admin/pedidos/${detalhe.id}/editar`)}>
+              Editar
+            </CButton>
+          )}
+        </CModalFooter>
+      </CModal>
     </div>
   );
 }
