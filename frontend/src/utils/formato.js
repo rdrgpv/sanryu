@@ -3,17 +3,18 @@ export function formatarMoeda(valor) {
 }
 
 // Datas/horas aqui são timestamps completos (não datas "puras" tipo aniversário), então
-// new Date(iso) é seguro — só formata sem os segundos, que toLocaleString('pt-BR') sem opções
-// sempre inclui (ex.: "28/08/2026, 19:00:00" em vez de "28/08/2026 19:00").
+// new Date(iso) é seguro. Monta a string na mão em vez de usar toLocaleString('pt-BR', {...}):
+// o Intl da própria engine sempre insere uma vírgula entre data e hora nesse tipo de formatação
+// combinada (varia entre navegador/Node, mas não dá pra tirar só com opções), então construir na
+// mão garante "28/08/2026 19:00" sem vírgula e sem segundos, sempre.
 export function formatarDataHora(iso) {
   if (!iso) return '-';
-  return new Date(iso).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const d = new Date(iso);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const hora = String(d.getHours()).padStart(2, '0');
+  const minuto = String(d.getMinutes()).padStart(2, '0');
+  return `${dia}/${mes}/${d.getFullYear()} ${hora}:${minuto}`;
 }
 
 // Máscara progressiva de telefone brasileiro conforme o usuário digita — (XX) XXXX-XXXX pra fixo
