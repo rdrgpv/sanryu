@@ -145,6 +145,7 @@ export default function InscricaoEvento() {
             telefone: '',
             dataNascimento: paraInputDate(candidato.dataNascimento),
             responsavel: '',
+            tamanhoFaixa: '',
           };
         });
         setExtras(extrasIniciais);
@@ -170,6 +171,7 @@ export default function InscricaoEvento() {
         indice,
         faixaEscolhida,
         dadosExtras: extras[indice],
+        tamanhoFaixa: extras[indice]?.tamanhoFaixa,
       });
       setResultado(res.data);
       setNovaFaixaConfirmada(novaFaixaNome || null);
@@ -281,14 +283,15 @@ export default function InscricaoEvento() {
                   const precisaEscolherFaixa = ehExameDeFaixa && atual.toLowerCase() === 'branca';
                   const proxima = ehExameDeFaixa && !precisaEscolherFaixa ? proximaFaixa(atual, faixas) : null;
                   const dadosObrigatorios = precisaDadosExtras(candidato);
-                  const extraDados = extras[indice] || { nome: '', telefone: '', dataNascimento: '', responsavel: '' };
+                  const extraDados = extras[indice] || { nome: '', telefone: '', dataNascimento: '', responsavel: '', tamanhoFaixa: '' };
                   const idade = calcularIdade(extraDados.dataNascimento);
                   const menorDeIdade = idade !== null && idade < 18;
                   const extrasValidos =
-                    !dadosObrigatorios ||
-                    (extraDados.nome.trim() &&
-                      extraDados.dataNascimento &&
-                      (!menorDeIdade || extraDados.responsavel.trim()));
+                    (!dadosObrigatorios ||
+                      (extraDados.nome.trim() &&
+                        extraDados.dataNascimento &&
+                        (!menorDeIdade || extraDados.responsavel.trim()))) &&
+                    (!ehExameDeFaixa || extraDados.tamanhoFaixa.trim());
 
                   const camposFaltando = [];
                   if (dadosObrigatorios) {
@@ -296,6 +299,7 @@ export default function InscricaoEvento() {
                     if (!extraDados.dataNascimento) camposFaltando.push('data de nascimento');
                     if (menorDeIdade && !extraDados.responsavel.trim()) camposFaltando.push('nome do responsável');
                   }
+                  if (ehExameDeFaixa && !extraDados.tamanhoFaixa.trim()) camposFaltando.push('tamanho da faixa');
 
                   return (
                     <div key={indice} className="tile">
@@ -335,6 +339,21 @@ export default function InscricaoEvento() {
                         Encontrou alguma informação divergente? Procure seu Sensei ou envie um e-mail para{' '}
                         <a href="mailto:contato@sanryu.com.br">contato@sanryu.com.br</a>.
                       </p>
+
+                      {ehExameDeFaixa && (
+                        <div className="form" style={{ marginTop: '1rem' }}>
+                          <label className="form__field">
+                            <span>Tamanho da faixa</span>
+                            <input
+                              value={extraDados.tamanhoFaixa}
+                              onChange={(event) => atualizarExtra(indice, 'tamanhoFaixa', event.target.value.slice(0, 2).toUpperCase())}
+                              maxLength={2}
+                              placeholder="Ex.: A1"
+                              required
+                            />
+                          </label>
+                        </div>
+                      )}
 
                       {dadosObrigatorios && (
                         <div className="form" style={{ marginTop: '1rem' }}>
@@ -467,6 +486,7 @@ export default function InscricaoEvento() {
                   <p className="tile__meta">Nascimento: {formatarData(resultado.dataNascimento)}</p>
                 )}
                 {resultado.telefone && <p className="tile__meta">Telefone: {resultado.telefone}</p>}
+                {resultado.tamanhoFaixa && <p className="tile__meta">Tamanho da faixa: {resultado.tamanhoFaixa}</p>}
                 {resultado.responsavel && <p className="tile__meta">Responsável: {resultado.responsavel}</p>}
                 {resultado.numeroCarteirinha && (
                   <p className="tile__meta">Carteirinha: {resultado.numeroCarteirinha}</p>

@@ -26,6 +26,12 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // Tamanho físico da faixa (ex.: A1) — só relevante em Exame de Faixa; o Gatame ainda não manda
+  // esse dado, então é sempre preenchido manualmente na inscrição.
+  tamanhoFaixa: {
+    type: DataTypes.CHAR(2),
+    allowNull: true,
+  },
   dataNascimento: {
     type: DataTypes.STRING,
     allowNull: true,

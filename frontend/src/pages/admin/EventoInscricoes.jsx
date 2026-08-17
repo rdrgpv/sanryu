@@ -19,6 +19,7 @@ const COLUNAS_EXPORTACAO = [
   'Email',
   'Telefone',
   'Faixa',
+  'Tamanho Faixa',
   'Nascimento',
   'Responsável',
   'Nº Carteirinha',
@@ -85,6 +86,7 @@ export default function EventoInscricoes() {
       inscricao.email || '',
       inscricao.telefone || '',
       inscricao.faixa || '',
+      inscricao.tamanhoFaixa || '',
       formatarData(inscricao.dataNascimento),
       inscricao.responsavel || '',
       inscricao.numeroCarteirinha || '',
@@ -151,6 +153,7 @@ export default function EventoInscricoes() {
               <CTableHeaderCell>Email</CTableHeaderCell>
               <CTableHeaderCell>Telefone</CTableHeaderCell>
               <CTableHeaderCell>Faixa</CTableHeaderCell>
+              <CTableHeaderCell>Tamanho Faixa</CTableHeaderCell>
               <CTableHeaderCell>Nascimento</CTableHeaderCell>
               <CTableHeaderCell>Responsável</CTableHeaderCell>
               <CTableHeaderCell>Nº Carteirinha</CTableHeaderCell>
@@ -171,6 +174,7 @@ export default function EventoInscricoes() {
                 <CTableDataCell>{inscricao.email}</CTableDataCell>
                 <CTableDataCell>{inscricao.telefone || '-'}</CTableDataCell>
                 <CTableDataCell>{inscricao.faixa || '-'}</CTableDataCell>
+                <CTableDataCell>{inscricao.tamanhoFaixa || '-'}</CTableDataCell>
                 <CTableDataCell>{formatarData(inscricao.dataNascimento)}</CTableDataCell>
                 <CTableDataCell>{inscricao.responsavel || '-'}</CTableDataCell>
                 <CTableDataCell>{inscricao.numeroCarteirinha || '-'}</CTableDataCell>
@@ -215,7 +219,7 @@ export default function EventoInscricoes() {
             ))}
             {inscricoes.length === 0 && (
               <CTableRow>
-                <CTableDataCell colSpan={15} className="text-body-secondary">
+                <CTableDataCell colSpan={16} className="text-body-secondary">
                   Nenhuma inscrição registrada.
                 </CTableDataCell>
               </CTableRow>

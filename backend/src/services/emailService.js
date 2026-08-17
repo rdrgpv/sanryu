@@ -80,6 +80,7 @@ async function enviarConfirmacaoInscricao({ evento, eventoAluno }) {
         ${eventoAluno.telefone ? `<li><strong>Telefone:</strong> ${eventoAluno.telefone}</li>` : ''}
         ${eventoAluno.faixaAtual ? `<li><strong>Faixa atual:</strong> ${eventoAluno.faixaAtual}</li>` : ''}
         ${eventoAluno.faixa ? `<li><strong>Faixa que vai:</strong> ${eventoAluno.faixa}</li>` : ''}
+        ${eventoAluno.tamanhoFaixa ? `<li><strong>Tamanho da faixa:</strong> ${eventoAluno.tamanhoFaixa}</li>` : ''}
         ${eventoAluno.responsavel ? `<li><strong>Responsável:</strong> ${eventoAluno.responsavel}</li>` : ''}
       </ul>
       ${linhaValor}

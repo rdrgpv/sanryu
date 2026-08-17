@@ -4,7 +4,7 @@ const gatameService = require('../services/gatameService');
 const pixService = require('../services/pixService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
-const { calcularValorInscricao } = require('../services/valorInscricaoService');
+const { calcularValorInscricao, TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const { logErro } = require('../utils/logger');
 
 // Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
@@ -180,7 +180,7 @@ async function inscrever(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const { email, indice, faixaEscolhida, dadosExtras, gerarNovoQrCode } = req.body;
+  const { email, indice, faixaEscolhida, dadosExtras, tamanhoFaixa, gerarNovoQrCode } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: 'Email é obrigatório.' });
@@ -278,6 +278,14 @@ async function inscrever(req, res) {
     candidato.responsavel = menorDeIdade ? responsavel : null;
   }
 
+  // Tamanho da faixa física (ex.: A1) é pedido pra todo mundo que se inscreve num Exame de Faixa,
+  // independente da origem dos dados — o Gatame ainda não manda essa informação.
+  const tamanhoFaixaTratado = (tamanhoFaixa || '').trim().slice(0, 2).toUpperCase();
+
+  if (evento.tipoEvento.id === TIPO_EXAME_DE_FAIXA_ID && !tamanhoFaixaTratado) {
+    return res.status(400).json({ error: 'Informe o tamanho da faixa.', precisaTamanhoFaixa: true });
+  }
+
   // A partir daqui não há mais validação de entrada (só cálculo/gravação/pagamento) — sem esse
   // try/catch, qualquer exceção aqui (ex.: Mercado Pago/Pix, banco de dados) derrubava a promise
   // da rota sem nunca responder, e o front ficava esperando até dar timeout com uma mensagem genérica.
@@ -312,6 +320,7 @@ async function inscrever(req, res) {
       responsavel: candidato.responsavel || null,
       numeroCarteirinha: candidato.numeroCarteirinha,
       validadeCarteirinha: candidato.validadeCarteirinha,
+      tamanhoFaixa: tamanhoFaixaTratado || null,
       carteirinhaValida: resultadoValor.carteirinhaValida ?? null,
       origemDados: candidato.origem,
       apto: true,
