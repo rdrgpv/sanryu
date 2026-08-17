@@ -12,7 +12,7 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint } from '@coreui/icons';
 import api from '../../services/api';
-import { formatarDataHora } from '../../utils/formato.js';
+import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
 
 const COLUNAS_EXPORTACAO = [
   'Nome',
@@ -44,6 +44,10 @@ export default function EventoInscricoes() {
   const { id } = useParams();
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
+
+  const totalRecebido = inscricoes
+    .filter((inscricao) => inscricao.statusPagamento === 'pago')
+    .reduce((soma, inscricao) => soma + Number(inscricao.valorCobrado || 0), 0);
 
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
@@ -106,7 +110,7 @@ export default function EventoInscricoes() {
       <Link to="/admin/eventos" className="text-body-secondary text-decoration-none d-inline-block mb-2">
         &larr; Voltar
       </Link>
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-1">
         <h1 className="h3 mb-0">Inscrições{evento ? ` — ${evento.nome}` : ''}</h1>
         <div className="d-flex gap-2">
           <CButton
@@ -125,6 +129,9 @@ export default function EventoInscricoes() {
           </CButton>
         </div>
       </div>
+      <p className="text-body-secondary mb-3">
+        Total recebido: <strong>{formatarMoeda(totalRecebido)}</strong>
+      </p>
 
       <div style={{ overflowX: 'auto', maxWidth: '100%' }} className="bg-white rounded">
         <CTable hover className="text-nowrap mb-0" style={{ width: 'max-content', minWidth: '100%' }}>
