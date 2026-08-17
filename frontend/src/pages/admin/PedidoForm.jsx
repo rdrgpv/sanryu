@@ -36,7 +36,7 @@ const estadoInicial = {
   situacao: 'P',
 };
 
-const itemInicial = { produtoVariacaoId: '', quantidade: 1, valorUnitario: '', observacao: '', personalizacoes: [] };
+const itemInicial = { produtoId: '', produtoVariacaoId: '', quantidade: 1, valorUnitario: '', observacao: '', personalizacoes: [] };
 const personalizacaoInicial = { tipoPersonalizacaoId: '', textoPersonalizado: '', corPersonalizacao: '', posicao: '', valor: '', observacao: '' };
 
 function rotuloVariacao(v) {
@@ -56,6 +56,7 @@ export default function PedidoForm() {
 
   const [form, setForm] = useState(estadoInicial);
   const [itens, setItens] = useState([]);
+  const [produtos, setProdutos] = useState([]);
   const [variacoes, setVariacoes] = useState([]);
   const [tiposPersonalizacao, setTiposPersonalizacao] = useState([]);
   const [erro, setErro] = useState(null);
@@ -66,6 +67,7 @@ export default function PedidoForm() {
   const [erroModal, setErroModal] = useState(null);
 
   useEffect(() => {
+    api.get('/admin/produtos?ativo=true').then((res) => setProdutos(res.data));
     api.get('/admin/produto-variacoes?ativo=true').then((res) => setVariacoes(res.data));
     api.get('/admin/tipos-personalizacao?ativo=true').then((res) => setTiposPersonalizacao(res.data));
   }, []);
@@ -116,6 +118,10 @@ export default function PedidoForm() {
     setForm((prev) => ({ ...prev, telefoneCliente: formatarTelefone(event.target.value) }));
   }
 
+  const variacoesDoProduto = itemEditado.produtoId
+    ? variacoes.filter((v) => v.produtoId === Number(itemEditado.produtoId))
+    : [];
+
   const valorProdutos = itens.reduce((soma, item) => soma + Number(item.valorTotal || 0), 0);
   const valorPersonalizacoes = itens.reduce(
     (soma, item) => soma + item.personalizacoes.reduce((s, p) => s + Number(p.valor || 0), 0),
@@ -131,7 +137,9 @@ export default function PedidoForm() {
   }
 
   function abrirEdicaoItem(indice) {
-    setItemEditado(itens[indice]);
+    const item = itens[indice];
+    const variacaoAtual = variacoes.find((v) => v.id === item.produtoVariacaoId);
+    setItemEditado({ ...item, produtoId: variacaoAtual?.produtoId || '' });
     setIndiceEmEdicao(indice);
     setErroModal(null);
     setModalAberto(true);
@@ -146,15 +154,22 @@ export default function PedidoForm() {
     const { name, value } = event.target;
     setItemEditado((prev) => {
       const atualizado = { ...prev, [name]: value };
-      if (name === 'produtoVariacaoId') {
-        const variacao = variacoes.find((v) => v.id === Number(value));
-        if (variacao) {
-          atualizado.produtoVariacaoLabel = rotuloVariacao(variacao);
-          if (!prev.valorUnitario) atualizado.valorUnitario = variacao.valorVenda;
-        }
+      // Trocar o produto invalida a variação escolhida antes (era de outro produto).
+      if (name === 'produtoId') {
+        atualizado.produtoVariacaoId = '';
+        atualizado.produtoVariacaoLabel = '';
       }
       return atualizado;
     });
+  }
+
+  function selecionarVariacao(variacao) {
+    setItemEditado((prev) => ({
+      ...prev,
+      produtoVariacaoId: variacao.id,
+      produtoVariacaoLabel: rotuloVariacao(variacao),
+      valorUnitario: prev.valorUnitario || variacao.valorVenda,
+    }));
   }
 
   function adicionarPersonalizacao() {
@@ -401,13 +416,13 @@ export default function PedidoForm() {
         </CModalHeader>
         <CModalBody>
           <CRow className="g-3">
-            <CCol md={8}>
-              <CFormLabel>Variação de produto</CFormLabel>
-              <CFormSelect name="produtoVariacaoId" value={itemEditado.produtoVariacaoId} onChange={handleItemChange}>
+            <CCol md={5}>
+              <CFormLabel>Produto</CFormLabel>
+              <CFormSelect name="produtoId" value={itemEditado.produtoId} onChange={handleItemChange}>
                 <option value="">Selecione</option>
-                {variacoes.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {rotuloVariacao(v)} — {v.saldoDisponivel ?? v.quantidadeEstoque} disponível
+                {produtos.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.descricao}
                   </option>
                 ))}
               </CFormSelect>
@@ -420,10 +435,62 @@ export default function PedidoForm() {
               <CFormLabel>Valor unitário</CFormLabel>
               <CFormInput type="number" step="0.01" min="0" name="valorUnitario" value={itemEditado.valorUnitario} onChange={handleItemChange} />
             </CCol>
-            <CCol xs={12}>
+            <CCol md={3}>
               <CFormLabel>Observação</CFormLabel>
               <CFormInput name="observacao" value={itemEditado.observacao} onChange={handleItemChange} />
             </CCol>
+
+            {itemEditado.produtoId && (
+              <CCol xs={12}>
+                <CFormLabel className="d-block">Variação (cor / tamanho)</CFormLabel>
+                {variacoesDoProduto.length === 0 ? (
+                  <p className="text-body-secondary small mb-0">Nenhuma variação ativa cadastrada para este produto.</p>
+                ) : (
+                  <div className="d-flex flex-wrap gap-2">
+                    {variacoesDoProduto.map((v) => {
+                      const disponivel = v.saldoDisponivel ?? v.quantidadeEstoque;
+                      const selecionada = itemEditado.produtoVariacaoId === v.id;
+                      const rotulo = [v.cor?.descricao, v.tamanho?.descricao].filter(Boolean).join(' / ') || v.codigo;
+                      return (
+                        <CButton
+                          key={v.id}
+                          type="button"
+                          size="sm"
+                          color={selecionada ? 'primary' : 'secondary'}
+                          variant={selecionada ? undefined : 'outline'}
+                          onClick={() => selecionarVariacao(v)}
+                          className="d-flex align-items-center gap-2"
+                        >
+                          {v.cor?.corHex && (
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                width: '0.9rem',
+                                height: '0.9rem',
+                                borderRadius: '50%',
+                                background: v.cor.corHex,
+                                border: '1px solid rgba(0,0,0,0.25)',
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                          <span>
+                            {rotulo}
+                            <span className={disponivel > 0 ? 'opacity-75' : 'text-danger'}> ({disponivel > 0 ? `${disponivel} disp.` : 'sem estoque'})</span>
+                          </span>
+                        </CButton>
+                      );
+                    })}
+                  </div>
+                )}
+              </CCol>
+            )}
+
+            {itemEditado.produtoVariacaoId && (
+              <CCol xs={12}>
+                <p className="text-body-secondary small mb-0">Selecionado: {itemEditado.produtoVariacaoLabel}</p>
+              </CCol>
+            )}
           </CRow>
 
           <hr className="my-3" />
