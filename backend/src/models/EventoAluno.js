@@ -26,8 +26,8 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  // Tamanho físico da faixa (ex.: A1) — só relevante em Exame de Faixa; o Gatame ainda não manda
-  // esse dado, então é sempre preenchido manualmente na inscrição.
+  // Tamanho físico da faixa (ex.: A1) — só relevante em Exame de Faixa. Quando a origem é "gatame"
+  // vem pronto da integração (campo tamanho_faixa); só é pedido manualmente pra quem não veio de lá.
   tamanhoFaixa: {
     type: DataTypes.CHAR(2),
     allowNull: true,
@@ -87,6 +87,13 @@ const EventoAluno = sequelize.define('EventoAluno', {
   mpPaymentId: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  // Marca que esse inscrito já foi cadastrado como aluno novo no Gatame (via
+  // eventoController.cadastrarComoAluno) — evita tentar de novo e mostrar duplicado à toa.
+  cadastradoNoGatame: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
 });
 

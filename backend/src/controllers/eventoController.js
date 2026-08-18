@@ -1,7 +1,8 @@
-const { Evento, TipoEvento, EventoAluno } = require('../models');
+const { Evento, TipoEvento, EventoAluno, Instrutor } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
+const gatameService = require('../services/gatameService');
 const { qrExpirado, gerarPagamentoPix } = require('../services/pagamentoInscricaoService');
 const { logErro } = require('../utils/logger');
 
@@ -21,7 +22,10 @@ async function aplicarRegraValor(dados) {
 
 async function listar(req, res) {
   const eventos = await Evento.findAll({
-    include: { model: TipoEvento, as: 'tipoEvento' },
+    include: [
+      { model: TipoEvento, as: 'tipoEvento' },
+      { model: Instrutor, as: 'instrutor' },
+    ],
     order: [['data', 'DESC']],
   });
   res.json(eventos);
@@ -29,7 +33,10 @@ async function listar(req, res) {
 
 async function buscarPorId(req, res) {
   const evento = await Evento.findByPk(req.params.id, {
-    include: { model: TipoEvento, as: 'tipoEvento' },
+    include: [
+      { model: TipoEvento, as: 'tipoEvento' },
+      { model: Instrutor, as: 'instrutor' },
+    ],
   });
 
   if (!evento) {
@@ -121,6 +128,66 @@ async function verificarPagamento(req, res) {
   }
 }
 
+// Cadastra um inscrito (que não veio do Gatame, ou seja, sem carteirinha já emitida por lá) como
+// aluno novo no Gatame. Usa o instrutor responsável do evento como "professor" do cadastro — por
+// isso exige que o evento tenha um instrutor com email definido antes de permitir a ação.
+async function cadastrarComoAluno(req, res) {
+  const inscricao = await EventoAluno.findByPk(req.params.id);
+
+  if (!inscricao) {
+    return res.status(404).json({ error: 'Inscrição não encontrada.' });
+  }
+
+  if (inscricao.origemDados === 'gatame') {
+    return res.status(400).json({ error: 'Este inscrito já veio do Gatame — não precisa ser cadastrado.' });
+  }
+
+  if (inscricao.cadastradoNoGatame) {
+    return res.status(400).json({ error: 'Este inscrito já foi cadastrado como aluno no Gatame.' });
+  }
+
+  const evento = await Evento.findByPk(inscricao.eventoId, { include: [{ model: Instrutor, as: 'instrutor' }] });
+
+  if (!evento?.instrutor?.email) {
+    return res.status(400).json({ error: 'Defina o instrutor responsável do evento (com email cadastrado) antes de cadastrar o aluno.' });
+  }
+
+  try {
+    await gatameService.cadastrarAluno({
+      emailProfessor: evento.instrutor.email,
+      emailAluno: inscricao.email,
+      nome: inscricao.nome,
+      faixa: inscricao.faixaAtual || inscricao.faixa || 'Branca',
+      tamanhoFaixa: inscricao.tamanhoFaixa,
+      dataNascimento: inscricao.dataNascimento,
+      numeroCarteirinha: inscricao.numeroCarteirinha,
+      observacao: `Cadastrado via inscrição no evento "${evento.nome}".`,
+    });
+
+    await inscricao.update({ cadastradoNoGatame: true });
+    res.json(inscricao);
+  } catch (err) {
+    if (err.interno) {
+      logErro('Erro de configuração ao cadastrar aluno no Gatame:', err);
+      return res.status(500).json({ error: 'Erro de configuração ao cadastrar aluno no Gatame.' });
+    }
+
+    // "aluno_duplicado" significa que o aluno já existe no Gatame — ou seja, o estado que a gente
+    // queria já é verdade. Marca como cadastrado em vez de mostrar isso como uma falha.
+    if (err.codigo === 'aluno_duplicado') {
+      await inscricao.update({ cadastradoNoGatame: true });
+      return res.json(inscricao);
+    }
+
+    if (err.status && err.status < 500) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    logErro('Erro ao cadastrar aluno no Gatame:', err);
+    res.status(502).json({ error: 'Não foi possível cadastrar o aluno no Gatame agora. Tente novamente.' });
+  }
+}
+
 // Reenvia o lembrete de pagamento pra todo mundo com statusPagamento "pendente" nesse evento. Se o
 // QR code/Pix já passou das 24h de validade (o normal, já que ninguém manda lembrete minutos depois
 // da inscrição), gera um novo pagamento antes de enviar — do contrário a pessoa receberia um QR
@@ -153,4 +220,14 @@ async function notificarPendentes(req, res) {
   res.json({ enviados: pendentes.length });
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, listarInscricoes, verificarPagamento, notificarPendentes };
+module.exports = {
+  listar,
+  buscarPorId,
+  criar,
+  atualizar,
+  remover,
+  listarInscricoes,
+  verificarPagamento,
+  cadastrarComoAluno,
+  notificarPendentes,
+};

@@ -31,6 +31,12 @@ const Evento = sequelize.define('Evento', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  // Professor responsável pelo evento — usado como email_professor ao cadastrar um inscrito como
+  // aluno novo no Gatame (ver eventoController.cadastrarComoAluno).
+  instrutorId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   data: {
     type: DataTypes.DATE,
     allowNull: false,

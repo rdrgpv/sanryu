@@ -10,7 +10,7 @@ import {
   CButton,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend } from '@coreui/icons';
+import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople } from '@coreui/icons';
 import api from '../../services/api';
 import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
 
@@ -51,6 +51,7 @@ export default function EventoInscricoes() {
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
   const [notificando, setNotificando] = useState(false);
+  const [cadastrandoId, setCadastrandoId] = useState(null);
 
   const pendentes = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pendente');
   const pagas = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pago');
@@ -79,6 +80,20 @@ export default function EventoInscricoes() {
       setInscricoes((prev) => prev.map((inscricao) => (inscricao.id === inscricaoId ? res.data : inscricao)));
     } catch (err) {
       window.alert(err.response?.data?.error || 'Não foi possível verificar o pagamento agora.');
+    }
+  }
+
+  async function cadastrarComoAluno(inscricao) {
+    if (!window.confirm(`Cadastrar ${inscricao.nome || inscricao.email} como aluno novo no Gatame?`)) return;
+
+    setCadastrandoId(inscricao.id);
+    try {
+      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cadastrar-aluno`);
+      setInscricoes((prev) => prev.map((item) => (item.id === inscricao.id ? res.data : item)));
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível cadastrar o aluno no Gatame agora.');
+    } finally {
+      setCadastrandoId(null);
     }
   }
 
@@ -227,14 +242,30 @@ export default function EventoInscricoes() {
                 </CTableDataCell>
                 <CTableDataCell>{formatarDataHora(inscricao.createdAt)}</CTableDataCell>
                 <CTableDataCell>
-                  {inscricao.mpPaymentId ? (
-                    <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
-                      <CIcon icon={cilCheckCircle} className="me-1" />
-                      Verificar
-                    </CButton>
-                  ) : (
-                    '-'
-                  )}
+                  <div className="d-flex flex-column gap-1 align-items-start">
+                    {inscricao.mpPaymentId && (
+                      <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
+                        <CIcon icon={cilCheckCircle} className="me-1" />
+                        Verificar
+                      </CButton>
+                    )}
+                    {inscricao.origemDados !== 'gatame' && (
+                      inscricao.cadastradoNoGatame ? (
+                        <span className="text-success small">Cadastrado no Gatame</span>
+                      ) : (
+                        <CButton
+                          color="secondary"
+                          variant="outline"
+                          size="sm"
+                          disabled={cadastrandoId === inscricao.id}
+                          onClick={() => cadastrarComoAluno(inscricao)}
+                        >
+                          <CIcon icon={cilPeople} className="me-1" />
+                          {cadastrandoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
+                        </CButton>
+                      )
+                    )}
+                  </div>
                 </CTableDataCell>
               </CTableRow>
             ))}

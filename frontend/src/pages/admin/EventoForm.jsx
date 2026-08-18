@@ -23,6 +23,7 @@ const estadoInicial = {
   slug: '',
   descricao: '',
   tipoEventoId: '',
+  instrutorId: '',
   data: '',
   local: '',
   status: STATUS[0],
@@ -44,11 +45,13 @@ export default function EventoForm() {
   const editando = !!id;
   const [form, setForm] = useState(estadoInicial);
   const [tiposEvento, setTiposEvento] = useState([]);
+  const [instrutores, setInstrutores] = useState([]);
   const [erro, setErro] = useState(null);
   const [linkCopiado, setLinkCopiado] = useState(false);
 
   useEffect(() => {
     api.get('/admin/tipos-evento').then((res) => setTiposEvento(res.data));
+    api.get('/admin/instrutores').then((res) => setInstrutores(res.data));
   }, []);
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function EventoForm() {
         slug: evento.slug || '',
         descricao: evento.descricao || '',
         tipoEventoId: evento.tipoEventoId,
+        instrutorId: evento.instrutorId || '',
         data: paraInputDatetime(evento.data),
         local: evento.local || '',
         status: evento.status,
@@ -132,6 +136,7 @@ export default function EventoForm() {
       data: form.data ? new Date(form.data).toISOString() : form.data,
       slug: form.slug.trim() || null,
       tipoEventoId: Number(form.tipoEventoId),
+      instrutorId: form.instrutorId !== '' ? Number(form.instrutorId) : null,
       valor: mostrarValor && form.valor !== '' ? Number(form.valor) : null,
     };
 
@@ -203,6 +208,17 @@ export default function EventoForm() {
               <CCol md={4}>
                 <CFormLabel>Local</CFormLabel>
                 <CFormInput name="local" value={form.local} onChange={handleChange} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Instrutor responsável</CFormLabel>
+                <CFormSelect name="instrutorId" value={form.instrutorId} onChange={handleChange}>
+                  <option value="">Nenhum</option>
+                  {instrutores.map((instrutor) => (
+                    <option key={instrutor.id} value={instrutor.id}>
+                      {instrutor.nome}
+                    </option>
+                  ))}
+                </CFormSelect>
               </CCol>
               {mostrarValor && (
                 <CCol md={2}>
