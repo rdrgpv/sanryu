@@ -1,4 +1,4 @@
-const { Evento, TipoEvento, EventoAluno, Instrutor } = require('../models');
+const { Evento, TipoEvento, EventoAluno, Instrutor, Aluno, Turma, Matricula, Faixa } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
@@ -128,10 +128,65 @@ async function verificarPagamento(req, res) {
   }
 }
 
+// Cadastra o inscrito como Aluno no próprio Sanryu (tabela Aluno) — reaproveita um Aluno já
+// existente com o mesmo email em vez de duplicar. Se o instrutor responsável do evento tiver uma
+// Turma (e o admin escolher uma via turmaId), já matricula o aluno nela também.
+async function cadastrarComoAluno(req, res) {
+  const { turmaId } = req.body;
+  const inscricao = await EventoAluno.findByPk(req.params.id);
+
+  if (!inscricao) {
+    return res.status(404).json({ error: 'Inscrição não encontrada.' });
+  }
+
+  if (inscricao.alunoId) {
+    return res.status(400).json({ error: 'Este inscrito já foi cadastrado como aluno no Sanryu.' });
+  }
+
+  try {
+    let turma = null;
+    if (turmaId) {
+      turma = await Turma.findByPk(turmaId);
+      if (!turma) {
+        return res.status(400).json({ error: 'Turma não encontrada.' });
+      }
+    }
+
+    let aluno = await Aluno.findOne({ where: { email: inscricao.email } });
+
+    if (!aluno) {
+      const faixaNome = inscricao.faixaAtual || inscricao.faixa || null;
+      const faixa = faixaNome ? await Faixa.findOne({ where: { nome: faixaNome } }) : null;
+
+      aluno = await Aluno.create({
+        nome: inscricao.nome || inscricao.email,
+        email: inscricao.email,
+        telefone: inscricao.telefone || null,
+        dataNascimento: inscricao.dataNascimento || null,
+        faixaId: faixa ? faixa.id : null,
+      });
+    }
+
+    let matriculado = false;
+    if (turma) {
+      const jaMatriculado = await Matricula.findOne({ where: { alunoId: aluno.id, turmaId: turma.id } });
+      if (!jaMatriculado) {
+        await Matricula.create({ alunoId: aluno.id, turmaId: turma.id });
+      }
+      matriculado = true;
+    }
+
+    await inscricao.update({ alunoId: aluno.id });
+    res.json({ inscricao, aluno, matriculado });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
 // Cadastra um inscrito (que não veio do Gatame, ou seja, sem carteirinha já emitida por lá) como
 // aluno novo no Gatame. Usa o instrutor responsável do evento como "professor" do cadastro — por
 // isso exige que o evento tenha um instrutor com email definido antes de permitir a ação.
-async function cadastrarComoAluno(req, res) {
+async function cadastrarNoGatame(req, res) {
   const inscricao = await EventoAluno.findByPk(req.params.id);
 
   if (!inscricao) {
@@ -229,5 +284,6 @@ module.exports = {
   listarInscricoes,
   verificarPagamento,
   cadastrarComoAluno,
+  cadastrarNoGatame,
   notificarPendentes,
 };

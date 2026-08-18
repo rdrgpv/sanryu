@@ -89,11 +89,17 @@ const EventoAluno = sequelize.define('EventoAluno', {
     allowNull: true,
   },
   // Marca que esse inscrito já foi cadastrado como aluno novo no Gatame (via
-  // eventoController.cadastrarComoAluno) — evita tentar de novo e mostrar duplicado à toa.
+  // eventoController.cadastrarNoGatame) — evita tentar de novo e mostrar duplicado à toa.
   cadastradoNoGatame: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
+  },
+  // Aluno do Sanryu criado (ou já existente, reaproveitado pelo email) a partir desse inscrito, via
+  // eventoController.cadastrarComoAluno — null enquanto não cadastrado por aqui.
+  alunoId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
 });
 

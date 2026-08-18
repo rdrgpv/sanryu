@@ -44,6 +44,9 @@ EventoAluno.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
 Instrutor.hasMany(Evento, { foreignKey: 'instrutorId', as: 'eventos' });
 Evento.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
 
+Aluno.hasMany(EventoAluno, { foreignKey: 'alunoId', as: 'inscricoesEvento' });
+EventoAluno.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
+
 Faixa.hasMany(Aluno, { foreignKey: 'faixaId', as: 'alunos' });
 Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
 

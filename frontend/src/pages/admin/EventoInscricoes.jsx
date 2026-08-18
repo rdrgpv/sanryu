@@ -8,6 +8,13 @@ import {
   CTableBody,
   CTableDataCell,
   CButton,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CFormLabel,
+  CFormSelect,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople } from '@coreui/icons';
@@ -51,7 +58,10 @@ export default function EventoInscricoes() {
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
   const [notificando, setNotificando] = useState(false);
-  const [cadastrandoId, setCadastrandoId] = useState(null);
+  const [cadastrandoGatameId, setCadastrandoGatameId] = useState(null);
+  const [turmas, setTurmas] = useState([]);
+  const [cadastrandoAlunoId, setCadastrandoAlunoId] = useState(null);
+  const [modalTurma, setModalTurma] = useState(null); // { inscricao, turmasDoInstrutor, turmaId }
 
   const pendentes = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pendente');
   const pagas = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pago');
@@ -64,6 +74,7 @@ export default function EventoInscricoes() {
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
     api.get(`/admin/eventos/${id}/inscricoes`).then((res) => setInscricoes(res.data));
+    api.get('/admin/turmas').then((res) => setTurmas(res.data));
   }, [id]);
 
   async function copiarPix(texto) {
@@ -83,18 +94,55 @@ export default function EventoInscricoes() {
     }
   }
 
-  async function cadastrarComoAluno(inscricao) {
+  async function cadastrarNoGatame(inscricao) {
     if (!window.confirm(`Cadastrar ${inscricao.nome || inscricao.email} como aluno novo no Gatame?`)) return;
 
-    setCadastrandoId(inscricao.id);
+    setCadastrandoGatameId(inscricao.id);
     try {
-      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cadastrar-aluno`);
+      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cadastrar-gatame`);
       setInscricoes((prev) => prev.map((item) => (item.id === inscricao.id ? res.data : item)));
     } catch (err) {
       window.alert(err.response?.data?.error || 'Não foi possível cadastrar o aluno no Gatame agora.');
     } finally {
-      setCadastrandoId(null);
+      setCadastrandoGatameId(null);
     }
+  }
+
+  async function enviarCadastroAluno(inscricao, turmaId) {
+    setCadastrandoAlunoId(inscricao.id);
+    try {
+      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cadastrar-aluno`, { turmaId: turmaId || undefined });
+      setInscricoes((prev) => prev.map((item) => (item.id === inscricao.id ? res.data.inscricao : item)));
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível cadastrar o aluno no Sanryu agora.');
+    } finally {
+      setCadastrandoAlunoId(null);
+    }
+  }
+
+  // Se o instrutor responsável do evento tiver mais de uma turma, pergunta em qual matricular; com
+  // 0 ou 1 turma não há escolha real a fazer, então só confirma e já manda direto.
+  function cadastrarComoAluno(inscricao) {
+    const turmasDoInstrutor = evento?.instrutorId ? turmas.filter((turma) => turma.instrutorId === evento.instrutorId) : [];
+
+    if (turmasDoInstrutor.length > 1) {
+      setModalTurma({ inscricao, turmasDoInstrutor, turmaId: turmasDoInstrutor[0].id });
+      return;
+    }
+
+    const turma = turmasDoInstrutor[0];
+    const mensagem = turma
+      ? `Cadastrar ${inscricao.nome || inscricao.email} como aluno e matricular na turma "${turma.nome}"?`
+      : `Cadastrar ${inscricao.nome || inscricao.email} como aluno no Sanryu?`;
+
+    if (!window.confirm(mensagem)) return;
+    enviarCadastroAluno(inscricao, turma?.id);
+  }
+
+  function confirmarCadastroComTurma() {
+    const { inscricao, turmaId } = modalTurma;
+    setModalTurma(null);
+    enviarCadastroAluno(inscricao, turmaId || undefined);
   }
 
   async function handleNotificarPendentes() {
@@ -249,6 +297,20 @@ export default function EventoInscricoes() {
                         Verificar
                       </CButton>
                     )}
+                    {inscricao.alunoId ? (
+                      <span className="text-success small">Aluno cadastrado</span>
+                    ) : (
+                      <CButton
+                        color="secondary"
+                        variant="outline"
+                        size="sm"
+                        disabled={cadastrandoAlunoId === inscricao.id}
+                        onClick={() => cadastrarComoAluno(inscricao)}
+                      >
+                        <CIcon icon={cilPeople} className="me-1" />
+                        {cadastrandoAlunoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
+                      </CButton>
+                    )}
                     {inscricao.origemDados !== 'gatame' && (
                       inscricao.cadastradoNoGatame ? (
                         <span className="text-success small">Cadastrado no Gatame</span>
@@ -257,11 +319,11 @@ export default function EventoInscricoes() {
                           color="secondary"
                           variant="outline"
                           size="sm"
-                          disabled={cadastrandoId === inscricao.id}
-                          onClick={() => cadastrarComoAluno(inscricao)}
+                          disabled={cadastrandoGatameId === inscricao.id}
+                          onClick={() => cadastrarNoGatame(inscricao)}
                         >
                           <CIcon icon={cilPeople} className="me-1" />
-                          {cadastrandoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
+                          {cadastrandoGatameId === inscricao.id ? 'Cadastrando...' : 'Cadastrar no Gatame'}
                         </CButton>
                       )
                     )}
@@ -279,6 +341,40 @@ export default function EventoInscricoes() {
           </CTableBody>
         </CTable>
       </div>
+
+      <CModal visible={!!modalTurma} onClose={() => setModalTurma(null)}>
+        <CModalHeader>
+          <CModalTitle>Cadastrar como Aluno</CModalTitle>
+        </CModalHeader>
+        {modalTurma && (
+          <CModalBody>
+            <p>
+              O instrutor responsável tem mais de uma turma. Escolha em qual matricular{' '}
+              <strong>{modalTurma.inscricao.nome || modalTurma.inscricao.email}</strong>, ou deixe sem turma.
+            </p>
+            <CFormLabel>Turma</CFormLabel>
+            <CFormSelect
+              value={modalTurma.turmaId}
+              onChange={(event) => setModalTurma((prev) => ({ ...prev, turmaId: event.target.value }))}
+            >
+              <option value="">Sem turma (só cadastrar o aluno)</option>
+              {modalTurma.turmasDoInstrutor.map((turma) => (
+                <option key={turma.id} value={turma.id}>
+                  {turma.nome}
+                </option>
+              ))}
+            </CFormSelect>
+          </CModalBody>
+        )}
+        <CModalFooter>
+          <CButton color="secondary" variant="outline" onClick={() => setModalTurma(null)}>
+            Cancelar
+          </CButton>
+          <CButton color="primary" onClick={confirmarCadastroComTurma}>
+            Cadastrar
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </div>
   );
 }
