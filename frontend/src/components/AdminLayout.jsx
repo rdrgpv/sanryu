@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   CSidebar,
@@ -10,7 +11,11 @@ import {
   CNavTitle,
   CContainer,
   CButton,
+  CHeader,
+  CHeaderToggler,
 } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilMenu } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const linksPrincipal = [
@@ -43,6 +48,9 @@ const linksSistema = [{ to: '/admin/configuracoes', label: 'Configurações' }];
 export default function AdminLayout({ children }) {
   const { admin, logout } = useAuth();
   const navigate = useNavigate();
+  // Abaixo do breakpoint lg (992px) o CSidebar do CoreUI já entra em modo off-canvas sozinho —
+  // só falta a gente controlar quando ele fica visível (não tem toggle nenhum por padrão).
+  const [sidebarVisible, setSidebarVisible] = useState(() => window.innerWidth >= 992);
 
   function handleLogout() {
     logout();
@@ -51,7 +59,13 @@ export default function AdminLayout({ children }) {
 
   return (
     <div>
-      <CSidebar className="border-end" colorScheme="dark" position="fixed">
+      <CSidebar
+        className="border-end"
+        colorScheme="dark"
+        position="fixed"
+        visible={sidebarVisible}
+        onVisibleChange={setSidebarVisible}
+      >
         <CSidebarHeader className="border-bottom">
           <CSidebarBrand>
             <div
@@ -108,7 +122,14 @@ export default function AdminLayout({ children }) {
         </CSidebarFooter>
       </CSidebar>
 
-      <div className="wrapper d-flex flex-column min-vh-100" style={{ marginLeft: 256 }}>
+      <div className="wrapper d-flex flex-column min-vh-100">
+        <CHeader position="sticky" className="mb-0 d-lg-none">
+          <CContainer fluid className="px-3">
+            <CHeaderToggler onClick={() => setSidebarVisible((visible) => !visible)}>
+              <CIcon icon={cilMenu} size="lg" />
+            </CHeaderToggler>
+          </CContainer>
+        </CHeader>
         <CContainer fluid className="px-4 py-4">
           {children}
         </CContainer>

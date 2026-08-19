@@ -10,6 +10,18 @@
   width: auto;
 }
 
+/* Abaixo do breakpoint lg o CSidebar do CoreUI vira off-canvas (sobrepõe, não empurra) — então o
+   conteúdo só precisa de margem reservada pra ele em telas grandes. */
+.wrapper {
+  margin-left: 0;
+}
+
+@media (min-width: 992px) {
+  .wrapper {
+    margin-left: 256px;
+  }
+}
+
 .btn-primary {
   --cui-btn-bg: #b23a2f;
   --cui-btn-border-color: #b23a2f;
