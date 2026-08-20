@@ -25,6 +25,10 @@ export default function Alunos() {
   const [selecionadoId, setSelecionadoId] = useState(null);
   const [matriculando, setMatriculando] = useState(false);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
+  const [verificandoGatame, setVerificandoGatame] = useState(false);
+  const [cadastrandoGatame, setCadastrandoGatame] = useState(false);
+
+  const alunoSelecionado = alunos.find((aluno) => aluno.id === selecionadoId) || null;
 
   async function carregarAlunos() {
     const res = await api.get('/admin/alunos', { params: busca ? { busca } : {} });
@@ -66,6 +70,45 @@ export default function Alunos() {
     carregarAlunos();
   }
 
+  // Verifica se o aluno já existe no Gatame pelo email — independente de já ter passado pelo fluxo
+  // de "cadastrar no Gatame" a partir de uma inscrição de evento.
+  async function verificarGatame() {
+    if (!selecionadoId) return;
+    setVerificandoGatame(true);
+
+    try {
+      const res = await api.get(`/admin/alunos/${selecionadoId}/verificar-gatame`);
+      if (res.data.apto) {
+        const detalhes = res.data.candidatos
+          .map((candidato) => `${candidato.nome} — Faixa ${candidato.faixa || '?'}${candidato.origem ? ` (${candidato.origem})` : ''}`)
+          .join('\n');
+        window.alert(`Encontrado no Gatame:\n${detalhes}`);
+      } else {
+        window.alert('Não encontrado no Gatame.');
+      }
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível consultar o Gatame agora.');
+    } finally {
+      setVerificandoGatame(false);
+    }
+  }
+
+  async function cadastrarNoGatame() {
+    if (!selecionadoId) return;
+    if (!window.confirm(`Cadastrar ${alunoSelecionado?.nome || 'este aluno'} como aluno novo no Gatame?`)) return;
+
+    setCadastrandoGatame(true);
+
+    try {
+      await api.post(`/admin/alunos/${selecionadoId}/cadastrar-gatame`);
+      carregarAlunos();
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível cadastrar o aluno no Gatame agora.');
+    } finally {
+      setCadastrandoGatame(false);
+    }
+  }
+
   return (
     <div>
       <h1 className="h3 mb-3">Alunos</h1>
@@ -77,15 +120,32 @@ export default function Alunos() {
         onExcluir={handleExcluir}
         onAtualizar={carregarAlunos}
         extra={
-          <CButton
-            color="secondary"
-            variant="outline"
-            disabled={!selecionadoId}
-            onClick={() => setMatriculando((prev) => !prev)}
-          >
-            <CIcon icon={cilPeople} className="me-1" />
-            Matricular
-          </CButton>
+          <>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionadoId}
+              onClick={() => setMatriculando((prev) => !prev)}
+            >
+              <CIcon icon={cilPeople} className="me-1" />
+              Matricular
+            </CButton>
+            <CButton color="info" variant="outline" disabled={!selecionadoId || verificandoGatame} onClick={verificarGatame}>
+              {verificandoGatame ? 'Verificando...' : 'Verificar no Gatame'}
+            </CButton>
+            <CButton
+              color="success"
+              variant="outline"
+              disabled={!selecionadoId || cadastrandoGatame || alunoSelecionado?.cadastradoNoGatame}
+              onClick={cadastrarNoGatame}
+            >
+              {cadastrandoGatame
+                ? 'Cadastrando...'
+                : alunoSelecionado?.cadastradoNoGatame
+                  ? 'Já cadastrado no Gatame'
+                  : 'Cadastrar no Gatame'}
+            </CButton>
+          </>
         }
       />
 
@@ -122,6 +182,7 @@ export default function Alunos() {
             <CTableHeaderCell>Faixa</CTableHeaderCell>
             <CTableHeaderCell>Status</CTableHeaderCell>
             <CTableHeaderCell>Turmas</CTableHeaderCell>
+            <CTableHeaderCell>Gatame</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
@@ -152,11 +213,18 @@ export default function Alunos() {
               </CTableDataCell>
               <CTableDataCell>{aluno.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
               <CTableDataCell>{(aluno.turmas || []).map((t) => t.nome).join(', ') || '-'}</CTableDataCell>
+              <CTableDataCell>
+                {aluno.cadastradoNoGatame ? (
+                  <span className="text-success small">Cadastrado</span>
+                ) : (
+                  <span className="text-body-secondary small">Não cadastrado</span>
+                )}
+              </CTableDataCell>
             </CTableRow>
           ))}
           {alunos.length === 0 && (
             <CTableRow>
-              <CTableDataCell colSpan={6} className="text-body-secondary">
+              <CTableDataCell colSpan={7} className="text-body-secondary">
                 Nenhum aluno encontrado.
               </CTableDataCell>
             </CTableRow>
