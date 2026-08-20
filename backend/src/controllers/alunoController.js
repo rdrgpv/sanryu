@@ -115,6 +115,14 @@ async function verificarGatame(req, res) {
       return res.json({ apto: false });
     }
 
+    // A consulta de carteirinha agrega mais de uma origem (Gatame, Morganti University etc.) — só
+    // marca como cadastrado no Gatame quando algum candidato realmente vem de lá, senão o campo
+    // ficaria "Cadastrado" pra quem só existe em outro sistema.
+    const encontradoNoGatame = resultado.candidatos.some((raw) => raw.origem === 'gatame');
+    if (encontradoNoGatame && !aluno.cadastradoNoGatame) {
+      await aluno.update({ cadastradoNoGatame: true });
+    }
+
     res.json({
       apto: true,
       candidatos: resultado.candidatos.map((raw) => ({

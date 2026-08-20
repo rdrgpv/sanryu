@@ -83,6 +83,7 @@ export default function Alunos() {
           .map((candidato) => `${candidato.nome} — Faixa ${candidato.faixa || '?'}${candidato.origem ? ` (${candidato.origem})` : ''}`)
           .join('\n');
         window.alert(`Encontrado no Gatame:\n${detalhes}`);
+        carregarAlunos();
       } else {
         window.alert('Não encontrado no Gatame.');
       }
