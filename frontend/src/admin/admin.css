@@ -67,7 +67,9 @@
 
 .ficha-exame {
   margin-bottom: 0.3rem;
-  max-width: 794px;
+  /* 718px = largura útil da A4 (210mm) já descontando os 10mm de cada lado do @page acima —
+     usar os 794px da folha inteira aqui faz o conteúdo estourar a área imprimível. */
+  max-width: 718px;
 }
 
 .ficha-exame__tabela {
@@ -109,5 +111,12 @@
 
   .wrapper {
     margin-left: 0 !important;
+  }
+
+  /* O CContainer do AdminLayout tem px-4 py-4 (padding) que sobra por cima da área já
+     reservada pelo @page — sem zerar aqui, a ficha de exame estoura a largura da folha
+     e o navegador encolhe a impressão inteira pra caber, distorcendo tudo. */
+  .wrapper .container-fluid {
+    padding: 0 !important;
   }
 }
