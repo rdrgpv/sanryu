@@ -422,7 +422,9 @@ export default function RelatorioExame() {
 
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
-    api.get(`/admin/eventos/${id}/inscricoes`).then((res) => setInscricoes(res.data));
+    api
+      .get(`/admin/eventos/${id}/inscricoes`)
+      .then((res) => setInscricoes(res.data.filter((inscricao) => inscricao.statusPagamento === 'pago')));
     api.get('/admin/faixas').then((res) => {
       const cores = {};
       const ordens = {};

@@ -19,6 +19,8 @@ export default function AlunoForm() {
   const [form, setForm] = useState(estadoInicial);
   const [faixas, setFaixas] = useState([]);
   const [erro, setErro] = useState(null);
+  const [verificandoGatame, setVerificandoGatame] = useState(false);
+  const [resultadoGatame, setResultadoGatame] = useState(null);
 
   useEffect(() => {
     api.get('/admin/faixas').then((res) => setFaixas(res.data));
@@ -42,6 +44,22 @@ export default function AlunoForm() {
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  // Verifica se o aluno já existe no Gatame pelo email — independente de já ter passado pelo fluxo
+  // de "cadastrar no Gatame" a partir de uma inscrição de evento.
+  async function verificarGatame() {
+    setVerificandoGatame(true);
+    setResultadoGatame(null);
+
+    try {
+      const res = await api.get(`/admin/alunos/${id}/verificar-gatame`);
+      setResultadoGatame(res.data);
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível consultar o Gatame agora.');
+    } finally {
+      setVerificandoGatame(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -118,8 +136,29 @@ export default function AlunoForm() {
               <CButton as={Link} to="/admin/alunos" color="secondary" variant="outline">
                 Cancelar
               </CButton>
+              {editando && (
+                <CButton type="button" color="info" variant="outline" disabled={verificandoGatame} onClick={verificarGatame}>
+                  {verificandoGatame ? 'Verificando...' : 'Verificar no Gatame'}
+                </CButton>
+              )}
             </div>
             {erro && <div className="alert alert-danger mt-3">{erro}</div>}
+            {resultadoGatame &&
+              (resultadoGatame.apto ? (
+                <div className="alert alert-success mt-3 mb-0">
+                  <strong>Encontrado no Gatame.</strong>
+                  <ul className="mb-0 mt-1 ps-3">
+                    {resultadoGatame.candidatos.map((candidato, indice) => (
+                      <li key={indice}>
+                        {candidato.nome || form.nome} — Faixa {candidato.faixa || '?'}
+                        {candidato.origem ? ` (${candidato.origem})` : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="alert alert-warning mt-3 mb-0">Não encontrado no Gatame.</div>
+              ))}
           </CForm>
         </CCardBody>
       </CCard>

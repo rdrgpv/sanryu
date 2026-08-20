@@ -32,6 +32,7 @@ router.get('/alunos/:id', alunoController.buscarPorId);
 router.put('/alunos/:id', alunoController.atualizar);
 router.delete('/alunos/:id', alunoController.remover);
 router.post('/alunos/:id/matricular', alunoController.matricular);
+router.get('/alunos/:id/verificar-gatame', alunoController.verificarGatame);
 
 router.get('/turmas', turmaController.listar);
 router.post('/turmas', turmaController.criar);

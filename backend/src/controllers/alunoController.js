@@ -1,4 +1,6 @@
 const { Aluno, Turma, Matricula, Faixa } = require('../models');
+const gatameService = require('../services/gatameService');
+const { logErro } = require('../utils/logger');
 
 async function listar(req, res) {
   const { busca } = req.query;
@@ -92,4 +94,44 @@ async function matricular(req, res) {
   res.status(201).json(matricula);
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, matricular };
+// Consulta se o aluno já existe no Gatame pelo email — independente de ele ter passado pelo fluxo
+// de "cadastrar no Gatame" a partir de uma inscrição (pode já existir lá por outro caminho, ex.:
+// cadastro direto feito por outro instrutor).
+async function verificarGatame(req, res) {
+  const aluno = await Aluno.findByPk(req.params.id);
+
+  if (!aluno) {
+    return res.status(404).json({ error: 'Aluno não encontrado.' });
+  }
+
+  if (!aluno.email) {
+    return res.status(400).json({ error: 'Aluno sem email cadastrado — não é possível consultar o Gatame.' });
+  }
+
+  try {
+    const resultado = await gatameService.consultarAluno(aluno.email);
+
+    if (!resultado.apto) {
+      return res.json({ apto: false });
+    }
+
+    res.json({
+      apto: true,
+      candidatos: resultado.candidatos.map((raw) => ({
+        nome: raw.nome,
+        faixa: raw.faixa || null,
+        origem: raw.origem,
+      })),
+    });
+  } catch (err) {
+    if (err.interno) {
+      logErro('Erro de configuração ao consultar o Gatame:', err);
+      return res.status(500).json({ error: 'Erro de configuração ao consultar o Gatame.' });
+    }
+
+    logErro('Erro ao consultar o Gatame:', err);
+    res.status(502).json({ error: 'Não foi possível consultar o Gatame agora. Tente novamente.' });
+  }
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover, matricular, verificarGatame };
