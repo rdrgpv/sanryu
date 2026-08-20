@@ -30,6 +30,13 @@ const Aluno = sequelize.define('Aluno', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  // Marca que esse aluno já foi cadastrado no Gatame a partir desta tela (ver
+  // alunoController.cadastrarNoGatame) — evita tentar de novo à toa.
+  cadastradoNoGatame: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
 });
 
 module.exports = Aluno;

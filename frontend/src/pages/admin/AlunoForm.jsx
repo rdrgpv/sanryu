@@ -21,6 +21,8 @@ export default function AlunoForm() {
   const [erro, setErro] = useState(null);
   const [verificandoGatame, setVerificandoGatame] = useState(false);
   const [resultadoGatame, setResultadoGatame] = useState(null);
+  const [cadastrandoGatame, setCadastrandoGatame] = useState(false);
+  const [cadastradoNoGatame, setCadastradoNoGatame] = useState(false);
 
   useEffect(() => {
     api.get('/admin/faixas').then((res) => setFaixas(res.data));
@@ -38,6 +40,7 @@ export default function AlunoForm() {
         faixaId: aluno.faixaId || '',
         ativo: aluno.ativo,
       });
+      setCadastradoNoGatame(aluno.cadastradoNoGatame);
     });
   }, [id, editando]);
 
@@ -59,6 +62,21 @@ export default function AlunoForm() {
       window.alert(err.response?.data?.error || 'Não foi possível consultar o Gatame agora.');
     } finally {
       setVerificandoGatame(false);
+    }
+  }
+
+  async function cadastrarNoGatame() {
+    if (!window.confirm(`Cadastrar ${form.nome || 'este aluno'} como aluno novo no Gatame?`)) return;
+
+    setCadastrandoGatame(true);
+
+    try {
+      await api.post(`/admin/alunos/${id}/cadastrar-gatame`);
+      setCadastradoNoGatame(true);
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível cadastrar o aluno no Gatame agora.');
+    } finally {
+      setCadastrandoGatame(false);
     }
   }
 
@@ -141,6 +159,14 @@ export default function AlunoForm() {
                   {verificandoGatame ? 'Verificando...' : 'Verificar no Gatame'}
                 </CButton>
               )}
+              {editando &&
+                (cadastradoNoGatame ? (
+                  <span className="text-success small align-self-center">Cadastrado no Gatame</span>
+                ) : (
+                  <CButton type="button" color="success" variant="outline" disabled={cadastrandoGatame} onClick={cadastrarNoGatame}>
+                    {cadastrandoGatame ? 'Cadastrando...' : 'Cadastrar no Gatame'}
+                  </CButton>
+                ))}
             </div>
             {erro && <div className="alert alert-danger mt-3">{erro}</div>}
             {resultadoGatame &&
