@@ -204,7 +204,12 @@ export default function InscricaoEvento() {
     setGerandoNovoQrCode(true);
 
     try {
-      const res = await api.post(`/eventos/${id}/inscricoes`, { email, gerarNovoQrCode: true });
+      const res = await api.post(`/eventos/${id}/inscricoes`, {
+        email,
+        gerarNovoQrCode: true,
+        numeroCarteirinha: resultado.numeroCarteirinha,
+        nome: resultado.nome,
+      });
       setResultado(res.data);
       setMostrarQrCode(true);
     } catch (err) {

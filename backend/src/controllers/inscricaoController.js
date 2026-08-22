@@ -140,41 +140,47 @@ async function inscrever(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const { email, indice, faixaEscolhida, dadosExtras, tamanhoFaixa, gerarNovoQrCode } = req.body;
+  const { email, indice, faixaEscolhida, dadosExtras, tamanhoFaixa, gerarNovoQrCode, numeroCarteirinha, nome } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: 'Email é obrigatório.' });
   }
 
-  const existente = await EventoAluno.findOne({ where: { eventoId: evento.id, email } });
+  // O mesmo email pode ter mais de um cadastro no Gatame (ex.: irmãos usando o email de um dos pais)
+  // — sem um desempate além do email, a pessoa errada era encontrada como "já inscrita". Prefere
+  // numeroCarteirinha (estável e único por pessoa); sem ele, cai pro nome.
+  function identificadorPessoa({ numeroCarteirinha, nome }) {
+    if (numeroCarteirinha) return { numeroCarteirinha };
+    if (nome) return { nome };
+    return {};
+  }
 
-  // Um registro existente sem valor calculado (statusPagamento "pendente" e valorCobrado nulo) nunca chegou a
-  // ser resolvido — ex.: a faixa ainda não estava cadastrada. Nesse caso, permite recalcular em vez de travar
-  // a pessoa nesse estado para sempre.
-  const pendenteSemValor = existente && existente.valorCobrado == null && existente.statusPagamento === 'pendente';
+  if (gerarNovoQrCode) {
+    const existente = await EventoAluno.findOne({
+      where: { eventoId: evento.id, email, ...identificadorPessoa({ numeroCarteirinha, nome }) },
+    });
 
-  if (existente && !pendenteSemValor) {
-    if (gerarNovoQrCode) {
-      if (existente.statusPagamento === 'pago') {
-        return res.status(400).json({ error: 'Esta inscrição já está paga; não há QR code para gerar.', jaInscrito: true });
-      }
-
-      if (!qrExpirado(existente)) {
-        return res.status(400).json({
-          error: 'O QR code atual ainda está dentro do prazo de validade de 24 horas.',
-          jaInscrito: true,
-        });
-      }
-
-      const novoPagamento = await gerarPagamentoPix({ valor: existente.valorCobrado, evento, email });
-      await existente.update({ ...novoPagamento, statusPagamento: 'pendente' });
-
-      emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: existente });
-
-      return res.status(200).json({ ...existente.toJSON(), jaInscrito: true, qrCodeRenovado: true });
+    if (!existente) {
+      return res.status(404).json({ error: 'Inscrição não encontrada.' });
     }
 
-    return res.status(200).json({ ...existente.toJSON(), jaInscrito: true });
+    if (existente.statusPagamento === 'pago') {
+      return res.status(400).json({ error: 'Esta inscrição já está paga; não há QR code para gerar.', jaInscrito: true });
+    }
+
+    if (!qrExpirado(existente)) {
+      return res.status(400).json({
+        error: 'O QR code atual ainda está dentro do prazo de validade de 24 horas.',
+        jaInscrito: true,
+      });
+    }
+
+    const novoPagamento = await gerarPagamentoPix({ valor: existente.valorCobrado, evento, email });
+    await existente.update({ ...novoPagamento, statusPagamento: 'pendente' });
+
+    emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: existente });
+
+    return res.status(200).json({ ...existente.toJSON(), jaInscrito: true, qrCodeRenovado: true });
   }
 
   let resultado;
@@ -234,6 +240,19 @@ async function inscrever(req, res) {
     candidato.dataNascimento = dataNascimento;
     candidato.telefone = telefone || null;
     candidato.responsavel = menorDeIdade ? responsavel : null;
+  }
+
+  const existente = await EventoAluno.findOne({
+    where: { eventoId: evento.id, email, ...identificadorPessoa(candidato) },
+  });
+
+  // Um registro existente sem valor calculado (statusPagamento "pendente" e valorCobrado nulo) nunca chegou a
+  // ser resolvido — ex.: a faixa ainda não estava cadastrada. Nesse caso, permite recalcular em vez de travar
+  // a pessoa nesse estado para sempre.
+  const pendenteSemValor = existente && existente.valorCobrado == null && existente.statusPagamento === 'pendente';
+
+  if (existente && !pendenteSemValor) {
+    return res.status(200).json({ ...existente.toJSON(), jaInscrito: true });
   }
 
   // Tamanho da faixa física (ex.: A1): quando vem do Gatame, usa o valor da integração direto e
