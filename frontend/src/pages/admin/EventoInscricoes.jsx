@@ -63,7 +63,11 @@ export default function EventoInscricoes() {
   const [cadastrandoAlunoId, setCadastrandoAlunoId] = useState(null);
   const [modalTurma, setModalTurma] = useState(null); // { inscricao, turmasDoInstrutor, turmaId }
 
-  const pendentes = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pendente');
+  // "expirado" (pagamento rejeitado/cancelado no Mercado Pago) também entra aqui — o backend gera
+  // um Pix novo pra esses antes de notificar, já que o anterior morreu.
+  const pendentes = inscricoes.filter(
+    (inscricao) => inscricao.statusPagamento === 'pendente' || inscricao.statusPagamento === 'expirado'
+  );
   const pagas = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pago');
   const totalRecebido = pagas.reduce((soma, inscricao) => soma + Number(inscricao.valorCobrado || 0), 0);
   const totalTaxas = pagas
@@ -147,7 +151,7 @@ export default function EventoInscricoes() {
 
   async function handleNotificarPendentes() {
     if (pendentes.length === 0) return;
-    if (!window.confirm(`Enviar lembrete de pagamento pendente para ${pendentes.length} inscrito(s)?`)) return;
+    if (!window.confirm(`Enviar lembrete de pagamento para ${pendentes.length} inscrito(s) pendente(s)/expirado(s)?`)) return;
 
     setNotificando(true);
     try {
@@ -219,7 +223,7 @@ export default function EventoInscricoes() {
           </CButton>
           <CButton color="secondary" variant="outline" onClick={handleNotificarPendentes} disabled={pendentes.length === 0 || notificando}>
             <CIcon icon={cilSend} className="me-1" />
-            {notificando ? 'Enviando...' : `Notificar pendentes (${pendentes.length})`}
+            {notificando ? 'Enviando...' : `Notificar pendentes/expirados (${pendentes.length})`}
           </CButton>
         </div>
       </div>

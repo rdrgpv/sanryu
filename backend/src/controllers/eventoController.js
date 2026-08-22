@@ -255,7 +255,9 @@ async function notificarPendentes(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const pendentes = await EventoAluno.findAll({ where: { eventoId: evento.id, statusPagamento: 'pendente' } });
+  // "expirado" (pagamento rejeitado/cancelado no Mercado Pago) também precisa de lembrete — sem
+  // isso, quem teve o Pix recusado ficava sem nenhum aviso pra tentar de novo.
+  const pendentes = await EventoAluno.findAll({ where: { eventoId: evento.id, statusPagamento: ['pendente', 'expirado'] } });
 
   if (pendentes.length === 0) {
     return res.json({ enviados: 0 });
@@ -263,9 +265,13 @@ async function notificarPendentes(req, res) {
 
   await Promise.all(
     pendentes.map(async (eventoAluno) => {
-      if (Number(eventoAluno.valorCobrado) > 0 && qrExpirado(eventoAluno)) {
+      // "expirado" sempre regenera (o pagamento anterior já morreu no Mercado Pago); "pendente" só
+      // regenera se o QR atual passou das 24h de validade.
+      const precisaPixNovo = Number(eventoAluno.valorCobrado) > 0 && (eventoAluno.statusPagamento === 'expirado' || qrExpirado(eventoAluno));
+
+      if (precisaPixNovo) {
         const novoPagamento = await gerarPagamentoPix({ valor: eventoAluno.valorCobrado, evento, email: eventoAluno.email });
-        await eventoAluno.update(novoPagamento);
+        await eventoAluno.update({ ...novoPagamento, statusPagamento: 'pendente' });
       }
 
       await emailService.enviarLembretePagamentoPendente({ evento, eventoAluno });
