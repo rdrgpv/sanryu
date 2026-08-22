@@ -4,6 +4,13 @@ import api from '../services/api';
 
 const TIPO_EXAME_DE_FAIXA_ID = 1;
 const OPCOES_FAIXA_BRANCA = ['Cinza', 'Amarela'];
+const OPCOES_TAMANHO_FAIXA = [
+  { valor: 'PP', label: 'PP — 2,10 m' },
+  { valor: 'P', label: 'P — 2,30 m' },
+  { valor: 'M', label: 'M — 2,70 m' },
+  { valor: 'G', label: 'G — 3,10 m' },
+  { valor: 'GG', label: 'GG — 3,60 m' },
+];
 
 function faixaEfetiva(candidato) {
   return candidato.origem === 'gatame' && candidato.faixa ? candidato.faixa : 'Branca';
@@ -359,13 +366,18 @@ export default function InscricaoEvento() {
                         <div className="form" style={{ marginTop: '1rem' }}>
                           <label className="form__field">
                             <span>Tamanho da faixa</span>
-                            <input
+                            <select
                               value={extraDados.tamanhoFaixa}
-                              onChange={(event) => atualizarExtra(indice, 'tamanhoFaixa', event.target.value.slice(0, 2).toUpperCase())}
-                              maxLength={2}
-                              placeholder="Ex.: A1"
+                              onChange={(event) => atualizarExtra(indice, 'tamanhoFaixa', event.target.value)}
                               required
-                            />
+                            >
+                              <option value="">Selecione</option>
+                              {OPCOES_TAMANHO_FAIXA.map((opcao) => (
+                                <option key={opcao.valor} value={opcao.valor}>
+                                  {opcao.label}
+                                </option>
+                              ))}
+                            </select>
                           </label>
                         </div>
                       )}
