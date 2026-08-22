@@ -151,7 +151,7 @@ export default function EventoInscricoes() {
 
   async function handleNotificarPendentes() {
     if (pendentes.length === 0) return;
-    if (!window.confirm(`Enviar lembrete de pagamento para ${pendentes.length} inscrito(s) pendente(s)/expirado(s)?`)) return;
+    if (!window.confirm(`Enviar lembrete de pagamento pendente para ${pendentes.length} inscrito(s)?`)) return;
 
     setNotificando(true);
     try {
@@ -217,13 +217,23 @@ export default function EventoInscricoes() {
             <CIcon icon={cilPrint} className="me-1" />
             Fichas de exame
           </CButton>
+          <CButton
+            as={Link}
+            to={`/admin/eventos/${id}/lista-inscritos`}
+            color="secondary"
+            variant="outline"
+            disabled={inscricoes.length === 0}
+          >
+            <CIcon icon={cilPrint} className="me-1" />
+            Lista de inscritos
+          </CButton>
           <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0}>
             <CIcon icon={cilCloudDownload} className="me-1" />
             Exportar CSV
           </CButton>
           <CButton color="secondary" variant="outline" onClick={handleNotificarPendentes} disabled={pendentes.length === 0 || notificando}>
             <CIcon icon={cilSend} className="me-1" />
-            {notificando ? 'Enviando...' : `Notificar pendentes/expirados (${pendentes.length})`}
+            {notificando ? 'Enviando...' : `Notificar pendentes (${pendentes.length})`}
           </CButton>
         </div>
       </div>

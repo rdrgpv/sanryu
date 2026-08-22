@@ -15,6 +15,7 @@ import EventosAdmin from '../pages/admin/Eventos.jsx';
 import EventoForm from '../pages/admin/EventoForm.jsx';
 import EventoInscricoes from '../pages/admin/EventoInscricoes.jsx';
 import RelatorioExame from '../pages/admin/RelatorioExame.jsx';
+import ListaInscritos from '../pages/admin/ListaInscritos.jsx';
 import Bancos from '../pages/admin/Bancos.jsx';
 import BancoForm from '../pages/admin/BancoForm.jsx';
 import Configuracoes from '../pages/admin/Configuracoes.jsx';
@@ -85,6 +86,7 @@ export default function AdminApp() {
       <Route path="eventos/:id/editar" element={<AdminRoute><EventoForm /></AdminRoute>} />
       <Route path="eventos/:id/inscricoes" element={<AdminRoute><EventoInscricoes /></AdminRoute>} />
       <Route path="eventos/:id/relatorio-exame" element={<AdminRoute><RelatorioExame /></AdminRoute>} />
+      <Route path="eventos/:id/lista-inscritos" element={<AdminRoute><ListaInscritos /></AdminRoute>} />
 
       <Route path="bancos" element={<AdminRoute><Bancos /></AdminRoute>} />
       <Route path="bancos/novo" element={<AdminRoute><BancoForm /></AdminRoute>} />
