@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm config *)",
+      "Bash(env)",
+      "Bash(node -e ' *)",
+      "Bash(node test-email-tmp.js)",
+      "Bash(git commit -m ' *)",
+      "Bash(node verify-telefone.cjs)",
+      "Bash(node verify-css-bleed.cjs)",
+      "Bash(node verify-laranja.cjs)",
+      "Bash(git commit *)",
+      "Bash(node verify-idade-quebra.cjs)",
+      "Bash(time curl -s -o /dev/null -w \"status=%{http_code} tempo_total=%{time_total}s\\\\n\" https://api.sanryu.com.br/api/faixas --max-time 15)",
+      "Bash(time curl -s -o /dev/null -w \"status=%{http_code} tempo_total=%{time_total}s\\\\n\" https://api.sanryu.com.br/api/eventos --max-time 15)",
+      "Bash(curl -s https://api.sanryu.com.br/api/eventos/exame-sfp-28/publico)",
+      "Bash(curl -s https://api.sanryu.com.br/api/eventos/exame-sfp-28/publico -o \"C:/Users/rdrgp/AppData/Local/Temp/claude/c--Projetos-sanryu/c1c9c0c7-3c45-44c7-9e81-2f16bf5dd826/scratchpad/evento-atualizado.json\")",
+      "Bash(curl -s https://api.sanryu.com.br/api/eventos/exame-sfp-28/publico -o \"C:/Users/rdrgp/AppData/Local/Temp/claude/c--Projetos-sanryu/c1c9c0c7-3c45-44c7-9e81-2f16bf5dd826/scratchpad/evento-atualizado2.json\")",
+      "Bash(curl -s https://api.sanryu.com.br/api/eventos)",
+      "Bash(curl -s https://api.sanryu.com.br/api/eventos/exame-parque-do-carmo/publico -o \"C:/Users/rdrgp/AppData/Local/Temp/claude/c--Projetos-sanryu/c1c9c0c7-3c45-44c7-9e81-2f16bf5dd826/scratchpad/evento-parque-carmo.json\")",
+      "Bash(node capturar-branca.cjs)",
+      "Bash(node gerar-manual.cjs)",
+      "Bash(rm -f gerar-manual.cjs manual.html passo-*.png manual-inscricao.png manual-inscricao.pdf capturar-branca.cjs)",
+      "Bash(taskkill //F //PID 12472)",
+      "Bash(node test-fase2-entregar.cjs)",
+      "Bash(taskkill //F //PID 27684)",
+      "Bash(taskkill //F //PID 8956)",
+      "Bash(node test-instrutor.cjs)",
+      "Bash(node \"C:/Users/rdrgp/AppData/Local/Temp/claude/c--Projetos-sanryu/c1c9c0c7-3c45-44c7-9e81-2f16bf5dd826/scratchpad/test-cadastrar-aluno.js\")"
+    ]
+  }
+}

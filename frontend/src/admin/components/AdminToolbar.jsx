@@ -15,24 +15,26 @@ export default function AdminToolbar({
   const excluirHabilitado = podeExcluir === undefined ? podeEditar : podeExcluir;
 
   return (
-    <CButtonGroup role="group" className="mb-3">
-      <CButton color="primary" onClick={onNovo}>
-        <CIcon icon={cilPlus} className="me-1" />
-        {novoLabel}
-      </CButton>
-      <CButton color="secondary" variant="outline" disabled={!podeEditar} onClick={onEditar}>
-        <CIcon icon={cilPencil} className="me-1" />
-        Editar
-      </CButton>
-      <CButton color="danger" variant="outline" disabled={!excluirHabilitado} onClick={onExcluir}>
-        <CIcon icon={cilTrash} className="me-1" />
-        Excluir
-      </CButton>
-      <CButton color="secondary" variant="outline" onClick={onAtualizar}>
-        <CIcon icon={cilReload} className="me-1" />
-        Atualizar
-      </CButton>
-      {extra}
-    </CButtonGroup>
+    <div className="d-flex flex-wrap gap-2 mb-3">
+      <CButtonGroup role="group">
+        <CButton color="primary" onClick={onNovo}>
+          <CIcon icon={cilPlus} className="me-1" />
+          {novoLabel}
+        </CButton>
+        <CButton color="secondary" variant="outline" disabled={!podeEditar} onClick={onEditar}>
+          <CIcon icon={cilPencil} className="me-1" />
+          Editar
+        </CButton>
+        <CButton color="danger" variant="outline" disabled={!excluirHabilitado} onClick={onExcluir}>
+          <CIcon icon={cilTrash} className="me-1" />
+          Excluir
+        </CButton>
+        <CButton color="secondary" variant="outline" onClick={onAtualizar}>
+          <CIcon icon={cilReload} className="me-1" />
+          Atualizar
+        </CButton>
+      </CButtonGroup>
+      {extra && <div className="d-flex flex-wrap gap-2">{extra}</div>}
+    </div>
   );
 }

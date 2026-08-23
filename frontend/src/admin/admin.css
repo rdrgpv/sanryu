@@ -1,8 +1,60 @@
+/* ==========================================================================
+   Identidade visual San·Ryu — variáveis do painel administrativo
+   Reaproveita as cores de marca do site público (global.css: --cor-hanko,
+   --cor-sumi, --cor-off-white...) em variáveis próprias do admin + overrides
+   das variáveis nativas do CoreUI (--cui-*) para que os componentes prontos
+   (CButton, CBadge, CAvatar cor="primary" etc.) já saiam com a cor da marca.
+   ========================================================================== */
 :root {
-  --cui-primary: #b23a2f;
+  --sanryu-primary: #b23a2f;
+  --sanryu-primary-dark: #8f2d25;
+
+  --sanryu-sumi: #111111;
+  --sanryu-sidebar: #111111;
+  --sanryu-sidebar-hover: #202020;
+
+  --sanryu-gold: #c6a15b;
+
+  --sanryu-background: #f5f5f3;
+  --sanryu-card: #ffffff;
+
+  --sanryu-text: #1c1c1c;
+  --sanryu-muted: #6b6b68;
+  --sanryu-border: #e5e5e2;
+
+  --sanryu-success: #198754;
+  --sanryu-danger: #dc3545;
+  --sanryu-warning: #ffc107;
+
+  --sanryu-space-1: 8px;
+  --sanryu-space-2: 12px;
+  --sanryu-space-3: 16px;
+  --sanryu-space-4: 24px;
+  --sanryu-space-5: 32px;
+
+  --sanryu-radius: 12px;
+  --sanryu-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+
+  /* Overrides das variáveis nativas do CoreUI/Bootstrap usadas pelos componentes prontos */
+  --cui-primary: var(--sanryu-primary);
   --cui-primary-rgb: 178, 58, 47;
-  --cui-link-color: #b23a2f;
-  --cui-link-hover-color: #8e2e25;
+  --cui-link-color: var(--sanryu-primary);
+  --cui-link-hover-color: var(--sanryu-primary-dark);
+  --cui-body-bg: var(--sanryu-background);
+  --cui-border-radius: 8px;
+}
+
+/* Tipografia: o site público usa Unbounded (títulos) + Inter (corpo) — o admin adota Inter para
+   todo o conteúdo (tabelas, formulários, textos longos), reservando Unbounded só para o wordmark
+   da sidebar (que já é uma imagem, não texto), conforme pedido — sem exagero tipográfico aqui. */
+.wrapper h1,
+.wrapper h2,
+.wrapper h3,
+.wrapper h4,
+.wrapper h5,
+.wrapper h6 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: normal;
 }
 
 .sidebar-brand img {
@@ -11,44 +63,160 @@
 }
 
 /* Abaixo do breakpoint lg o CSidebar do CoreUI vira off-canvas (sobrepõe, não empurra) — então o
-   conteúdo só precisa de margem reservada pra ele em telas grandes. */
+   conteúdo só precisa de margem reservada pra ele em telas grandes. --cui-sidebar-occupy-start é
+   definida automaticamente pelo próprio CoreUI nos irmãos da sidebar (16rem normal, 4rem quando
+   "unfoldable"/recolhida) — usamos ela em vez de um valor fixo pra acompanhar o recolhimento. */
 .wrapper {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--sanryu-background);
   margin-left: 0;
+  transition: margin-left 0.15s ease;
 }
 
 @media (min-width: 992px) {
   .wrapper {
-    margin-left: 256px;
+    margin-left: var(--cui-sidebar-occupy-start, 16rem);
   }
 }
 
 .btn-primary {
-  --cui-btn-bg: #b23a2f;
-  --cui-btn-border-color: #b23a2f;
-  --cui-btn-hover-bg: #8e2e25;
-  --cui-btn-hover-border-color: #8e2e25;
-  --cui-btn-active-bg: #8e2e25;
-  --cui-btn-active-border-color: #8e2e25;
+  --cui-btn-bg: var(--sanryu-primary);
+  --cui-btn-border-color: var(--sanryu-primary);
+  --cui-btn-hover-bg: var(--sanryu-primary-dark);
+  --cui-btn-hover-border-color: var(--sanryu-primary-dark);
+  --cui-btn-active-bg: var(--sanryu-primary-dark);
+  --cui-btn-active-border-color: var(--sanryu-primary-dark);
 }
 
-.table tbody tr {
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+.sidebar {
+  --cui-sidebar-bg: var(--sanryu-sidebar);
+}
+
+.sidebar .nav-link {
+  border-radius: 6px;
+  margin: 2px var(--sanryu-space-1);
+  width: calc(100% - 2 * var(--sanryu-space-1));
+}
+
+.sidebar .nav-link:hover {
+  background: var(--sanryu-sidebar-hover);
+}
+
+.sidebar .nav-link.active {
+  background: var(--sanryu-primary);
+  color: #fff;
+}
+
+.sidebar .nav-icon {
+  opacity: 0.85;
+}
+
+.sidebar .nav-title {
+  color: var(--sanryu-gold);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.sidebar-header {
+  padding: var(--sanryu-space-3);
+}
+
+.sidebar-toggler {
+  margin-inline-start: auto;
+}
+
+/* ==========================================================================
+   Header administrativo
+   ========================================================================== */
+.admin-header {
+  --cui-header-bg: var(--sanryu-card);
+  border-bottom: 1px solid var(--sanryu-border);
+}
+
+.admin-header__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--sanryu-text);
+}
+
+.admin-header__breadcrumb {
+  font-size: 0.75rem;
+  color: var(--sanryu-muted);
+  margin: 0 0 2px;
+}
+
+.admin-header__user {
+  display: flex;
+  align-items: center;
+  gap: var(--sanryu-space-1);
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.admin-header__user:hover {
+  background: var(--sanryu-background);
+}
+
+.admin-header__user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sanryu-text);
+}
+
+/* ==========================================================================
+   Cards, tabelas, badges e estados vazios
+   ========================================================================== */
+.wrapper .card {
+  border: 1px solid var(--sanryu-border);
+  border-radius: var(--sanryu-radius);
+  box-shadow: var(--sanryu-shadow);
+}
+
+.wrapper .table thead th {
+  background: var(--sanryu-background);
+  color: var(--sanryu-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  border-bottom: 1px solid var(--sanryu-border);
+}
+
+.wrapper .table tbody tr {
   cursor: pointer;
 }
 
-.table tbody tr.table-active {
+.wrapper .table tbody tr:hover {
+  --cui-table-hover-bg: rgba(17, 17, 17, 0.03);
+}
+
+.wrapper .table tbody tr.table-active {
   --cui-table-active-bg: rgba(178, 58, 47, 0.12);
 }
 
-/* O global.css do site público define h1-h4 com a fonte de marca (Unbounded);
-   dentro do admin usamos a fonte padrão do sistema, igual ao resto do CoreUI. */
-.wrapper h1,
-.wrapper h2,
-.wrapper h3,
-.wrapper h4,
-.wrapper h5,
-.wrapper h6 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  letter-spacing: normal;
+.wrapper .table td,
+.wrapper .table th {
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
+
+.wrapper .badge {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.admin-empty-state {
+  padding: var(--sanryu-space-4) var(--sanryu-space-2);
+  text-align: center;
+  color: var(--sanryu-muted);
 }
 
 /* Ficha de exame (relatório impresso) — ~5 fichas por página A4, não uma por página */
