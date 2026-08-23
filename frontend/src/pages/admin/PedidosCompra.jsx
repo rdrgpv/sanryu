@@ -1,17 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-  CButton,
-  CBadge,
-} from '@coreui/react';
+import { CButton, CBadge } from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 
 const SITUACOES = {
@@ -118,47 +110,46 @@ export default function PedidosCompra() {
         Pedidos de compra não são criados diretamente — use "Gerar pedido de compra" a partir de um pedido de venda pendente.
       </p>
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Fornecedor</CTableHeaderCell>
-            <CTableHeaderCell>Data</CTableHeaderCell>
-            <CTableHeaderCell>Situação</CTableHeaderCell>
-            <CTableHeaderCell>Total</CTableHeaderCell>
-            <CTableHeaderCell>Previsão de entrega</CTableHeaderCell>
-            <CTableHeaderCell>Recebimento</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {pedidosCompra.map((pedidoCompra) => (
-            <CTableRow
-              key={pedidoCompra.id}
-              active={selecionadoId === pedidoCompra.id}
-              onClick={() => selecionarLinha(pedidoCompra.id)}
-            >
-              <CTableDataCell>{pedidoCompra.fornecedor?.nome || '-'}</CTableDataCell>
-              <CTableDataCell>{formatarDataHora(pedidoCompra.dataPedido)}</CTableDataCell>
-              <CTableDataCell>
-                <CBadge color={SITUACOES[pedidoCompra.situacao]?.cor || 'secondary'}>
-                  {SITUACOES[pedidoCompra.situacao]?.label || pedidoCompra.situacao}
-                </CBadge>
-              </CTableDataCell>
-              <CTableDataCell>{formatarMoeda(pedidoCompra.valorTotal)}</CTableDataCell>
-              <CTableDataCell>{pedidoCompra.dataPrevistaEntrega || '-'}</CTableDataCell>
-              <CTableDataCell>
-                {pedidoCompra.dataRecebimento ? new Date(pedidoCompra.dataRecebimento).toLocaleDateString('pt-BR') : '-'}
-              </CTableDataCell>
-            </CTableRow>
-          ))}
-          {pedidosCompra.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={6} className="text-body-secondary">
-                Nenhum pedido de compra gerado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={pedidosCompra}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum pedido de compra gerado."
+        columns={[
+          {
+            key: 'fornecedor',
+            label: 'Fornecedor',
+            sortable: true,
+            sortValue: (pc) => pc.fornecedor?.nome || '',
+            render: (pc) => pc.fornecedor?.nome || '-',
+          },
+          { key: 'dataPedido', label: 'Data', sortable: true, render: (pc) => formatarDataHora(pc.dataPedido) },
+          {
+            key: 'situacao',
+            label: 'Situação',
+            sortable: true,
+            sortValue: (pc) => SITUACOES[pc.situacao]?.label || pc.situacao,
+            render: (pc) => (
+              <CBadge color={SITUACOES[pc.situacao]?.cor || 'secondary'}>
+                {SITUACOES[pc.situacao]?.label || pc.situacao}
+              </CBadge>
+            ),
+          },
+          { key: 'valorTotal', label: 'Total', align: 'end', sortable: true, render: (pc) => formatarMoeda(pc.valorTotal) },
+          {
+            key: 'dataPrevistaEntrega',
+            label: 'Previsão de entrega',
+            sortable: true,
+            render: (pc) => pc.dataPrevistaEntrega || '-',
+          },
+          {
+            key: 'dataRecebimento',
+            label: 'Recebimento',
+            sortable: true,
+            render: (pc) => (pc.dataRecebimento ? new Date(pc.dataRecebimento).toLocaleDateString('pt-BR') : '-'),
+          },
+        ]}
+      />
     </div>
   );
 }

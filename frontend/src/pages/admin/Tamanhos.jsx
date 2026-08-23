@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Tamanhos() {
   const navigate = useNavigate();
@@ -53,35 +46,27 @@ export default function Tamanhos() {
         onAtualizar={carregarTamanhos}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Descrição</CTableHeaderCell>
-            <CTableHeaderCell>Ordem</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {tamanhos.map((tamanho) => (
-            <CTableRow
-              key={tamanho.id}
-              active={selecionadoId === tamanho.id}
-              onClick={() => selecionarLinha(tamanho.id)}
-            >
-              <CTableDataCell>{tamanho.descricao}</CTableDataCell>
-              <CTableDataCell>{tamanho.ordem ?? '-'}</CTableDataCell>
-              <CTableDataCell>{tamanho.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {tamanhos.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={3} className="text-body-secondary">
-                Nenhum tamanho cadastrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={tamanhos}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum tamanho cadastrado."
+        pageSize={25}
+        columns={[
+          { key: 'descricao', label: 'Descrição', sortable: true },
+          { key: 'ordem', label: 'Ordem', align: 'center', sortable: true, render: (tamanho) => tamanho.ordem ?? '-' },
+          {
+            key: 'ativo',
+            label: 'Status',
+            sortable: true,
+            render: (tamanho) => (
+              <span className={`badge ${tamanho.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                {tamanho.ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

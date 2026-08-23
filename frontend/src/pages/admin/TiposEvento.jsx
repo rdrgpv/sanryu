@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function TiposEvento() {
   const navigate = useNavigate();
@@ -63,31 +56,23 @@ export default function TiposEvento() {
         </p>
       )}
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nome</CTableHeaderCell>
-            <CTableHeaderCell>Cobrável</CTableHeaderCell>
-            <CTableHeaderCell>Valor</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {tipos.map((tipo) => (
-            <CTableRow key={tipo.id} active={selecionadoId === tipo.id} onClick={() => selecionarLinha(tipo.id)}>
-              <CTableDataCell>{tipo.nome}</CTableDataCell>
-              <CTableDataCell>{tipo.cobravel ? 'Sim' : 'Não'}</CTableDataCell>
-              <CTableDataCell>{tipo.valor != null ? `R$ ${Number(tipo.valor).toFixed(2)}` : '-'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {tipos.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={3} className="text-body-secondary">
-                Nenhum tipo de evento cadastrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={tipos}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum tipo de evento cadastrado."
+        columns={[
+          { key: 'nome', label: 'Nome', sortable: true },
+          { key: 'cobravel', label: 'Cobrável', sortable: true, render: (tipo) => (tipo.cobravel ? 'Sim' : 'Não') },
+          {
+            key: 'valor',
+            label: 'Valor',
+            align: 'end',
+            sortable: true,
+            render: (tipo) => (tipo.valor != null ? `R$ ${Number(tipo.valor).toFixed(2)}` : '-'),
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -1,19 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-  CButton,
-  CFormCheck,
-} from '@coreui/react';
+import { CButton, CFormCheck } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilList, cilClone } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { formatarMoeda } from '../../utils/formato.js';
 
 export default function ProdutoVariacoes() {
@@ -90,67 +82,80 @@ export default function ProdutoVariacoes() {
         onChange={(event) => setComEstoque(event.target.checked)}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Produto</CTableHeaderCell>
-            <CTableHeaderCell>Cor</CTableHeaderCell>
-            <CTableHeaderCell>Tamanho</CTableHeaderCell>
-            <CTableHeaderCell>Código</CTableHeaderCell>
-            <CTableHeaderCell>Custo</CTableHeaderCell>
-            <CTableHeaderCell>Venda</CTableHeaderCell>
-            <CTableHeaderCell>Estoque</CTableHeaderCell>
-            <CTableHeaderCell>Reservado</CTableHeaderCell>
-            <CTableHeaderCell>Disponível</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {variacoes.map((variacao) => (
-            <CTableRow
-              key={variacao.id}
-              active={selecionadoId === variacao.id}
-              onClick={() => selecionarLinha(variacao.id)}
-            >
-              <CTableDataCell>{variacao.produto?.descricao || '-'}</CTableDataCell>
-              <CTableDataCell>
-                {variacao.cor ? (
-                  <span className="d-flex align-items-center gap-2">
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        width: '1rem',
-                        height: '1rem',
-                        borderRadius: '50%',
-                        background: variacao.cor.corHex || '#ccc',
-                        border: '1px solid rgba(0,0,0,0.15)',
-                      }}
-                    />
-                    {variacao.cor.descricao}
-                  </span>
-                ) : (
-                  '-'
-                )}
-              </CTableDataCell>
-              <CTableDataCell>{variacao.tamanho?.descricao || '-'}</CTableDataCell>
-              <CTableDataCell>{variacao.codigo}</CTableDataCell>
-              <CTableDataCell>{formatarMoeda(variacao.valorCusto)}</CTableDataCell>
-              <CTableDataCell>{formatarMoeda(variacao.valorVenda)}</CTableDataCell>
-              <CTableDataCell>{variacao.quantidadeEstoque}</CTableDataCell>
-              <CTableDataCell>{variacao.quantidadeReservada ?? 0}</CTableDataCell>
-              <CTableDataCell>{variacao.saldoDisponivel ?? variacao.quantidadeEstoque}</CTableDataCell>
-              <CTableDataCell>{variacao.ativo ? 'Ativa' : 'Inativa'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {variacoes.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={10} className="text-body-secondary">
-                Nenhuma variação cadastrada.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={variacoes}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhuma variação cadastrada."
+        columns={[
+          {
+            key: 'produto',
+            label: 'Produto',
+            sortable: true,
+            sortValue: (variacao) => variacao.produto?.descricao || '',
+            render: (variacao) => variacao.produto?.descricao || '-',
+          },
+          {
+            key: 'cor',
+            label: 'Cor',
+            sortable: true,
+            sortValue: (variacao) => variacao.cor?.descricao || '',
+            render: (variacao) =>
+              variacao.cor ? (
+                <span className="d-flex align-items-center gap-2">
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '1rem',
+                      height: '1rem',
+                      borderRadius: '50%',
+                      background: variacao.cor.corHex || '#ccc',
+                      border: '1px solid rgba(0,0,0,0.15)',
+                    }}
+                  />
+                  {variacao.cor.descricao}
+                </span>
+              ) : (
+                '-'
+              ),
+          },
+          {
+            key: 'tamanho',
+            label: 'Tamanho',
+            sortable: true,
+            sortValue: (variacao) => variacao.tamanho?.descricao || '',
+            render: (variacao) => variacao.tamanho?.descricao || '-',
+          },
+          { key: 'codigo', label: 'Código', sortable: true },
+          { key: 'valorCusto', label: 'Custo', align: 'end', sortable: true, render: (v) => formatarMoeda(v.valorCusto) },
+          { key: 'valorVenda', label: 'Venda', align: 'end', sortable: true, render: (v) => formatarMoeda(v.valorVenda) },
+          { key: 'quantidadeEstoque', label: 'Estoque', align: 'center', sortable: true },
+          {
+            key: 'quantidadeReservada',
+            label: 'Reservado',
+            align: 'center',
+            sortable: true,
+            render: (v) => v.quantidadeReservada ?? 0,
+          },
+          {
+            key: 'saldoDisponivel',
+            label: 'Disponível',
+            align: 'center',
+            sortable: true,
+            render: (v) => v.saldoDisponivel ?? v.quantidadeEstoque,
+          },
+          {
+            key: 'ativo',
+            label: 'Status',
+            sortable: true,
+            render: (v) => (
+              <span className={`badge ${v.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                {v.ativo ? 'Ativa' : 'Inativa'}
+              </span>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

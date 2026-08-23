@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Fornecedores() {
   const navigate = useNavigate();
@@ -53,39 +46,28 @@ export default function Fornecedores() {
         onAtualizar={carregarFornecedores}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nome</CTableHeaderCell>
-            <CTableHeaderCell>CNPJ/CPF</CTableHeaderCell>
-            <CTableHeaderCell>Telefone</CTableHeaderCell>
-            <CTableHeaderCell>Email</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {fornecedores.map((fornecedor) => (
-            <CTableRow
-              key={fornecedor.id}
-              active={selecionadoId === fornecedor.id}
-              onClick={() => selecionarLinha(fornecedor.id)}
-            >
-              <CTableDataCell>{fornecedor.nome}</CTableDataCell>
-              <CTableDataCell>{fornecedor.cnpjCpf || '-'}</CTableDataCell>
-              <CTableDataCell>{fornecedor.telefone || '-'}</CTableDataCell>
-              <CTableDataCell>{fornecedor.email || '-'}</CTableDataCell>
-              <CTableDataCell>{fornecedor.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {fornecedores.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={5} className="text-body-secondary">
-                Nenhum fornecedor cadastrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={fornecedores}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum fornecedor cadastrado."
+        columns={[
+          { key: 'nome', label: 'Nome', sortable: true },
+          { key: 'cnpjCpf', label: 'CNPJ/CPF', sortable: true, render: (f) => f.cnpjCpf || '-' },
+          { key: 'telefone', label: 'Telefone', render: (f) => f.telefone || '-' },
+          { key: 'email', label: 'Email', sortable: true, render: (f) => f.email || '-' },
+          {
+            key: 'ativo',
+            label: 'Status',
+            sortable: true,
+            render: (f) => (
+              <span className={`badge ${f.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                {f.ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Bancos() {
   const navigate = useNavigate();
@@ -52,35 +45,22 @@ export default function Bancos() {
         onAtualizar={carregarBancos}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nome</CTableHeaderCell>
-            <CTableHeaderCell>Titular</CTableHeaderCell>
-            <CTableHeaderCell>Tipo de chave</CTableHeaderCell>
-            <CTableHeaderCell>Chave Pix</CTableHeaderCell>
-            <CTableHeaderCell>Cidade</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {bancos.map((banco) => (
-            <CTableRow key={banco.id} active={selecionadoId === banco.id} onClick={() => selecionarLinha(banco.id)}>
-              <CTableDataCell>{banco.nome}</CTableDataCell>
-              <CTableDataCell>{banco.titular}</CTableDataCell>
-              <CTableDataCell>{banco.tipoChave}</CTableDataCell>
-              <CTableDataCell>{banco.chavePix}</CTableDataCell>
-              <CTableDataCell>{banco.cidade}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {bancos.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={5} className="text-body-secondary">
-                Nenhuma configuração Pix cadastrada.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      {/* Sem ordenação por coluna aqui de propósito: a ordem da lista tem significado funcional
+          (a primeira linha é a conta usada pro QR Pix dos eventos, conforme o aviso acima). */}
+      <AdminDataTable
+        rows={bancos}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhuma configuração Pix cadastrada."
+        pageSizeOptions={[25, 50]}
+        columns={[
+          { key: 'nome', label: 'Nome' },
+          { key: 'titular', label: 'Titular' },
+          { key: 'tipoChave', label: 'Tipo de chave' },
+          { key: 'chavePix', label: 'Chave Pix' },
+          { key: 'cidade', label: 'Cidade' },
+        ]}
+      />
     </div>
   );
 }

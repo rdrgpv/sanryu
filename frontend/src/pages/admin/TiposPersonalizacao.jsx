@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { formatarMoeda } from '../../utils/formato.js';
 
 export default function TiposPersonalizacao() {
@@ -54,33 +47,33 @@ export default function TiposPersonalizacao() {
         onAtualizar={carregarTipos}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Descrição</CTableHeaderCell>
-            <CTableHeaderCell>Valor padrão</CTableHeaderCell>
-            <CTableHeaderCell>Exige texto</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {tipos.map((tipo) => (
-            <CTableRow key={tipo.id} active={selecionadoId === tipo.id} onClick={() => selecionarLinha(tipo.id)}>
-              <CTableDataCell>{tipo.descricao}</CTableDataCell>
-              <CTableDataCell>{formatarMoeda(tipo.valorPadrao)}</CTableDataCell>
-              <CTableDataCell>{tipo.exigeTexto ? 'Sim' : 'Não'}</CTableDataCell>
-              <CTableDataCell>{tipo.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {tipos.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={4} className="text-body-secondary">
-                Nenhum tipo de personalização cadastrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={tipos}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum tipo de personalização cadastrado."
+        columns={[
+          { key: 'descricao', label: 'Descrição', sortable: true },
+          {
+            key: 'valorPadrao',
+            label: 'Valor padrão',
+            align: 'end',
+            sortable: true,
+            render: (tipo) => formatarMoeda(tipo.valorPadrao),
+          },
+          { key: 'exigeTexto', label: 'Exige texto', sortable: true, render: (tipo) => (tipo.exigeTexto ? 'Sim' : 'Não') },
+          {
+            key: 'ativo',
+            label: 'Status',
+            sortable: true,
+            render: (tipo) => (
+              <span className={`badge ${tipo.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                {tipo.ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 } from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 
 const SITUACOES = {
@@ -125,41 +126,35 @@ export default function Pedidos() {
         }
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Cliente</CTableHeaderCell>
-            <CTableHeaderCell>Telefone</CTableHeaderCell>
-            <CTableHeaderCell>Data</CTableHeaderCell>
-            <CTableHeaderCell>Situação</CTableHeaderCell>
-            <CTableHeaderCell>Total</CTableHeaderCell>
-            <CTableHeaderCell>Previsão de entrega</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {pedidos.map((pedido) => (
-            <CTableRow key={pedido.id} active={selecionadoId === pedido.id} onClick={() => selecionarLinha(pedido.id)}>
-              <CTableDataCell>{pedido.nomeCliente}</CTableDataCell>
-              <CTableDataCell>{pedido.telefoneCliente || '-'}</CTableDataCell>
-              <CTableDataCell>{formatarDataHora(pedido.dataPedido)}</CTableDataCell>
-              <CTableDataCell>
-                <CBadge color={SITUACOES[pedido.situacao]?.cor || 'secondary'}>
-                  {SITUACOES[pedido.situacao]?.label || pedido.situacao}
-                </CBadge>
-              </CTableDataCell>
-              <CTableDataCell>{formatarMoeda(pedido.valorTotal)}</CTableDataCell>
-              <CTableDataCell>{pedido.dataPrevistaEntrega || '-'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {pedidos.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={6} className="text-body-secondary">
-                Nenhum pedido cadastrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={pedidos}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum pedido cadastrado."
+        columns={[
+          { key: 'nomeCliente', label: 'Cliente', sortable: true },
+          { key: 'telefoneCliente', label: 'Telefone', render: (p) => p.telefoneCliente || '-' },
+          { key: 'dataPedido', label: 'Data', sortable: true, render: (p) => formatarDataHora(p.dataPedido) },
+          {
+            key: 'situacao',
+            label: 'Situação',
+            sortable: true,
+            sortValue: (p) => SITUACOES[p.situacao]?.label || p.situacao,
+            render: (p) => (
+              <CBadge color={SITUACOES[p.situacao]?.cor || 'secondary'}>
+                {SITUACOES[p.situacao]?.label || p.situacao}
+              </CBadge>
+            ),
+          },
+          { key: 'valorTotal', label: 'Total', align: 'end', sortable: true, render: (p) => formatarMoeda(p.valorTotal) },
+          {
+            key: 'dataPrevistaEntrega',
+            label: 'Previsão de entrega',
+            sortable: true,
+            render: (p) => p.dataPrevistaEntrega || '-',
+          },
+        ]}
+      />
 
       <CModal visible={!!detalhe || carregandoDetalhe} onClose={() => setDetalhe(null)} size="lg">
         <CModalHeader>

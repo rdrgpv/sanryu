@@ -1,21 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-  CFormInput,
-  CFormSelect,
-  CButton,
-  CInputGroup,
-} from '@coreui/react';
+import { CFormInput, CFormSelect, CButton, CInputGroup } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilPeople } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Alunos() {
   const navigate = useNavigate();
@@ -174,64 +164,68 @@ export default function Alunos() {
         onChange={(event) => setBusca(event.target.value)}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nome</CTableHeaderCell>
-            <CTableHeaderCell>Email</CTableHeaderCell>
-            <CTableHeaderCell>Telefone</CTableHeaderCell>
-            <CTableHeaderCell>Faixa</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
-            <CTableHeaderCell>Turmas</CTableHeaderCell>
-            <CTableHeaderCell>Gatame</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {alunos.map((aluno) => (
-            <CTableRow key={aluno.id} active={selecionadoId === aluno.id} onClick={() => selecionarLinha(aluno.id)}>
-              <CTableDataCell>{aluno.nome}</CTableDataCell>
-              <CTableDataCell>{aluno.email}</CTableDataCell>
-              <CTableDataCell>{aluno.telefone || '-'}</CTableDataCell>
-              <CTableDataCell>
-                {aluno.faixa ? (
-                  <span className="d-flex align-items-center gap-2">
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        width: '1rem',
-                        height: '1rem',
-                        borderRadius: '50%',
-                        background: aluno.faixa.cor,
-                        border: '1px solid rgba(0,0,0,0.15)',
-                        flexShrink: 0,
-                      }}
-                    />
-                    {aluno.faixa.nome}
-                  </span>
-                ) : (
-                  '-'
-                )}
-              </CTableDataCell>
-              <CTableDataCell>{aluno.ativo ? 'Ativo' : 'Inativo'}</CTableDataCell>
-              <CTableDataCell>{(aluno.turmas || []).map((t) => t.nome).join(', ') || '-'}</CTableDataCell>
-              <CTableDataCell>
-                {aluno.cadastradoNoGatame ? (
-                  <span className="text-success small">Cadastrado</span>
-                ) : (
-                  <span className="text-body-secondary small">Não cadastrado</span>
-                )}
-              </CTableDataCell>
-            </CTableRow>
-          ))}
-          {alunos.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={7} className="text-body-secondary">
-                Nenhum aluno encontrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={alunos}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum aluno encontrado."
+        columns={[
+          { key: 'nome', label: 'Nome', sortable: true },
+          { key: 'email', label: 'Email', sortable: true },
+          { key: 'telefone', label: 'Telefone', render: (aluno) => aluno.telefone || '-' },
+          {
+            key: 'faixa',
+            label: 'Faixa',
+            sortable: true,
+            sortValue: (aluno) => aluno.faixa?.nome || '',
+            render: (aluno) =>
+              aluno.faixa ? (
+                <span className="d-flex align-items-center gap-2">
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '1rem',
+                      height: '1rem',
+                      borderRadius: '50%',
+                      background: aluno.faixa.cor,
+                      border: '1px solid rgba(0,0,0,0.15)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  {aluno.faixa.nome}
+                </span>
+              ) : (
+                '-'
+              ),
+          },
+          {
+            key: 'ativo',
+            label: 'Status',
+            sortable: true,
+            render: (aluno) => (
+              <span className={`badge ${aluno.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                {aluno.ativo ? 'Ativo' : 'Inativo'}
+              </span>
+            ),
+          },
+          {
+            key: 'turmas',
+            label: 'Turmas',
+            render: (aluno) => (aluno.turmas || []).map((t) => t.nome).join(', ') || '-',
+          },
+          {
+            key: 'cadastradoNoGatame',
+            label: 'Gatame',
+            sortable: true,
+            render: (aluno) =>
+              aluno.cadastradoNoGatame ? (
+                <span className="text-success small">Cadastrado</span>
+              ) : (
+                <span className="text-body-secondary small">Não cadastrado</span>
+              ),
+          },
+        ]}
+      />
     </div>
   );
 }

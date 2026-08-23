@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Instrutores() {
   const navigate = useNavigate();
@@ -49,59 +42,48 @@ export default function Instrutores() {
         onAtualizar={carregarInstrutores}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nome</CTableHeaderCell>
-            <CTableHeaderCell>Faixa</CTableHeaderCell>
-            <CTableHeaderCell>Email</CTableHeaderCell>
-            <CTableHeaderCell>Especialidade</CTableHeaderCell>
-            <CTableHeaderCell>Bio</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {instrutores.map((instrutor) => (
-            <CTableRow
-              key={instrutor.id}
-              active={selecionadoId === instrutor.id}
-              onClick={() => selecionarLinha(instrutor.id)}
-            >
-              <CTableDataCell>{instrutor.nome}</CTableDataCell>
-              <CTableDataCell>
-                {instrutor.faixa ? (
-                  <span className="d-flex align-items-center gap-2">
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        width: '1rem',
-                        height: '1rem',
-                        borderRadius: '50%',
-                        background: instrutor.faixa.cor,
-                        border: '1px solid rgba(0,0,0,0.15)',
-                        flexShrink: 0,
-                      }}
-                    />
-                    {instrutor.faixa.nome}
-                    {instrutor.faixa.grau ? ` ${instrutor.faixa.grau}º grau` : ''}
-                  </span>
-                ) : (
-                  '-'
-                )}
-              </CTableDataCell>
-              <CTableDataCell>{instrutor.email || '-'}</CTableDataCell>
-              <CTableDataCell>{instrutor.especialidade || '-'}</CTableDataCell>
-              <CTableDataCell style={{ maxWidth: 320 }}>{instrutor.bio || '-'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {instrutores.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={5} className="text-body-secondary">
-                Nenhum instrutor cadastrado.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={instrutores}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhum instrutor cadastrado."
+        columns={[
+          { key: 'nome', label: 'Nome', sortable: true },
+          {
+            key: 'faixa',
+            label: 'Faixa',
+            sortable: true,
+            sortValue: (instrutor) => instrutor.faixa?.nome || '',
+            render: (instrutor) =>
+              instrutor.faixa ? (
+                <span className="d-flex align-items-center gap-2">
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '1rem',
+                      height: '1rem',
+                      borderRadius: '50%',
+                      background: instrutor.faixa.cor,
+                      border: '1px solid rgba(0,0,0,0.15)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  {instrutor.faixa.nome}
+                  {instrutor.faixa.grau ? ` ${instrutor.faixa.grau}º grau` : ''}
+                </span>
+              ) : (
+                '-'
+              ),
+          },
+          { key: 'email', label: 'Email', sortable: true, render: (instrutor) => instrutor.email || '-' },
+          { key: 'especialidade', label: 'Especialidade', render: (instrutor) => instrutor.especialidade || '-' },
+          {
+            key: 'bio',
+            label: 'Bio',
+            render: (instrutor) => <span style={{ display: 'inline-block', maxWidth: 320 }}>{instrutor.bio || '-'}</span>,
+          },
+        ]}
+      />
     </div>
   );
 }

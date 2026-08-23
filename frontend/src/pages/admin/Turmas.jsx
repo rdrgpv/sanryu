@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Turmas() {
   const navigate = useNavigate();
@@ -49,41 +42,31 @@ export default function Turmas() {
         onAtualizar={carregarTurmas}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell>Nome</CTableHeaderCell>
-            <CTableHeaderCell>Modalidade</CTableHeaderCell>
-            <CTableHeaderCell>Nível</CTableHeaderCell>
-            <CTableHeaderCell>Instrutor</CTableHeaderCell>
-            <CTableHeaderCell>Dias</CTableHeaderCell>
-            <CTableHeaderCell>Horário</CTableHeaderCell>
-            <CTableHeaderCell>Vagas</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {turmas.map((turma) => (
-            <CTableRow key={turma.id} active={selecionadoId === turma.id} onClick={() => selecionarLinha(turma.id)}>
-              <CTableDataCell>{turma.nome}</CTableDataCell>
-              <CTableDataCell>{turma.modalidade}</CTableDataCell>
-              <CTableDataCell>{turma.nivel}</CTableDataCell>
-              <CTableDataCell>{turma.instrutor?.nome || '-'}</CTableDataCell>
-              <CTableDataCell>{turma.diaSemana}</CTableDataCell>
-              <CTableDataCell>
-                {turma.horaInicio} — {turma.horaFim}
-              </CTableDataCell>
-              <CTableDataCell>{turma.vagas}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {turmas.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={7} className="text-body-secondary">
-                Nenhuma turma cadastrada.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={turmas}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhuma turma cadastrada."
+        columns={[
+          { key: 'nome', label: 'Nome', sortable: true },
+          { key: 'modalidade', label: 'Modalidade', sortable: true },
+          { key: 'nivel', label: 'Nível', sortable: true },
+          {
+            key: 'instrutor',
+            label: 'Instrutor',
+            sortable: true,
+            sortValue: (turma) => turma.instrutor?.nome || '',
+            render: (turma) => turma.instrutor?.nome || '-',
+          },
+          { key: 'diaSemana', label: 'Dias' },
+          {
+            key: 'horario',
+            label: 'Horário',
+            render: (turma) => `${turma.horaInicio} — ${turma.horaFim}`,
+          },
+          { key: 'vagas', label: 'Vagas', align: 'center', sortable: true },
+        ]}
+      />
     </div>
   );
 }

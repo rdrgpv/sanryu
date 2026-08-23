@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-} from '@coreui/react';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 
 export default function Cores() {
   const navigate = useNavigate();
@@ -53,42 +46,42 @@ export default function Cores() {
         onAtualizar={carregarCores}
       />
 
-      <CTable hover responsive className="bg-white">
-        <CTableHead>
-          <CTableRow>
-            <CTableHeaderCell></CTableHeaderCell>
-            <CTableHeaderCell>Descrição</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
-          </CTableRow>
-        </CTableHead>
-        <CTableBody>
-          {cores.map((cor) => (
-            <CTableRow key={cor.id} active={selecionadoId === cor.id} onClick={() => selecionarLinha(cor.id)}>
-              <CTableDataCell>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    width: '1.4rem',
-                    height: '1.4rem',
-                    borderRadius: '50%',
-                    background: cor.corHex || '#ccc',
-                    border: '1px solid rgba(0,0,0,0.15)',
-                  }}
-                />
-              </CTableDataCell>
-              <CTableDataCell>{cor.descricao}</CTableDataCell>
-              <CTableDataCell>{cor.ativo ? 'Ativa' : 'Inativa'}</CTableDataCell>
-            </CTableRow>
-          ))}
-          {cores.length === 0 && (
-            <CTableRow>
-              <CTableDataCell colSpan={3} className="text-body-secondary">
-                Nenhuma cor cadastrada.
-              </CTableDataCell>
-            </CTableRow>
-          )}
-        </CTableBody>
-      </CTable>
+      <AdminDataTable
+        rows={cores}
+        selectedId={selecionadoId}
+        onSelectRow={selecionarLinha}
+        emptyMessage="Nenhuma cor cadastrada."
+        pageSize={25}
+        columns={[
+          {
+            key: 'corHex',
+            label: '',
+            render: (cor) => (
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: '1.4rem',
+                  height: '1.4rem',
+                  borderRadius: '50%',
+                  background: cor.corHex || '#ccc',
+                  border: '1px solid rgba(0,0,0,0.15)',
+                }}
+              />
+            ),
+          },
+          { key: 'descricao', label: 'Descrição', sortable: true },
+          {
+            key: 'ativo',
+            label: 'Status',
+            sortable: true,
+            render: (cor) => (
+              <span className={`badge ${cor.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
+                {cor.ativo ? 'Ativa' : 'Inativa'}
+              </span>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
