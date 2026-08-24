@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
   CButton,
   CModal,
   CModalHeader,
@@ -19,6 +13,7 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople } from '@coreui/icons';
 import api from '../../services/api';
+import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
 
 const COLUNAS_EXPORTACAO = [
@@ -243,118 +238,118 @@ export default function EventoInscricoes() {
         Total líquido (descontada a taxa de 0,99% do Mercado Pago): <strong>{formatarMoeda(totalLiquido)}</strong>
       </p>
 
-      <div style={{ overflowX: 'auto', maxWidth: '100%' }} className="bg-white rounded">
-        <CTable hover className="text-nowrap mb-0" style={{ width: 'max-content', minWidth: '100%' }}>
-          <CTableHead>
-            <CTableRow>
-              <CTableHeaderCell>Nome</CTableHeaderCell>
-              <CTableHeaderCell>Email</CTableHeaderCell>
-              <CTableHeaderCell>Telefone</CTableHeaderCell>
-              <CTableHeaderCell>Faixa</CTableHeaderCell>
-              <CTableHeaderCell>Tamanho Faixa</CTableHeaderCell>
-              <CTableHeaderCell>Nascimento</CTableHeaderCell>
-              <CTableHeaderCell>Responsável</CTableHeaderCell>
-              <CTableHeaderCell>Nº Carteirinha</CTableHeaderCell>
-              <CTableHeaderCell>Validade Carteirinha</CTableHeaderCell>
-              <CTableHeaderCell>Origem</CTableHeaderCell>
-              <CTableHeaderCell>Apto</CTableHeaderCell>
-              <CTableHeaderCell>Valor</CTableHeaderCell>
-              <CTableHeaderCell>Pagamento</CTableHeaderCell>
-              <CTableHeaderCell>QR Pix</CTableHeaderCell>
-              <CTableHeaderCell>Inscrito em</CTableHeaderCell>
-              <CTableHeaderCell>Ações</CTableHeaderCell>
-            </CTableRow>
-          </CTableHead>
-          <CTableBody>
-            {inscricoes.map((inscricao) => (
-              <CTableRow key={inscricao.id}>
-                <CTableDataCell>{inscricao.nome || '-'}</CTableDataCell>
-                <CTableDataCell>{inscricao.email}</CTableDataCell>
-                <CTableDataCell>{inscricao.telefone || '-'}</CTableDataCell>
-                <CTableDataCell>{inscricao.faixa || '-'}</CTableDataCell>
-                <CTableDataCell>{inscricao.tamanhoFaixa || '-'}</CTableDataCell>
-                <CTableDataCell>{formatarData(inscricao.dataNascimento)}</CTableDataCell>
-                <CTableDataCell>{inscricao.responsavel || '-'}</CTableDataCell>
-                <CTableDataCell>{inscricao.numeroCarteirinha || '-'}</CTableDataCell>
-                <CTableDataCell>
-                  {formatarData(inscricao.validadeCarteirinha)}
-                  {inscricao.carteirinhaValida === false && (
-                    <div className="text-danger small">Aluno sem carteirinha válida</div>
+      <AdminDataTable
+        rows={inscricoes}
+        emptyMessage="Nenhuma inscrição registrada."
+        tableClassName="text-nowrap"
+        tableStyle={{ width: 'max-content', minWidth: '100%' }}
+        pageSize={25}
+        pageSizeOptions={[25, 50, 100]}
+        columns={[
+          { key: 'nome', label: 'Nome', sortable: true, render: (i) => i.nome || '-' },
+          { key: 'email', label: 'Email', sortable: true },
+          { key: 'telefone', label: 'Telefone', render: (i) => i.telefone || '-' },
+          { key: 'faixa', label: 'Faixa', sortable: true, render: (i) => i.faixa || '-' },
+          { key: 'tamanhoFaixa', label: 'Tamanho Faixa', render: (i) => i.tamanhoFaixa || '-' },
+          {
+            key: 'dataNascimento',
+            label: 'Nascimento',
+            sortable: true,
+            render: (i) => formatarData(i.dataNascimento),
+          },
+          { key: 'responsavel', label: 'Responsável', render: (i) => i.responsavel || '-' },
+          { key: 'numeroCarteirinha', label: 'Nº Carteirinha', render: (i) => i.numeroCarteirinha || '-' },
+          {
+            key: 'validadeCarteirinha',
+            label: 'Validade Carteirinha',
+            sortable: true,
+            render: (i) => (
+              <>
+                {formatarData(i.validadeCarteirinha)}
+                {i.carteirinhaValida === false && <div className="text-danger small">Aluno sem carteirinha válida</div>}
+              </>
+            ),
+          },
+          { key: 'origemDados', label: 'Origem', sortable: true, render: (i) => i.origemDados || '-' },
+          { key: 'apto', label: 'Apto', sortable: true, sortValue: (i) => (i.apto ? 1 : 0), render: (i) => (i.apto ? 'Sim' : 'Não') },
+          {
+            key: 'valorCobrado',
+            label: 'Valor',
+            align: 'end',
+            sortable: true,
+            sortValue: (i) => (i.valorCobrado != null ? Number(i.valorCobrado) : null),
+            render: (i) => (i.valorCobrado != null ? `R$ ${Number(i.valorCobrado).toFixed(2)}` : '-'),
+          },
+          { key: 'statusPagamento', label: 'Pagamento', sortable: true },
+          {
+            key: 'qrcodePix',
+            label: 'QR Pix',
+            render: (i) =>
+              i.qrcodePix ? (
+                <div className="d-flex align-items-center gap-2">
+                  <img src={i.qrcodePix} alt="QR Pix" style={{ width: 40, height: 40 }} />
+                  {i.pixCopiaCola && (
+                    <CButton color="secondary" variant="outline" size="sm" onClick={() => copiarPix(i.pixCopiaCola)}>
+                      <CIcon icon={cilCopy} />
+                    </CButton>
                   )}
-                </CTableDataCell>
-                <CTableDataCell>{inscricao.origemDados || '-'}</CTableDataCell>
-                <CTableDataCell>{inscricao.apto ? 'Sim' : 'Não'}</CTableDataCell>
-                <CTableDataCell>
-                  {inscricao.valorCobrado != null ? `R$ ${Number(inscricao.valorCobrado).toFixed(2)}` : '-'}
-                </CTableDataCell>
-                <CTableDataCell>{inscricao.statusPagamento}</CTableDataCell>
-                <CTableDataCell>
-                  {inscricao.qrcodePix ? (
-                    <div className="d-flex align-items-center gap-2">
-                      <img src={inscricao.qrcodePix} alt="QR Pix" style={{ width: 40, height: 40 }} />
-                      {inscricao.pixCopiaCola && (
-                        <CButton color="secondary" variant="outline" size="sm" onClick={() => copiarPix(inscricao.pixCopiaCola)}>
-                          <CIcon icon={cilCopy} />
-                        </CButton>
-                      )}
-                    </div>
+                </div>
+              ) : (
+                '-'
+              ),
+          },
+          {
+            key: 'createdAt',
+            label: 'Inscrito em',
+            sortable: true,
+            sortValue: (i) => (i.createdAt ? new Date(i.createdAt).getTime() : null),
+            render: (i) => formatarDataHora(i.createdAt),
+          },
+          {
+            key: 'acoes',
+            label: 'Ações',
+            render: (inscricao) => (
+              <div className="d-flex flex-column gap-1 align-items-start">
+                {inscricao.mpPaymentId && (
+                  <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
+                    <CIcon icon={cilCheckCircle} className="me-1" />
+                    Verificar
+                  </CButton>
+                )}
+                {inscricao.alunoId ? (
+                  <span className="text-success small">Aluno cadastrado</span>
+                ) : (
+                  <CButton
+                    color="secondary"
+                    variant="outline"
+                    size="sm"
+                    disabled={cadastrandoAlunoId === inscricao.id}
+                    onClick={() => cadastrarComoAluno(inscricao)}
+                  >
+                    <CIcon icon={cilPeople} className="me-1" />
+                    {cadastrandoAlunoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
+                  </CButton>
+                )}
+                {inscricao.origemDados !== 'gatame' &&
+                  (inscricao.cadastradoNoGatame ? (
+                    <span className="text-success small">Cadastrado no Gatame</span>
                   ) : (
-                    '-'
-                  )}
-                </CTableDataCell>
-                <CTableDataCell>{formatarDataHora(inscricao.createdAt)}</CTableDataCell>
-                <CTableDataCell>
-                  <div className="d-flex flex-column gap-1 align-items-start">
-                    {inscricao.mpPaymentId && (
-                      <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
-                        <CIcon icon={cilCheckCircle} className="me-1" />
-                        Verificar
-                      </CButton>
-                    )}
-                    {inscricao.alunoId ? (
-                      <span className="text-success small">Aluno cadastrado</span>
-                    ) : (
-                      <CButton
-                        color="secondary"
-                        variant="outline"
-                        size="sm"
-                        disabled={cadastrandoAlunoId === inscricao.id}
-                        onClick={() => cadastrarComoAluno(inscricao)}
-                      >
-                        <CIcon icon={cilPeople} className="me-1" />
-                        {cadastrandoAlunoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
-                      </CButton>
-                    )}
-                    {inscricao.origemDados !== 'gatame' && (
-                      inscricao.cadastradoNoGatame ? (
-                        <span className="text-success small">Cadastrado no Gatame</span>
-                      ) : (
-                        <CButton
-                          color="secondary"
-                          variant="outline"
-                          size="sm"
-                          disabled={cadastrandoGatameId === inscricao.id}
-                          onClick={() => cadastrarNoGatame(inscricao)}
-                        >
-                          <CIcon icon={cilPeople} className="me-1" />
-                          {cadastrandoGatameId === inscricao.id ? 'Cadastrando...' : 'Cadastrar no Gatame'}
-                        </CButton>
-                      )
-                    )}
-                  </div>
-                </CTableDataCell>
-              </CTableRow>
-            ))}
-            {inscricoes.length === 0 && (
-              <CTableRow>
-                <CTableDataCell colSpan={16} className="text-body-secondary">
-                  Nenhuma inscrição registrada.
-                </CTableDataCell>
-              </CTableRow>
-            )}
-          </CTableBody>
-        </CTable>
-      </div>
+                    <CButton
+                      color="secondary"
+                      variant="outline"
+                      size="sm"
+                      disabled={cadastrandoGatameId === inscricao.id}
+                      onClick={() => cadastrarNoGatame(inscricao)}
+                    >
+                      <CIcon icon={cilPeople} className="me-1" />
+                      {cadastrandoGatameId === inscricao.id ? 'Cadastrando...' : 'Cadastrar no Gatame'}
+                    </CButton>
+                  ))}
+              </div>
+            ),
+          },
+        ]}
+      />
 
       <CModal visible={!!modalTurma} onClose={() => setModalTurma(null)}>
         <CModalHeader>

@@ -41,16 +41,20 @@ export default function AdminDataTable({
   emptyMessage = 'Nenhum registro encontrado.',
   pageSizeOptions = OPCOES_PAGINA_PADRAO,
   pageSize = OPCOES_PAGINA_PADRAO[0],
+  tableClassName = '',
+  tableStyle,
 }) {
   const [ordenacao, setOrdenacao] = useState(null); // { key, direcao: 'asc' | 'desc' }
   const [pagina, setPagina] = useState(1);
   const [tamanhoPagina, setTamanhoPagina] = useState(pageSize);
 
-  // Sempre que o conjunto de dados muda (nova busca, reload, exclusão...) volta pra primeira
-  // página — senão o usuário pode ficar "preso" numa página que não existe mais.
+  // Volta pra primeira página quando a QUANTIDADE de linhas muda (nova busca, exclusão, filtro) —
+  // não a cada nova referência de `rows`. Telas como EventoInscricoes atualizam uma linha só (ex.:
+  // marcar pagamento verificado) recriando o array inteiro; se resetasse nessa hora, o admin seria
+  // jogado de volta pra página 1 no meio de uma ação, o que é pior do que simplesmente não resetar.
   useEffect(() => {
     setPagina(1);
-  }, [rows]);
+  }, [rows.length]);
 
   function alternarOrdenacao(coluna) {
     if (!coluna.sortable) return;
@@ -83,7 +87,7 @@ export default function AdminDataTable({
   return (
     <div>
       <div className="table-responsive">
-        <CTable hover className="bg-white mb-0">
+        <CTable hover className={`bg-white mb-0 ${tableClassName}`} style={tableStyle}>
           <CTableHead>
             <CTableRow>
               {columns.map((coluna) => (
