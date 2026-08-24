@@ -12,6 +12,7 @@ export default function Alunos() {
   const [alunos, setAlunos] = useState([]);
   const [turmas, setTurmas] = useState([]);
   const [busca, setBusca] = useState('');
+  const [turmaFiltro, setTurmaFiltro] = useState('');
   const [selecionadoId, setSelecionadoId] = useState(null);
   const [matriculando, setMatriculando] = useState(false);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
@@ -19,6 +20,9 @@ export default function Alunos() {
   const [cadastrandoGatame, setCadastrandoGatame] = useState(false);
 
   const alunoSelecionado = alunos.find((aluno) => aluno.id === selecionadoId) || null;
+  const alunosFiltrados = turmaFiltro
+    ? alunos.filter((aluno) => (aluno.turmas || []).some((turma) => String(turma.id) === turmaFiltro))
+    : alunos;
 
   async function carregarAlunos() {
     const res = await api.get('/admin/alunos', { params: busca ? { busca } : {} });
@@ -43,6 +47,12 @@ export default function Alunos() {
     setSelecionadoId((atual) => (atual === id ? null : id));
     setMatriculando(false);
   }
+
+  // Filtrar por turma esconde linhas sem trocar a lista carregada — se o aluno selecionado saía de
+  // vista, os botões da toolbar continuavam habilitados apontando pra uma linha que já não aparece.
+  useEffect(() => {
+    setSelecionadoId(null);
+  }, [turmaFiltro]);
 
   async function handleExcluir() {
     if (!selecionadoId) return;
@@ -156,19 +166,32 @@ export default function Alunos() {
         </CInputGroup>
       )}
 
-      <CFormInput
-        className="mb-3"
-        style={{ maxWidth: 360 }}
-        placeholder="Buscar por nome ou email..."
-        value={busca}
-        onChange={(event) => setBusca(event.target.value)}
-      />
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        <CFormInput
+          style={{ maxWidth: 360 }}
+          placeholder="Buscar por nome ou email..."
+          value={busca}
+          onChange={(event) => setBusca(event.target.value)}
+        />
+        <CFormSelect
+          style={{ maxWidth: 240 }}
+          value={turmaFiltro}
+          onChange={(event) => setTurmaFiltro(event.target.value)}
+        >
+          <option value="">Todas as turmas</option>
+          {turmas.map((turma) => (
+            <option key={turma.id} value={turma.id}>
+              {turma.nome}
+            </option>
+          ))}
+        </CFormSelect>
+      </div>
 
       <AdminDataTable
-        rows={alunos}
+        rows={alunosFiltrados}
         selectedId={selecionadoId}
         onSelectRow={selecionarLinha}
-        emptyMessage="Nenhum aluno encontrado."
+        emptyMessage={turmaFiltro ? 'Nenhum aluno matriculado nessa turma.' : 'Nenhum aluno encontrado.'}
         columns={[
           { key: 'nome', label: 'Nome', sortable: true },
           { key: 'email', label: 'Email', sortable: true },
@@ -211,6 +234,8 @@ export default function Alunos() {
           {
             key: 'turmas',
             label: 'Turmas',
+            sortable: true,
+            sortValue: (aluno) => (aluno.turmas || []).map((t) => t.nome).join(', '),
             render: (aluno) => (aluno.turmas || []).map((t) => t.nome).join(', ') || '-',
           },
           {
