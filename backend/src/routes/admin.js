@@ -71,6 +71,7 @@ router.delete('/eventos/:id', eventoController.remover);
 router.get('/eventos/:id/inscricoes', eventoController.listarInscricoes);
 router.post('/eventos/:id/notificar-pendentes', eventoController.notificarPendentes);
 router.post('/inscricoes/:id/verificar-pagamento', eventoController.verificarPagamento);
+router.post('/inscricoes/:id/cancelar-pagamento', eventoController.cancelarPagamento);
 router.post('/inscricoes/:id/cadastrar-aluno', eventoController.cadastrarComoAluno);
 router.post('/inscricoes/:id/cadastrar-gatame', eventoController.cadastrarNoGatame);
 

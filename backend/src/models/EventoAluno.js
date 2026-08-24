@@ -71,8 +71,13 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
+  // "cancelado" é sempre uma ação manual do admin (cancelar a cobrança Pix no Mercado Pago pra
+  // ninguém pagar por engano) — diferente de "expirado", que o próprio Mercado Pago reporta e que
+  // o fluxo de notificar pendentes trata como "gera um Pix novo e tenta de novo". Por isso os dois
+  // não podem ser o mesmo valor: se fossem, cancelar uma cobrança faria ela "reviver" na próxima
+  // leva de lembretes de pagamento pendente.
   statusPagamento: {
-    type: DataTypes.ENUM('pendente', 'pago', 'expirado'),
+    type: DataTypes.ENUM('pendente', 'pago', 'expirado', 'cancelado'),
     allowNull: false,
     defaultValue: 'pendente',
   },

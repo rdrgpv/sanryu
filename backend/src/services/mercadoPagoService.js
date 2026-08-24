@@ -71,4 +71,28 @@ async function consultarPagamento(paymentId) {
   return { statusMp: resposta.data.status, statusPagamento: mapearStatusPagamento(resposta.data.status) };
 }
 
-module.exports = { criarPagamentoPix, consultarPagamento, mapearStatusPagamento };
+// Cancela a cobrança Pix no Mercado Pago. A própria API do MP só aceita esse cancelamento enquanto
+// o pagamento ainda está "pending" lá — quem chama (eventoController) já garante isso antes de
+// chegar aqui, checando o statusPagamento local.
+async function cancelarPagamento(paymentId) {
+  const accessToken = await obterAccessToken();
+
+  if (!accessToken) {
+    const erroConfig = new Error('Access Token do Mercado Pago não configurado em Configurações.');
+    erroConfig.interno = true;
+    throw erroConfig;
+  }
+
+  const resposta = await axios.put(
+    `${MP_API_URL}/${paymentId}`,
+    { status: 'cancelled' },
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      timeout: 15000,
+    }
+  );
+
+  return { statusMp: resposta.data.status };
+}
+
+module.exports = { criarPagamentoPix, consultarPagamento, cancelarPagamento, mapearStatusPagamento };

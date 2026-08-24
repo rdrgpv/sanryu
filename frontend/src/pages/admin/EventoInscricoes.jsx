@@ -11,7 +11,7 @@ import {
   CFormSelect,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople } from '@coreui/icons';
+import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople, cilXCircle } from '@coreui/icons';
 import api from '../../services/api';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
@@ -56,6 +56,7 @@ export default function EventoInscricoes() {
   const [cadastrandoGatameId, setCadastrandoGatameId] = useState(null);
   const [turmas, setTurmas] = useState([]);
   const [cadastrandoAlunoId, setCadastrandoAlunoId] = useState(null);
+  const [cancelandoPagamentoId, setCancelandoPagamentoId] = useState(null);
   const [modalTurma, setModalTurma] = useState(null); // { inscricao, turmasDoInstrutor, turmaId }
 
   // "expirado" (pagamento rejeitado/cancelado no Mercado Pago) também entra aqui — o backend gera
@@ -90,6 +91,24 @@ export default function EventoInscricoes() {
       setInscricoes((prev) => prev.map((inscricao) => (inscricao.id === inscricaoId ? res.data : inscricao)));
     } catch (err) {
       window.alert(err.response?.data?.error || 'Não foi possível verificar o pagamento agora.');
+    }
+  }
+
+  // Só é chamado quando a inscrição ainda está "pendente" (o próprio Mercado Pago rejeita cancelar
+  // um pagamento em qualquer outro estado) — o botão só aparece nesse caso, e o backend confere de
+  // novo antes de chamar o Mercado Pago.
+  async function cancelarPagamentoPix(inscricao) {
+    if (!window.confirm(`Cancelar a cobrança Pix de ${inscricao.nome || inscricao.email}? Ela não poderá mais ser paga.`))
+      return;
+
+    setCancelandoPagamentoId(inscricao.id);
+    try {
+      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cancelar-pagamento`);
+      setInscricoes((prev) => prev.map((item) => (item.id === inscricao.id ? res.data : item)));
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível cancelar o pagamento agora.');
+    } finally {
+      setCancelandoPagamentoId(null);
     }
   }
 
@@ -310,10 +329,22 @@ export default function EventoInscricoes() {
             label: 'Ações',
             render: (inscricao) => (
               <div className="d-flex flex-column gap-1 align-items-start">
-                {inscricao.mpPaymentId && (
+                {inscricao.mpPaymentId && inscricao.statusPagamento !== 'cancelado' && (
                   <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
                     <CIcon icon={cilCheckCircle} className="me-1" />
                     Verificar
+                  </CButton>
+                )}
+                {inscricao.mpPaymentId && inscricao.statusPagamento === 'pendente' && (
+                  <CButton
+                    color="danger"
+                    variant="outline"
+                    size="sm"
+                    disabled={cancelandoPagamentoId === inscricao.id}
+                    onClick={() => cancelarPagamentoPix(inscricao)}
+                  >
+                    <CIcon icon={cilXCircle} className="me-1" />
+                    {cancelandoPagamentoId === inscricao.id ? 'Cancelando...' : 'Cancelar Pix'}
                   </CButton>
                 )}
                 {inscricao.alunoId ? (

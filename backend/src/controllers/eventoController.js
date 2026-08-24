@@ -109,6 +109,14 @@ async function verificarPagamento(req, res) {
     return res.status(400).json({ error: 'Esta inscrição não possui um pagamento via Mercado Pago associado.' });
   }
 
+  // "cancelado" é definitivo (ação manual do admin) — o Mercado Pago também reporta esse pagamento
+  // como "cancelled", que mapearStatusPagamento traduz pra "expirado". Sem esse corte aqui, verificar
+  // de novo rebaixaria o cancelamento pra "expirado" e a cobrança voltaria a ser reenviada no
+  // próximo "notificar pendentes".
+  if (inscricao.statusPagamento === 'cancelado') {
+    return res.json(inscricao);
+  }
+
   try {
     const resultado = await mercadoPagoService.consultarPagamento(inscricao.mpPaymentId);
 
@@ -125,6 +133,39 @@ async function verificarPagamento(req, res) {
 
     logErro('Erro ao consultar status do pagamento no Mercado Pago:', err);
     res.status(502).json({ error: 'Não foi possível consultar o status do pagamento agora. Tente novamente.' });
+  }
+}
+
+// Cancela a cobrança Pix no Mercado Pago pra ninguém pagar por engano depois que o admin já não
+// quer mais aquele pagamento em aberto. O MP só aceita cancelar pagamento "pending" — por isso a
+// checagem de statusPagamento aqui, antes de gastar a chamada.
+async function cancelarPagamento(req, res) {
+  const inscricao = await EventoAluno.findByPk(req.params.id);
+
+  if (!inscricao) {
+    return res.status(404).json({ error: 'Inscrição não encontrada.' });
+  }
+
+  if (!inscricao.mpPaymentId) {
+    return res.status(400).json({ error: 'Esta inscrição não possui um pagamento via Mercado Pago associado.' });
+  }
+
+  if (inscricao.statusPagamento !== 'pendente') {
+    return res.status(400).json({ error: 'Só é possível cancelar um pagamento que ainda está pendente.' });
+  }
+
+  try {
+    await mercadoPagoService.cancelarPagamento(inscricao.mpPaymentId);
+    await inscricao.update({ statusPagamento: 'cancelado' });
+    res.json(inscricao);
+  } catch (err) {
+    if (err.interno) {
+      logErro('Erro de configuração ao cancelar pagamento no Mercado Pago:', err);
+      return res.status(500).json({ error: 'Erro de configuração ao cancelar o pagamento no Mercado Pago.' });
+    }
+
+    logErro('Erro ao cancelar pagamento no Mercado Pago:', err);
+    res.status(502).json({ error: 'Não foi possível cancelar o pagamento agora. Tente novamente.' });
   }
 }
 
@@ -289,6 +330,7 @@ module.exports = {
   remover,
   listarInscricoes,
   verificarPagamento,
+  cancelarPagamento,
   cadastrarComoAluno,
   cadastrarNoGatame,
   notificarPendentes,
