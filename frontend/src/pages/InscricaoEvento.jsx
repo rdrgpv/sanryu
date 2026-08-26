@@ -1,16 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
+import { OPCOES_TAMANHO_FAIXA } from '../utils/opcoesTamanhoFaixa.js';
 
 const TIPO_EXAME_DE_FAIXA_ID = 1;
 const OPCOES_FAIXA_BRANCA = ['Cinza', 'Amarela'];
-const OPCOES_TAMANHO_FAIXA = [
-  { valor: 'PP', label: 'PP — 2,10 m' },
-  { valor: 'P', label: 'P — 2,30 m' },
-  { valor: 'M', label: 'M — 2,70 m' },
-  { valor: 'G', label: 'G — 3,10 m' },
-  { valor: 'GG', label: 'GG — 3,60 m' },
-];
 
 function faixaEfetiva(candidato) {
   return candidato.origem === 'gatame' && candidato.faixa ? candidato.faixa : 'Branca';

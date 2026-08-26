@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormSelect, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
+import { OPCOES_TAMANHO_FAIXA } from '../../utils/opcoesTamanhoFaixa.js';
 
 const estadoInicial = {
   nome: '',
@@ -9,6 +10,7 @@ const estadoInicial = {
   telefone: '',
   dataNascimento: '',
   faixaId: '',
+  tamanhoFaixa: '',
   ativo: true,
 };
 
@@ -34,6 +36,7 @@ export default function AlunoForm() {
         telefone: aluno.telefone || '',
         dataNascimento: aluno.dataNascimento || '',
         faixaId: aluno.faixaId || '',
+        tamanhoFaixa: aluno.tamanhoFaixa || '',
         ativo: aluno.ativo,
       });
     });
@@ -48,7 +51,7 @@ export default function AlunoForm() {
     event.preventDefault();
     setErro(null);
 
-    const payload = { ...form, faixaId: form.faixaId || null };
+    const payload = { ...form, faixaId: form.faixaId || null, tamanhoFaixa: form.tamanhoFaixa || null };
 
     try {
       if (editando) {
@@ -102,6 +105,17 @@ export default function AlunoForm() {
                     <option key={faixa.id} value={faixa.id}>
                       {faixa.nome}
                       {faixa.grau ? ` ${faixa.grau}º grau` : ''}
+                    </option>
+                  ))}
+                </CFormSelect>
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Tamanho da faixa</CFormLabel>
+                <CFormSelect name="tamanhoFaixa" value={form.tamanhoFaixa} onChange={handleChange}>
+                  <option value="">Selecione</option>
+                  {OPCOES_TAMANHO_FAIXA.map((opcao) => (
+                    <option key={opcao.valor} value={opcao.valor}>
+                      {opcao.label}
                     </option>
                   ))}
                 </CFormSelect>

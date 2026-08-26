@@ -189,6 +189,7 @@ async function cadastrarNoGatame(req, res) {
       emailAluno: aluno.email,
       nome: aluno.nome,
       faixa: aluno.faixa?.nome || 'Branca',
+      tamanhoFaixa: aluno.tamanhoFaixa,
       dataNascimento: aluno.dataNascimento,
       observacao: 'Cadastrado via tela de alunos (San·Ryu).',
     });

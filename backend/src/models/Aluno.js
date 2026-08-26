@@ -26,6 +26,12 @@ const Aluno = sequelize.define('Aluno', {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  // Medida física da faixa (PP/P/M/G/GG) — enviada como tamanho_faixa ao cadastrar o aluno no
+  // Gatame (ver alunoController.cadastrarNoGatame). Mesmas opções da inscrição pública de eventos.
+  tamanhoFaixa: {
+    type: DataTypes.CHAR(2),
+    allowNull: true,
+  },
   ativo: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
