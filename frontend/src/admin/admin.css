@@ -233,13 +233,13 @@
 }
 
 /* Ficha de exame (relatório impresso) — ~5 fichas por página A4, não uma por página.
-   margin: 0 aqui é proposital — é o que impede o navegador de imprimir o próprio cabeçalho/rodapé
-   padrão (data, título da aba, URL, número da página) em cima da ficha: sem espaço de margem
-   reservado no @page, não sobra onde desenhar esse texto. A margem visual de 10mm que a ficha
-   precisa é recriada como padding do .container-fluid, no @media print mais abaixo. */
+   margin aqui precisa continuar no @page (não como padding de algum elemento): margem de @page
+   se repete em toda folha física gerada por page-break-after, enquanto padding de um elemento só
+   aparece no topo da primeira folha e no fim da última — nas folhas do meio (a maioria, quando há
+   várias páginas de fichas) o conteúdo ficaria colado na borda do papel. */
 @page {
   size: A4;
-  margin: 0;
+  margin: 10mm;
 }
 
 .ficha-exame-pagina {
@@ -302,11 +302,10 @@
     margin-left: 0 !important;
   }
 
-  /* Com o @page acima em margin: 0, essa margem de 10mm passa a ser a ÚNICA fonte de espaço em
-     branco ao redor da ficha (substitui tanto os 10mm que o @page dava antes quanto o px-4 py-4
-     do CContainer do AdminLayout, que sobraria por cima). O cálculo de largura em .ficha-exame
-     (718px) já considera esses 10mm de cada lado — não mexer num sem mexer no outro. */
+  /* O CContainer do AdminLayout tem px-4 py-4 (padding) que sobra por cima da área já
+     reservada pelo @page — sem zerar aqui, a ficha de exame estoura a largura da folha
+     e o navegador encolhe a impressão inteira pra caber, distorcendo tudo. */
   .wrapper .container-fluid {
-    padding: 10mm !important;
+    padding: 0 !important;
   }
 }
