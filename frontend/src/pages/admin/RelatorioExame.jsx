@@ -221,11 +221,12 @@ function capacidadePagina(faixa) {
   return normalizarFaixa(faixa) === 'preta' ? FICHAS_POR_PAGINA_PRETA : FICHAS_POR_PAGINA;
 }
 
-// Faixas etárias pra agrupar dentro de uma mesma faixa de graduação: até 8, 9 a 13, 14 ou mais.
+// Faixas etárias pra agrupar dentro de uma mesma faixa de graduação: até 8, 9 a 14, 15 a 49, 50 ou mais.
 const FAIXAS_ETARIAS = [
   { chave: 'ate-8', ordem: 0, teste: (idade) => idade <= 8 },
-  { chave: '9-13', ordem: 1, teste: (idade) => idade >= 9 && idade <= 13 },
-  { chave: '14-mais', ordem: 2, teste: (idade) => idade >= 14 },
+  { chave: '9-14', ordem: 1, teste: (idade) => idade >= 9 && idade <= 14 },
+  { chave: '15-49', ordem: 2, teste: (idade) => idade >= 15 && idade <= 49 },
+  { chave: '50-mais', ordem: 3, teste: (idade) => idade >= 50 },
 ];
 
 function faixaEtaria(idade) {
@@ -238,7 +239,7 @@ function ordemFaixaEtaria(chave) {
 }
 
 // Agrupa em páginas por faixa de graduação + faixa etária: nunca mistura faixas diferentes, nem
-// idades de grupos etários diferentes (até 8 / 9 a 13 / 14+), na mesma folha — mesmo que venham
+// idades de grupos etários diferentes (até 8 / 9 a 14 / 15 a 49 / 50+), na mesma folha — mesmo que venham
 // intercaladas na lista. Dentro de um mesmo grupo, respeita a capacidade da faixa (2 fichas de
 // Preta por página, 5 das demais). `ordemPorFaixa` (de /admin/faixas) ordena as faixas antes de
 // paginar; faixas sem cadastro vão pro final, na ordem em que apareceram.
