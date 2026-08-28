@@ -219,6 +219,19 @@
   color: var(--sanryu-muted);
 }
 
+/* AdminDataTable: linhas fora da página atual ficam escondidas na tela, mas a impressão (Ctrl+P)
+   deve sair com a listagem inteira, não só a página visível — a paginação em si não faz sentido
+   no papel. */
+.admin-table-row--fora-da-pagina {
+  display: none;
+}
+
+@media print {
+  .admin-table-row--fora-da-pagina {
+    display: table-row;
+  }
+}
+
 /* Ficha de exame (relatório impresso) — ~5 fichas por página A4, não uma por página */
 @page {
   size: A4;

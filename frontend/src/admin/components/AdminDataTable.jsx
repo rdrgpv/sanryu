@@ -82,7 +82,7 @@ export default function AdminDataTable({
   const totalPaginas = Math.max(1, Math.ceil(linhasOrdenadas.length / tamanhoPagina));
   const paginaAtual = Math.min(pagina, totalPaginas);
   const inicio = (paginaAtual - 1) * tamanhoPagina;
-  const linhasDaPagina = linhasOrdenadas.slice(inicio, inicio + tamanhoPagina);
+  const fim = inicio + tamanhoPagina;
 
   return (
     <div>
@@ -109,10 +109,20 @@ export default function AdminDataTable({
             </CTableRow>
           </CTableHead>
           <CTableBody>
-            {linhasDaPagina.map((row) => {
+            {/* Sempre renderiza TODAS as linhas ordenadas — a paginação só esconde por CSS (classe
+                abaixo) as que estão fora da página atual. Assim, na impressão (ver admin.css), a
+                folha sai com a lista inteira, não só com a página visível na tela. */}
+            {linhasOrdenadas.map((row, indice) => {
               const id = getRowId(row);
+              const foraDaPaginaAtual = indice < inicio || indice >= fim;
+
               return (
-                <CTableRow key={id} active={selectedId === id} onClick={() => onSelectRow?.(id)}>
+                <CTableRow
+                  key={id}
+                  active={selectedId === id}
+                  onClick={() => onSelectRow?.(id)}
+                  className={foraDaPaginaAtual ? 'admin-table-row--fora-da-pagina' : undefined}
+                >
                   {columns.map((coluna) => (
                     <CTableDataCell key={coluna.key} style={{ textAlign: coluna.align }}>
                       {coluna.render ? coluna.render(row) : (valorPadraoDaColuna(coluna, row) ?? '-')}
@@ -121,7 +131,7 @@ export default function AdminDataTable({
                 </CTableRow>
               );
             })}
-            {linhasDaPagina.length === 0 && (
+            {linhasOrdenadas.length === 0 && (
               <CTableRow>
                 <CTableDataCell colSpan={columns.length} className="p-0">
                   <div className="admin-empty-state">
@@ -136,10 +146,10 @@ export default function AdminDataTable({
       </div>
 
       {linhasOrdenadas.length > 0 && (
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
+        <div className="d-print-none d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
           <div className="d-flex align-items-center gap-2 small text-body-secondary">
             <span>
-              {inicio + 1}–{Math.min(inicio + tamanhoPagina, linhasOrdenadas.length)} de {linhasOrdenadas.length}
+              {inicio + 1}–{Math.min(fim, linhasOrdenadas.length)} de {linhasOrdenadas.length}
             </span>
             {pageSizeOptions.length > 1 && (
               <CFormSelect
