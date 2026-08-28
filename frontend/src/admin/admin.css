@@ -298,7 +298,12 @@
     display: none !important;
   }
 
+  /* .wrapper é "d-flex flex-column min-vh-100" pra tela — dentro de um contexto flex, a paginação
+     de impressão do Chrome não reaplica a margem do @page corretamente a partir da segunda folha
+     (bug conhecido de flexbox + quebra de página). Forçar bloco aqui resolve. */
   .wrapper {
+    display: block !important;
+    min-height: 0 !important;
     margin-left: 0 !important;
   }
 
