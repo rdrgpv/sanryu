@@ -8,12 +8,16 @@ import {
   CModalBody,
   CModalFooter,
   CFormLabel,
+  CFormInput,
   CFormSelect,
+  CRow,
+  CCol,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople, cilXCircle } from '@coreui/icons';
+import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople, cilXCircle, cilPencil } from '@coreui/icons';
 import api from '../../services/api';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import { OPCOES_TAMANHO_FAIXA } from '../../utils/opcoesTamanhoFaixa.js';
 import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
 
 const COLUNAS_EXPORTACAO = [
@@ -58,6 +62,8 @@ export default function EventoInscricoes() {
   const [cadastrandoAlunoId, setCadastrandoAlunoId] = useState(null);
   const [cancelandoPagamentoId, setCancelandoPagamentoId] = useState(null);
   const [modalTurma, setModalTurma] = useState(null); // { inscricao, turmasDoInstrutor, turmaId }
+  const [modalEdicao, setModalEdicao] = useState(null); // { id, nome, email, ... } — campos editáveis
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
   // "expirado" (pagamento rejeitado/cancelado no Mercado Pago) também entra aqui — o backend gera
   // um Pix novo pra esses antes de notificar, já que o anterior morreu.
@@ -109,6 +115,45 @@ export default function EventoInscricoes() {
       window.alert(err.response?.data?.error || 'Não foi possível cancelar o pagamento agora.');
     } finally {
       setCancelandoPagamentoId(null);
+    }
+  }
+
+  // Só os dados cadastrais são editáveis aqui (valor cobrado, status de pagamento e afins têm seus
+  // próprios fluxos — verificar/cancelar pagamento — e não devem ser mexidos por uma edição livre).
+  function abrirEdicao(inscricao) {
+    setModalEdicao({
+      id: inscricao.id,
+      nome: inscricao.nome || '',
+      email: inscricao.email || '',
+      telefone: inscricao.telefone || '',
+      faixa: inscricao.faixa || '',
+      faixaAtual: inscricao.faixaAtual || '',
+      tamanhoFaixa: inscricao.tamanhoFaixa || '',
+      dataNascimento: inscricao.dataNascimento || '',
+      responsavel: inscricao.responsavel || '',
+      numeroCarteirinha: inscricao.numeroCarteirinha || '',
+      validadeCarteirinha: inscricao.validadeCarteirinha || '',
+    });
+  }
+
+  function handleChangeEdicao(event) {
+    const { name, value } = event.target;
+    setModalEdicao((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function salvarEdicao() {
+    setSalvandoEdicao(true);
+
+    const { id: inscricaoId, ...payload } = modalEdicao;
+
+    try {
+      const res = await api.put(`/admin/inscricoes/${inscricaoId}`, payload);
+      setInscricoes((prev) => prev.map((item) => (item.id === inscricaoId ? res.data : item)));
+      setModalEdicao(null);
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível salvar as alterações.');
+    } finally {
+      setSalvandoEdicao(false);
     }
   }
 
@@ -329,6 +374,10 @@ export default function EventoInscricoes() {
             label: 'Ações',
             render: (inscricao) => (
               <div className="d-flex flex-column gap-1 align-items-start">
+                <CButton color="secondary" variant="outline" size="sm" onClick={() => abrirEdicao(inscricao)}>
+                  <CIcon icon={cilPencil} className="me-1" />
+                  Editar
+                </CButton>
                 {inscricao.mpPaymentId && inscricao.statusPagamento !== 'cancelado' && (
                   <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
                     <CIcon icon={cilCheckCircle} className="me-1" />
@@ -412,6 +461,81 @@ export default function EventoInscricoes() {
           </CButton>
           <CButton color="primary" onClick={confirmarCadastroComTurma}>
             Cadastrar
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      <CModal visible={!!modalEdicao} onClose={() => setModalEdicao(null)} size="lg">
+        <CModalHeader>
+          <CModalTitle>Editar inscrição</CModalTitle>
+        </CModalHeader>
+        {modalEdicao && (
+          <CModalBody>
+            <CRow className="g-3">
+              <CCol md={4}>
+                <CFormLabel>Nome</CFormLabel>
+                <CFormInput name="nome" value={modalEdicao.nome} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Email</CFormLabel>
+                <CFormInput type="email" name="email" value={modalEdicao.email} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Telefone</CFormLabel>
+                <CFormInput name="telefone" value={modalEdicao.telefone} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Nascimento</CFormLabel>
+                <CFormInput type="date" name="dataNascimento" value={modalEdicao.dataNascimento} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Responsável</CFormLabel>
+                <CFormInput name="responsavel" value={modalEdicao.responsavel} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Tamanho da faixa</CFormLabel>
+                <CFormSelect name="tamanhoFaixa" value={modalEdicao.tamanhoFaixa} onChange={handleChangeEdicao}>
+                  <option value="">Selecione</option>
+                  {OPCOES_TAMANHO_FAIXA.map((opcao) => (
+                    <option key={opcao.valor} value={opcao.valor}>
+                      {opcao.label}
+                    </option>
+                  ))}
+                </CFormSelect>
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Faixa (exame)</CFormLabel>
+                <CFormInput name="faixa" value={modalEdicao.faixa} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Faixa atual</CFormLabel>
+                <CFormInput name="faixaAtual" value={modalEdicao.faixaAtual} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Nº Carteirinha</CFormLabel>
+                <CFormInput name="numeroCarteirinha" value={modalEdicao.numeroCarteirinha} onChange={handleChangeEdicao} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Validade da carteirinha</CFormLabel>
+                <CFormInput
+                  type="date"
+                  name="validadeCarteirinha"
+                  value={modalEdicao.validadeCarteirinha}
+                  onChange={handleChangeEdicao}
+                />
+              </CCol>
+            </CRow>
+            <p className="text-body-secondary small mt-3 mb-0">
+              Valor cobrado, status de pagamento e cadastro no Gatame/Sanryu não são editáveis aqui — use as ações da tabela.
+            </p>
+          </CModalBody>
+        )}
+        <CModalFooter>
+          <CButton color="secondary" variant="outline" onClick={() => setModalEdicao(null)}>
+            Cancelar
+          </CButton>
+          <CButton color="primary" disabled={salvandoEdicao} onClick={salvarEdicao}>
+            {salvandoEdicao ? 'Salvando...' : 'Salvar alterações'}
           </CButton>
         </CModalFooter>
       </CModal>

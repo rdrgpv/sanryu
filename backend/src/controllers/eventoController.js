@@ -169,6 +169,50 @@ async function cancelarPagamento(req, res) {
   }
 }
 
+// Permite corrigir dados cadastrais digitados errado na inscrição pública (nome, contato, faixa,
+// carteirinha). De propósito NÃO toca em campos derivados de regra de negócio — valorCobrado,
+// statusPagamento, apto, carteirinhaValida, origemDados — nem nos dados do Mercado Pago: esses têm
+// fluxos próprios (verificar/cancelar pagamento) e recalculá-los aqui abriria brecha pra
+// inconsistência entre o que foi cobrado e o que está cadastrado.
+async function atualizarInscricao(req, res) {
+  const inscricao = await EventoAluno.findByPk(req.params.id);
+
+  if (!inscricao) {
+    return res.status(404).json({ error: 'Inscrição não encontrada.' });
+  }
+
+  const {
+    nome,
+    email,
+    telefone,
+    faixa,
+    faixaAtual,
+    tamanhoFaixa,
+    dataNascimento,
+    responsavel,
+    numeroCarteirinha,
+    validadeCarteirinha,
+  } = req.body;
+
+  try {
+    await inscricao.update({
+      nome,
+      email,
+      telefone,
+      faixa,
+      faixaAtual,
+      tamanhoFaixa,
+      dataNascimento,
+      responsavel,
+      numeroCarteirinha,
+      validadeCarteirinha,
+    });
+    res.json(inscricao);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
 // Cadastra o inscrito como Aluno no próprio Sanryu (tabela Aluno) — reaproveita um Aluno já
 // existente com o mesmo email em vez de duplicar. Se o instrutor responsável do evento tiver uma
 // Turma (e o admin escolher uma via turmaId), já matricula o aluno nela também.
@@ -329,6 +373,7 @@ module.exports = {
   atualizar,
   remover,
   listarInscricoes,
+  atualizarInscricao,
   verificarPagamento,
   cancelarPagamento,
   cadastrarComoAluno,

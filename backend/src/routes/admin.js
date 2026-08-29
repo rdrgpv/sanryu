@@ -69,6 +69,7 @@ router.get('/eventos/:id', eventoController.buscarPorId);
 router.put('/eventos/:id', eventoController.atualizar);
 router.delete('/eventos/:id', eventoController.remover);
 router.get('/eventos/:id/inscricoes', eventoController.listarInscricoes);
+router.put('/inscricoes/:id', eventoController.atualizarInscricao);
 router.post('/eventos/:id/notificar-pendentes', eventoController.notificarPendentes);
 router.post('/inscricoes/:id/verificar-pagamento', eventoController.verificarPagamento);
 router.post('/inscricoes/:id/cancelar-pagamento', eventoController.cancelarPagamento);
