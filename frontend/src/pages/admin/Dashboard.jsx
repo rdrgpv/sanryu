@@ -38,7 +38,7 @@ export default function Dashboard() {
 
       {erro && <div className="alert alert-danger">{erro}</div>}
 
-      <CRow className="g-3 mb-3">
+      <CRow className="g-3 mb-4">
         <CCol sm={6} lg={3}>
           <DashboardStatCard
             title="Alunos ativos"
@@ -64,7 +64,7 @@ export default function Dashboard() {
         </CCol>
       </CRow>
 
-      <CRow className="g-3 mb-3">
+      <CRow className="g-3 mb-4">
         <CCol lg={6}>
           <DashboardSection title="Distribuição de Faixas">
             <BeltDistribution faixas={resumo?.distribuicaoFaixas} loading={loading} />

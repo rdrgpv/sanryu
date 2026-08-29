@@ -12,9 +12,24 @@ import {
   CFormSelect,
   CRow,
   CCol,
+  CDropdown,
+  CDropdownToggle,
+  CDropdownMenu,
+  CDropdownItem,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCopy, cilCheckCircle, cilCloudDownload, cilPrint, cilSend, cilPeople, cilXCircle, cilPencil } from '@coreui/icons';
+import {
+  cilCopy,
+  cilCheckCircle,
+  cilCloudDownload,
+  cilPrint,
+  cilSend,
+  cilPeople,
+  cilXCircle,
+  cilPencil,
+  cilQrCode,
+  cilOptions,
+} from '@coreui/icons';
 import api from '../../services/api';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { OPCOES_TAMANHO_FAIXA } from '../../utils/opcoesTamanhoFaixa.js';
@@ -64,6 +79,7 @@ export default function EventoInscricoes() {
   const [modalTurma, setModalTurma] = useState(null); // { inscricao, turmasDoInstrutor, turmaId }
   const [modalEdicao, setModalEdicao] = useState(null); // { id, nome, email, ... } — campos editáveis
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+  const [modalPix, setModalPix] = useState(null); // inscrição cujo QR Pix está sendo visualizado
 
   // "expirado" (pagamento rejeitado/cancelado no Mercado Pago) também entra aqui — o backend gera
   // um Pix novo pra esses antes de notificar, já que o anterior morreu.
@@ -350,14 +366,10 @@ export default function EventoInscricoes() {
             label: 'QR Pix',
             render: (i) =>
               i.qrcodePix ? (
-                <div className="d-flex align-items-center gap-2">
-                  <img src={i.qrcodePix} alt="QR Pix" style={{ width: 40, height: 40 }} />
-                  {i.pixCopiaCola && (
-                    <CButton color="secondary" variant="outline" size="sm" onClick={() => copiarPix(i.pixCopiaCola)}>
-                      <CIcon icon={cilCopy} />
-                    </CButton>
-                  )}
-                </div>
+                <CButton color="secondary" variant="outline" size="sm" onClick={() => setModalPix(i)}>
+                  <CIcon icon={cilQrCode} className="me-1" />
+                  Ver Pix
+                </CButton>
               ) : (
                 '-'
               ),
@@ -372,61 +384,75 @@ export default function EventoInscricoes() {
           {
             key: 'acoes',
             label: 'Ações',
-            render: (inscricao) => (
-              <div className="d-flex flex-column gap-1 align-items-start">
-                <CButton color="secondary" variant="outline" size="sm" onClick={() => abrirEdicao(inscricao)}>
-                  <CIcon icon={cilPencil} className="me-1" />
-                  Editar
-                </CButton>
-                {inscricao.mpPaymentId && inscricao.statusPagamento !== 'cancelado' && (
-                  <CButton color="secondary" variant="outline" size="sm" onClick={() => verificarPagamento(inscricao.id)}>
-                    <CIcon icon={cilCheckCircle} className="me-1" />
-                    Verificar
-                  </CButton>
-                )}
-                {inscricao.mpPaymentId && inscricao.statusPagamento === 'pendente' && (
-                  <CButton
-                    color="danger"
-                    variant="outline"
-                    size="sm"
-                    disabled={cancelandoPagamentoId === inscricao.id}
-                    onClick={() => cancelarPagamentoPix(inscricao)}
-                  >
-                    <CIcon icon={cilXCircle} className="me-1" />
-                    {cancelandoPagamentoId === inscricao.id ? 'Cancelando...' : 'Cancelar Pix'}
-                  </CButton>
-                )}
-                {inscricao.alunoId ? (
-                  <span className="text-success small">Aluno cadastrado</span>
-                ) : (
-                  <CButton
-                    color="secondary"
-                    variant="outline"
-                    size="sm"
-                    disabled={cadastrandoAlunoId === inscricao.id}
-                    onClick={() => cadastrarComoAluno(inscricao)}
-                  >
-                    <CIcon icon={cilPeople} className="me-1" />
-                    {cadastrandoAlunoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
-                  </CButton>
-                )}
-                {inscricao.origemDados !== 'gatame' &&
-                  (inscricao.cadastradoNoGatame ? (
-                    <span className="text-success small">Cadastrado no Gatame</span>
-                  ) : (
-                    <CButton
-                      color="secondary"
-                      variant="outline"
-                      size="sm"
-                      disabled={cadastrandoGatameId === inscricao.id}
-                      onClick={() => cadastrarNoGatame(inscricao)}
-                    >
-                      <CIcon icon={cilPeople} className="me-1" />
-                      {cadastrandoGatameId === inscricao.id ? 'Cadastrando...' : 'Cadastrar no Gatame'}
+            render: (inscricao) => {
+              const podeVerificar = inscricao.mpPaymentId && inscricao.statusPagamento !== 'cancelado';
+              const podeCancelar = inscricao.mpPaymentId && inscricao.statusPagamento === 'pendente';
+              const podeCadastrarAluno = !inscricao.alunoId;
+              const podeCadastrarGatame = inscricao.origemDados !== 'gatame' && !inscricao.cadastradoNoGatame;
+              const temAcoesExtras = podeVerificar || podeCancelar || podeCadastrarAluno || podeCadastrarGatame;
+
+              return (
+                <div className="d-flex flex-column gap-1 align-items-start">
+                  <div className="d-flex gap-1">
+                    <CButton color="secondary" variant="outline" size="sm" onClick={() => abrirEdicao(inscricao)} title="Editar">
+                      <CIcon icon={cilPencil} />
                     </CButton>
-                  ))}
-              </div>
-            ),
+                    {temAcoesExtras && (
+                      <CDropdown portal alignment="end">
+                        <CDropdownToggle color="secondary" variant="outline" size="sm" caret={false} title="Mais ações">
+                          <CIcon icon={cilOptions} />
+                        </CDropdownToggle>
+                        <CDropdownMenu>
+                          {podeVerificar && (
+                            <CDropdownItem role="button" onClick={() => verificarPagamento(inscricao.id)}>
+                              <CIcon icon={cilCheckCircle} className="me-2" />
+                              Verificar pagamento
+                            </CDropdownItem>
+                          )}
+                          {podeCancelar && (
+                            <CDropdownItem
+                              role="button"
+                              className="text-danger"
+                              disabled={cancelandoPagamentoId === inscricao.id}
+                              onClick={() => cancelarPagamentoPix(inscricao)}
+                            >
+                              <CIcon icon={cilXCircle} className="me-2" />
+                              {cancelandoPagamentoId === inscricao.id ? 'Cancelando...' : 'Cancelar Pix'}
+                            </CDropdownItem>
+                          )}
+                          {podeCadastrarAluno && (
+                            <CDropdownItem
+                              role="button"
+                              disabled={cadastrandoAlunoId === inscricao.id}
+                              onClick={() => cadastrarComoAluno(inscricao)}
+                            >
+                              <CIcon icon={cilPeople} className="me-2" />
+                              {cadastrandoAlunoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
+                            </CDropdownItem>
+                          )}
+                          {podeCadastrarGatame && (
+                            <CDropdownItem
+                              role="button"
+                              disabled={cadastrandoGatameId === inscricao.id}
+                              onClick={() => cadastrarNoGatame(inscricao)}
+                            >
+                              <CIcon icon={cilPeople} className="me-2" />
+                              {cadastrandoGatameId === inscricao.id ? 'Cadastrando...' : 'Cadastrar no Gatame'}
+                            </CDropdownItem>
+                          )}
+                        </CDropdownMenu>
+                      </CDropdown>
+                    )}
+                  </div>
+                  <div className="d-flex flex-column gap-1">
+                    {inscricao.alunoId && <span className="badge bg-success-subtle text-success-emphasis">Aluno cadastrado</span>}
+                    {inscricao.cadastradoNoGatame && (
+                      <span className="badge bg-success-subtle text-success-emphasis">Cadastrado no Gatame</span>
+                    )}
+                  </div>
+                </div>
+              );
+            },
           },
         ]}
       />
@@ -536,6 +562,34 @@ export default function EventoInscricoes() {
           </CButton>
           <CButton color="primary" disabled={salvandoEdicao} onClick={salvarEdicao}>
             {salvandoEdicao ? 'Salvando...' : 'Salvar alterações'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      <CModal visible={!!modalPix} onClose={() => setModalPix(null)}>
+        <CModalHeader>
+          <CModalTitle>QR Pix</CModalTitle>
+        </CModalHeader>
+        {modalPix && (
+          <CModalBody className="text-center">
+            <p className="text-body-secondary small mb-3">{modalPix.nome || modalPix.email}</p>
+            <img src={modalPix.qrcodePix} alt="QR Pix" style={{ width: 220, height: 220 }} />
+            {modalPix.pixCopiaCola && (
+              <CButton
+                color="secondary"
+                variant="outline"
+                className="d-block mx-auto mt-3"
+                onClick={() => copiarPix(modalPix.pixCopiaCola)}
+              >
+                <CIcon icon={cilCopy} className="me-1" />
+                Copiar código Pix
+              </CButton>
+            )}
+          </CModalBody>
+        )}
+        <CModalFooter>
+          <CButton color="secondary" variant="outline" onClick={() => setModalPix(null)}>
+            Fechar
           </CButton>
         </CModalFooter>
       </CModal>

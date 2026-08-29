@@ -180,6 +180,17 @@
   box-shadow: var(--sanryu-shadow);
 }
 
+.wrapper .card-body {
+  padding: var(--sanryu-space-4) var(--sanryu-space-4);
+}
+
+.wrapper .card-header {
+  background: var(--sanryu-card);
+  border-bottom: 1px solid var(--sanryu-border);
+  font-weight: 700;
+  padding: var(--sanryu-space-3) var(--sanryu-space-4);
+}
+
 .wrapper .table thead th {
   background: var(--sanryu-background);
   color: var(--sanryu-muted);
@@ -204,18 +215,68 @@
 
 .wrapper .table td,
 .wrapper .table th {
-  padding-top: 0.65rem;
-  padding-bottom: 0.65rem;
+  padding-top: var(--sanryu-space-2);
+  padding-bottom: var(--sanryu-space-2);
+  padding-left: var(--sanryu-space-2);
+  padding-right: var(--sanryu-space-2);
 }
 
 .wrapper .badge {
   font-weight: 600;
   letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 0.35em 0.75em;
 }
 
 .admin-empty-state {
   padding: var(--sanryu-space-4) var(--sanryu-space-2);
   text-align: center;
+  color: var(--sanryu-muted);
+}
+
+/* Respiro geral: gutters de CRow/CCol (g-3, usado em quase todo formulário e grid de cards) um
+   pouco mais largos, e mais espaço entre o conteúdo e a borda da página. Escopado a .wrapper — não
+   afeta modais (que renderizam fora dessa árvore) nem o site público. */
+.wrapper .row.g-3 {
+  --cui-gutter-x: 1.5rem;
+  --cui-gutter-y: 1.5rem;
+}
+
+.wrapper > .container-fluid {
+  padding: var(--sanryu-space-5) var(--sanryu-space-5) var(--sanryu-space-5) !important;
+}
+
+@media (max-width: 768px) {
+  .wrapper > .container-fluid {
+    padding: var(--sanryu-space-3) !important;
+  }
+}
+
+/* Identidade: título de cada página ganha uma "assinatura" — traço curto na cor da marca embaixo,
+   no mesmo espírito do .page-header do site público (borda inferior vermelha). Todas as telas do
+   admin começam com <h1 className="h3">, então esse seletor cobre o painel inteiro de uma vez. */
+.wrapper h1.h3 {
+  position: relative;
+  padding-bottom: var(--sanryu-space-2);
+}
+
+.wrapper h1.h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--sanryu-primary);
+}
+
+/* Rótulos de formulário em versalete discreto — foge do "form padrão Bootstrap" sem pesar. */
+.wrapper .form-label {
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--sanryu-muted);
 }
 
