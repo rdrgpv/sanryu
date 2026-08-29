@@ -113,7 +113,7 @@ export default function FaixaForm() {
                 <CFormInput name="nome" value={form.nome} onChange={handleChange} required />
               </CCol>
               <CCol md={2}>
-                <CFormLabel>Grau {grauObrigatorio ? '' : '(opcional)'}</CFormLabel>
+                <CFormLabel>Dan {grauObrigatorio ? '' : '(opcional)'}</CFormLabel>
                 <CFormInput
                   type="number"
                   name="grau"

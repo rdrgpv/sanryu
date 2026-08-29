@@ -35,7 +35,7 @@ export default function BeltDistribution({ faixas, loading }) {
                   }}
                 />
                 {faixa.nome}
-                {faixa.grau ? ` — ${faixa.grau}º grau` : ''}
+                {faixa.grau ? ` — ${faixa.grau}º Dan` : ''}
               </span>
               <span className="text-body-secondary small">{faixa.total}</span>
             </div>

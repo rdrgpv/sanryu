@@ -70,7 +70,7 @@ export default function Faixas() {
             ),
           },
           { key: 'nome', label: 'Nome', sortable: true },
-          { key: 'grau', label: 'Grau', align: 'center', sortable: true, render: (faixa) => faixa.grau ?? '-' },
+          { key: 'grau', label: 'Dan', align: 'center', sortable: true, render: (faixa) => faixa.grau ?? '-' },
           { key: 'ordem', label: 'Ordem', align: 'center', sortable: true },
           {
             key: 'valorComCarteirinha',

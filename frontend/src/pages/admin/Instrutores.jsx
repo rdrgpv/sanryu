@@ -69,7 +69,7 @@ export default function Instrutores() {
                     }}
                   />
                   {instrutor.faixa.nome}
-                  {instrutor.faixa.grau ? ` ${instrutor.faixa.grau}º grau` : ''}
+                  {instrutor.faixa.grau ? ` ${instrutor.faixa.grau}º Dan` : ''}
                 </span>
               ) : (
                 '-'

@@ -104,7 +104,7 @@ export default function AlunoForm() {
                   {faixas.map((faixa) => (
                     <option key={faixa.id} value={faixa.id}>
                       {faixa.nome}
-                      {faixa.grau ? ` ${faixa.grau}º grau` : ''}
+                      {faixa.grau ? ` ${faixa.grau}º Dan` : ''}
                     </option>
                   ))}
                 </CFormSelect>
