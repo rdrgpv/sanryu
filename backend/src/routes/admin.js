@@ -144,6 +144,7 @@ router.put('/pedidos-compra/:id', pedidoCompraController.atualizar);
 router.delete('/pedidos-compra/:id', pedidoCompraController.remover);
 router.post('/pedidos/:id/gerar-pedido-compra', pedidoCompraController.gerar);
 router.post('/pedidos-compra/:id/receber-itens', pedidoCompraController.receberItens);
+router.put('/pedidos-compra/:id/itens-valores', pedidoCompraController.atualizarValoresItens);
 router.post('/pedidos-compra/:id/marcar-encomendado', pedidoCompraController.marcarComoEncomendado);
 
 module.exports = router;

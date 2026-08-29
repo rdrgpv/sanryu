@@ -37,6 +37,8 @@ export default function PedidoCompraDetalhe() {
   const [pedidoCompra, setPedidoCompra] = useState(null);
   const [camposCabecalho, setCamposCabecalho] = useState({ observacao: '', dataPrevistaEntrega: '' });
   const [recebimentos, setRecebimentos] = useState({});
+  const [valoresUnitarios, setValoresUnitarios] = useState({});
+  const [salvandoValores, setSalvandoValores] = useState(false);
   const [erro, setErro] = useState(null);
   const [mensagem, setMensagem] = useState(null);
 
@@ -48,11 +50,14 @@ export default function PedidoCompraDetalhe() {
       dataPrevistaEntrega: res.data.dataPrevistaEntrega || '',
     });
     const iniciais = {};
+    const valores = {};
     (res.data.itens || []).forEach((item) => {
       const pendente = item.quantidade - item.quantidadeRecebida;
       if (pendente > 0) iniciais[item.id] = pendente;
+      valores[item.id] = item.valorUnitario;
     });
     setRecebimentos(iniciais);
+    setValoresUnitarios(valores);
   }
 
   useEffect(() => {
@@ -79,6 +84,38 @@ export default function PedidoCompraDetalhe() {
 
   function handleRecebimentoChange(itemId, valor) {
     setRecebimentos((prev) => ({ ...prev, [itemId]: valor }));
+  }
+
+  function handleValorUnitarioChange(itemId, valor) {
+    setValoresUnitarios((prev) => ({ ...prev, [itemId]: valor }));
+  }
+
+  // Ajusta o preço negociado com o fornecedor — o valor gravado na geração do pedido é só uma
+  // cópia inicial do custo cadastrado na variação. Não muda o custo cadastrado no produto, só o
+  // valor deste pedido de compra.
+  async function handleSalvarValores() {
+    const itens = (pedidoCompra.itens || []).map((item) => ({
+      id: item.id,
+      valorUnitario: Number(valoresUnitarios[item.id]),
+    }));
+
+    if (itens.some((item) => !(item.valorUnitario >= 0))) {
+      setErro('Informe um valor unitário válido para todos os itens.');
+      return;
+    }
+
+    setSalvandoValores(true);
+    setErro(null);
+    setMensagem(null);
+    try {
+      await api.put(`/admin/pedidos-compra/${id}/itens-valores`, { itens });
+      setMensagem('Valores atualizados.');
+      carregar();
+    } catch (err) {
+      setErro(err.response?.data?.error || 'Erro ao salvar os valores.');
+    } finally {
+      setSalvandoValores(false);
+    }
   }
 
   async function handleConfirmarRecebimento() {
@@ -185,7 +222,20 @@ export default function PedidoCompraDetalhe() {
                 <CTableDataCell>{item.quantidade}</CTableDataCell>
                 <CTableDataCell>{item.quantidadeRecebida}</CTableDataCell>
                 <CTableDataCell>{pendente}</CTableDataCell>
-                <CTableDataCell>{formatarMoeda(item.valorUnitario)}</CTableDataCell>
+                <CTableDataCell>
+                  {podeReceber ? (
+                    <CFormInput
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      style={{ width: 120 }}
+                      value={valoresUnitarios[item.id] ?? ''}
+                      onChange={(e) => handleValorUnitarioChange(item.id, e.target.value)}
+                    />
+                  ) : (
+                    formatarMoeda(item.valorUnitario)
+                  )}
+                </CTableDataCell>
                 <CTableDataCell>{formatarMoeda(item.valorTotal)}</CTableDataCell>
                 {podeReceber && (
                   <CTableDataCell>
@@ -207,9 +257,14 @@ export default function PedidoCompraDetalhe() {
       </CTable>
 
       {podeReceber && (
-        <CButton color="primary" className="mt-3" onClick={handleConfirmarRecebimento}>
-          Confirmar recebimento
-        </CButton>
+        <div className="d-flex gap-2 mt-3">
+          <CButton color="secondary" variant="outline" disabled={salvandoValores} onClick={handleSalvarValores}>
+            {salvandoValores ? 'Salvando...' : 'Salvar valores'}
+          </CButton>
+          <CButton color="primary" onClick={handleConfirmarRecebimento}>
+            Confirmar recebimento
+          </CButton>
+        </div>
       )}
     </div>
   );

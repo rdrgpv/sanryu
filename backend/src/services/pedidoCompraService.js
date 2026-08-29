@@ -154,4 +154,42 @@ async function marcarComoEncomendado(pedidoCompra) {
   await pedidoCompra.update({ situacao: 'X', dataEncomenda: new Date() });
 }
 
-module.exports = { calcularAlocado, calcularItensPendentesCompra, gerarPedidoCompra, receberItens, marcarComoEncomendado };
+// Ajusta o valor unitário negociado com o fornecedor — o valor gravado na geração do pedido é só
+// um ponto de partida (cópia do custo cadastrado na variação) e pode não bater com o que foi
+// fechado de verdade. De propósito NÃO mexe no valorCusto da ProdutoVariacao: o ajuste vale só
+// para este pedido de compra, sem virar o novo custo padrão do produto pra sempre.
+async function atualizarValoresItens(pedidoCompraId, itens) {
+  const pedidoCompra = await PedidoCompra.findByPk(pedidoCompraId, { include: ['itens'] });
+  if (!pedidoCompra) throw new Error('Pedido de compra não encontrado.');
+
+  if (!['P', 'X'].includes(pedidoCompra.situacao)) {
+    throw new Error('Só é possível editar o valor de um pedido de compra pendente ou encomendado.');
+  }
+
+  return sequelize.transaction(async (t) => {
+    for (const linha of itens) {
+      const item = pedidoCompra.itens.find((i) => i.id === linha.id);
+      if (!item) throw new Error(`Item ${linha.id} não pertence a este pedido de compra.`);
+
+      const valorUnitario = Number(linha.valorUnitario);
+      if (!(valorUnitario >= 0)) throw new Error('Valor unitário inválido.');
+
+      await item.update({ valorUnitario, valorTotal: valorUnitario * item.quantidade }, { transaction: t });
+    }
+
+    const itensAtualizados = await PedidoCompraItem.findAll({ where: { pedidoCompraId: pedidoCompra.id }, transaction: t });
+    const valorTotal = itensAtualizados.reduce((soma, i) => soma + Number(i.valorTotal), 0);
+    await pedidoCompra.update({ valorTotal }, { transaction: t });
+
+    return PedidoCompra.findByPk(pedidoCompra.id, { include: ['itens'], transaction: t });
+  });
+}
+
+module.exports = {
+  calcularAlocado,
+  calcularItensPendentesCompra,
+  gerarPedidoCompra,
+  receberItens,
+  marcarComoEncomendado,
+  atualizarValoresItens,
+};

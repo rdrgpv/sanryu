@@ -98,6 +98,15 @@ async function receberItens(req, res) {
   }
 }
 
+async function atualizarValoresItens(req, res) {
+  try {
+    const pedidoCompra = await pedidoCompraService.atualizarValoresItens(req.params.id, req.body.itens || []);
+    res.json(pedidoCompra);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
 async function marcarComoEncomendado(req, res) {
   const pedidoCompra = await PedidoCompra.findByPk(req.params.id);
 
@@ -113,4 +122,4 @@ async function marcarComoEncomendado(req, res) {
   }
 }
 
-module.exports = { listar, buscarPorId, atualizar, remover, gerar, receberItens, marcarComoEncomendado };
+module.exports = { listar, buscarPorId, atualizar, remover, gerar, receberItens, atualizarValoresItens, marcarComoEncomendado };
