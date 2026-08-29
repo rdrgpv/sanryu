@@ -24,6 +24,7 @@ import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 const SITUACOES = {
   P: { label: 'Pendente', cor: 'secondary' },
   X: { label: 'Encomendado', cor: 'info' },
+  PG: { label: 'Pago', cor: 'warning' },
   R: { label: 'Recebido', cor: 'success' },
   E: { label: 'Cancelado', cor: 'danger' },
 };
@@ -141,7 +142,11 @@ export default function PedidoCompraDetalhe() {
 
   if (!pedidoCompra) return null;
 
-  const podeReceber = ['P', 'X'].includes(pedidoCompra.situacao);
+  // Itens ainda podem ser recebidos mesmo depois de pago (PG) — pagamento e recebimento físico são
+  // coisas diferentes. Já o valor unitário trava assim que marcado como pago: mudar o preço depois
+  // de já ter pago não faz sentido, então o backend só aceita edição em P/X (sem PG).
+  const podeReceber = ['P', 'X', 'PG'].includes(pedidoCompra.situacao);
+  const podeEditarValores = ['P', 'X'].includes(pedidoCompra.situacao);
 
   return (
     <div>
@@ -175,6 +180,10 @@ export default function PedidoCompraDetalhe() {
                   value={camposCabecalho.dataPrevistaEntrega}
                   onChange={handleCabecalhoChange}
                 />
+              </CCol>
+              <CCol md={3}>
+                <CFormLabel>Pago em</CFormLabel>
+                <CFormInput value={formatarDataHora(pedidoCompra.dataPagamento)} disabled readOnly />
               </CCol>
               <CCol md={3}>
                 <CFormLabel>Recebido em</CFormLabel>
@@ -223,7 +232,7 @@ export default function PedidoCompraDetalhe() {
                 <CTableDataCell>{item.quantidadeRecebida}</CTableDataCell>
                 <CTableDataCell>{pendente}</CTableDataCell>
                 <CTableDataCell>
-                  {podeReceber ? (
+                  {podeEditarValores ? (
                     <CFormInput
                       type="number"
                       min="0"
@@ -256,14 +265,18 @@ export default function PedidoCompraDetalhe() {
         </CTableBody>
       </CTable>
 
-      {podeReceber && (
+      {(podeEditarValores || podeReceber) && (
         <div className="d-flex gap-2 mt-3">
-          <CButton color="secondary" variant="outline" disabled={salvandoValores} onClick={handleSalvarValores}>
-            {salvandoValores ? 'Salvando...' : 'Salvar valores'}
-          </CButton>
-          <CButton color="primary" onClick={handleConfirmarRecebimento}>
-            Confirmar recebimento
-          </CButton>
+          {podeEditarValores && (
+            <CButton color="secondary" variant="outline" disabled={salvandoValores} onClick={handleSalvarValores}>
+              {salvandoValores ? 'Salvando...' : 'Salvar valores'}
+            </CButton>
+          )}
+          {podeReceber && (
+            <CButton color="primary" onClick={handleConfirmarRecebimento}>
+              Confirmar recebimento
+            </CButton>
+          )}
         </div>
       )}
     </div>

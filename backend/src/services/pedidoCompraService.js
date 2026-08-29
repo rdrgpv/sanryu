@@ -139,7 +139,7 @@ async function receberItens(pedidoCompraId, linhas) {
 
     const itensAtualizados = await PedidoCompraItem.findAll({ where: { pedidoCompraId: pedidoCompra.id }, transaction: t });
     const tudoRecebido = itensAtualizados.every((i) => i.quantidadeRecebida >= i.quantidade);
-    if (tudoRecebido && ['P', 'X'].includes(pedidoCompra.situacao)) {
+    if (tudoRecebido && ['P', 'X', 'PG'].includes(pedidoCompra.situacao)) {
       await pedidoCompra.update({ situacao: 'R', dataRecebimento: new Date() }, { transaction: t });
     }
 
@@ -152,6 +152,13 @@ async function marcarComoEncomendado(pedidoCompra) {
     throw new Error('Só é possível marcar como encomendado um pedido de compra pendente.');
   }
   await pedidoCompra.update({ situacao: 'X', dataEncomenda: new Date() });
+}
+
+async function marcarComoPago(pedidoCompra) {
+  if (pedidoCompra.situacao !== 'X') {
+    throw new Error('Só é possível marcar como pago um pedido de compra encomendado.');
+  }
+  await pedidoCompra.update({ situacao: 'PG', dataPagamento: new Date() });
 }
 
 // Ajusta o valor unitário negociado com o fornecedor — o valor gravado na geração do pedido é só
@@ -191,5 +198,6 @@ module.exports = {
   gerarPedidoCompra,
   receberItens,
   marcarComoEncomendado,
+  marcarComoPago,
   atualizarValoresItens,
 };

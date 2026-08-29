@@ -122,4 +122,29 @@ async function marcarComoEncomendado(req, res) {
   }
 }
 
-module.exports = { listar, buscarPorId, atualizar, remover, gerar, receberItens, atualizarValoresItens, marcarComoEncomendado };
+async function marcarComoPago(req, res) {
+  const pedidoCompra = await PedidoCompra.findByPk(req.params.id);
+
+  if (!pedidoCompra) {
+    return res.status(404).json({ error: 'Pedido de compra não encontrado.' });
+  }
+
+  try {
+    await pedidoCompraService.marcarComoPago(pedidoCompra);
+    res.json(pedidoCompra);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = {
+  listar,
+  buscarPorId,
+  atualizar,
+  remover,
+  gerar,
+  receberItens,
+  atualizarValoresItens,
+  marcarComoEncomendado,
+  marcarComoPago,
+};

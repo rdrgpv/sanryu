@@ -9,6 +9,7 @@ import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 const SITUACOES = {
   P: { label: 'Pendente', cor: 'secondary' },
   X: { label: 'Encomendado', cor: 'info' },
+  PG: { label: 'Pago', cor: 'warning' },
   R: { label: 'Recebido', cor: 'success' },
   E: { label: 'Cancelado', cor: 'danger' },
 };
@@ -72,6 +73,17 @@ export default function PedidosCompra() {
     }
   }
 
+  async function handleMarcarPago() {
+    if (!selecionado) return;
+    if (!window.confirm('Marcar este pedido de compra como pago?')) return;
+    try {
+      await api.post(`/admin/pedidos-compra/${selecionado.id}/marcar-pago`);
+      carregarPedidosCompra();
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível marcar como pago.');
+    }
+  }
+
   async function handleEnviarWhatsApp() {
     if (!selecionado) return;
     const res = await api.get(`/admin/pedidos-compra/${selecionado.id}`);
@@ -94,6 +106,9 @@ export default function PedidosCompra() {
           <>
             <CButton color="secondary" variant="outline" disabled={selecionado?.situacao !== 'P'} onClick={handleMarcarEncomendado}>
               Marcar como encomendado
+            </CButton>
+            <CButton color="secondary" variant="outline" disabled={selecionado?.situacao !== 'X'} onClick={handleMarcarPago}>
+              Marcar como pago
             </CButton>
             <CButton
               color="secondary"
@@ -141,6 +156,12 @@ export default function PedidosCompra() {
             label: 'Previsão de entrega',
             sortable: true,
             render: (pc) => pc.dataPrevistaEntrega || '-',
+          },
+          {
+            key: 'dataPagamento',
+            label: 'Pagamento',
+            sortable: true,
+            render: (pc) => (pc.dataPagamento ? new Date(pc.dataPagamento).toLocaleDateString('pt-BR') : '-'),
           },
           {
             key: 'dataRecebimento',
