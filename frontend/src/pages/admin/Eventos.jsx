@@ -50,9 +50,9 @@ export default function Eventos() {
             variant="outline"
             disabled={!selecionadoId}
             onClick={() => navigate(`/admin/eventos/${selecionadoId}/inscricoes`)}
+            title="Inscrições"
           >
-            <CIcon icon={cilList} className="me-1" />
-            Inscrições
+            <CIcon icon={cilList} />
           </CButton>
         }
       />

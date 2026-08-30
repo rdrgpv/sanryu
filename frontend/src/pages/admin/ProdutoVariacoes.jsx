@@ -57,18 +57,18 @@ export default function ProdutoVariacoes() {
               variant="outline"
               disabled={!selecionadoId}
               onClick={() => navigate(`/admin/produto-variacoes/novo?duplicarDe=${selecionadoId}`)}
+              title="Duplicar"
             >
-              <CIcon icon={cilClone} className="me-1" />
-              Duplicar
+              <CIcon icon={cilClone} />
             </CButton>
             <CButton
               color="secondary"
               variant="outline"
               disabled={!selecionadoId}
               onClick={() => navigate(`/admin/produto-variacoes/${selecionadoId}/movimentacoes`)}
+              title="Movimentações"
             >
-              <CIcon icon={cilList} className="me-1" />
-              Movimentações
+              <CIcon icon={cilList} />
             </CButton>
           </>
         }

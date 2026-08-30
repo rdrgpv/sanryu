@@ -87,7 +87,7 @@ export default function AdminDataTable({
   return (
     <div>
       <div className="table-responsive">
-        <CTable hover className={`bg-white mb-0 ${tableClassName}`} style={tableStyle}>
+        <CTable hover striped bordered className={`bg-white mb-0 ${tableClassName}`} style={tableStyle}>
           <CTableHead>
             <CTableRow>
               {columns.map((coluna) => (

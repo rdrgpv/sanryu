@@ -17,21 +17,17 @@ export default function AdminToolbar({
   return (
     <div className="d-flex flex-wrap gap-2 mb-3">
       <CButtonGroup role="group">
-        <CButton color="primary" onClick={onNovo}>
-          <CIcon icon={cilPlus} className="me-1" />
-          {novoLabel}
+        <CButton color="primary" onClick={onNovo} title={novoLabel}>
+          <CIcon icon={cilPlus} />
         </CButton>
-        <CButton color="secondary" variant="outline" disabled={!podeEditar} onClick={onEditar}>
-          <CIcon icon={cilPencil} className="me-1" />
-          Editar
+        <CButton color="secondary" variant="outline" disabled={!podeEditar} onClick={onEditar} title="Editar">
+          <CIcon icon={cilPencil} />
         </CButton>
-        <CButton color="danger" variant="outline" disabled={!excluirHabilitado} onClick={onExcluir}>
-          <CIcon icon={cilTrash} className="me-1" />
-          Excluir
+        <CButton color="danger" variant="outline" disabled={!excluirHabilitado} onClick={onExcluir} title="Excluir">
+          <CIcon icon={cilTrash} />
         </CButton>
-        <CButton color="secondary" variant="outline" onClick={onAtualizar}>
-          <CIcon icon={cilReload} className="me-1" />
-          Atualizar
+        <CButton color="secondary" variant="outline" onClick={onAtualizar} title="Atualizar">
+          <CIcon icon={cilReload} />
         </CButton>
       </CButtonGroup>
       {extra && <div className="d-flex flex-wrap gap-2">{extra}</div>}

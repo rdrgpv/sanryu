@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CFormInput, CFormSelect, CButton, CInputGroup } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPeople } from '@coreui/icons';
+import { cilSchool, cilSearch, cilUserPlus } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
@@ -127,24 +127,33 @@ export default function Alunos() {
               variant="outline"
               disabled={!selecionadoId}
               onClick={() => setMatriculando((prev) => !prev)}
+              title="Matricular"
             >
-              <CIcon icon={cilPeople} className="me-1" />
-              Matricular
+              <CIcon icon={cilSchool} />
             </CButton>
-            <CButton color="info" variant="outline" disabled={!selecionadoId || verificandoGatame} onClick={verificarGatame}>
-              {verificandoGatame ? 'Verificando...' : 'Verificar no Gatame'}
+            <CButton
+              color="info"
+              variant="outline"
+              disabled={!selecionadoId || verificandoGatame}
+              onClick={verificarGatame}
+              title={verificandoGatame ? 'Verificando...' : 'Verificar no Gatame'}
+            >
+              <CIcon icon={cilSearch} />
             </CButton>
             <CButton
               color="success"
               variant="outline"
               disabled={!selecionadoId || cadastrandoGatame || alunoSelecionado?.cadastradoNoGatame}
               onClick={cadastrarNoGatame}
+              title={
+                cadastrandoGatame
+                  ? 'Cadastrando...'
+                  : alunoSelecionado?.cadastradoNoGatame
+                    ? 'Já cadastrado no Gatame'
+                    : 'Cadastrar no Gatame'
+              }
             >
-              {cadastrandoGatame
-                ? 'Cadastrando...'
-                : alunoSelecionado?.cadastradoNoGatame
-                  ? 'Já cadastrado no Gatame'
-                  : 'Cadastrar no Gatame'}
+              <CIcon icon={cilUserPlus} />
             </CButton>
           </>
         }

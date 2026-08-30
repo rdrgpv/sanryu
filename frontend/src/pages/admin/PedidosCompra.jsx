@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CButton, CBadge } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilTruck, cilCash, cilSend } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
@@ -104,19 +106,32 @@ export default function PedidosCompra() {
         onAtualizar={carregarPedidosCompra}
         extra={
           <>
-            <CButton color="secondary" variant="outline" disabled={selecionado?.situacao !== 'P'} onClick={handleMarcarEncomendado}>
-              Marcar como encomendado
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={selecionado?.situacao !== 'P'}
+              onClick={handleMarcarEncomendado}
+              title="Marcar como encomendado"
+            >
+              <CIcon icon={cilTruck} />
             </CButton>
-            <CButton color="secondary" variant="outline" disabled={selecionado?.situacao !== 'X'} onClick={handleMarcarPago}>
-              Marcar como pago
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={selecionado?.situacao !== 'X'}
+              onClick={handleMarcarPago}
+              title="Marcar como pago"
+            >
+              <CIcon icon={cilCash} />
             </CButton>
             <CButton
               color="secondary"
               variant="outline"
               disabled={!selecionado || !['P', 'X'].includes(selecionado.situacao)}
               onClick={handleEnviarWhatsApp}
+              title="Enviar por WhatsApp"
             >
-              Enviar por WhatsApp
+              <CIcon icon={cilSend} />
             </CButton>
           </>
         }

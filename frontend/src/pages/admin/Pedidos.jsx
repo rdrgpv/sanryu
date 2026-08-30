@@ -15,6 +15,8 @@ import {
   CModalBody,
   CModalFooter,
 } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilTask, cilTruck, cilCheckCircle } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
@@ -103,24 +105,26 @@ export default function Pedidos() {
         onAtualizar={carregarPedidos}
         extra={
           <>
-            <CButton color="secondary" variant="outline" disabled={!selecionadoId} onClick={abrirDetalhe}>
-              Detalhe
+            <CButton color="secondary" variant="outline" disabled={!selecionadoId} onClick={abrirDetalhe} title="Detalhe">
+              <CIcon icon={cilTask} />
             </CButton>
             <CButton
               color="secondary"
               variant="outline"
               disabled={selecionado?.situacao !== 'P'}
               onClick={() => navigate(`/admin/pedidos/${selecionadoId}/gerar-pedido-compra`)}
+              title="Gerar pedido de compra"
             >
-              Gerar pedido de compra
+              <CIcon icon={cilTruck} />
             </CButton>
             <CButton
               color="secondary"
               variant="outline"
               disabled={!selecionado || !['P', 'C'].includes(selecionado.situacao)}
               onClick={handleEntregar}
+              title="Entregar"
             >
-              Entregar
+              <CIcon icon={cilCheckCircle} />
             </CButton>
           </>
         }

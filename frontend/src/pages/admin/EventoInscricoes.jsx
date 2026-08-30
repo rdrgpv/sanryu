@@ -23,8 +23,10 @@ import {
   cilCheckCircle,
   cilCloudDownload,
   cilPrint,
+  cilList,
   cilSend,
   cilPeople,
+  cilSchool,
   cilXCircle,
   cilPencil,
   cilQrCode,
@@ -288,9 +290,9 @@ export default function EventoInscricoes() {
             color="secondary"
             variant="outline"
             disabled={inscricoes.length === 0}
+            title="Fichas de exame"
           >
-            <CIcon icon={cilPrint} className="me-1" />
-            Fichas de exame
+            <CIcon icon={cilPrint} />
           </CButton>
           <CButton
             as={Link}
@@ -298,17 +300,21 @@ export default function EventoInscricoes() {
             color="secondary"
             variant="outline"
             disabled={inscricoes.length === 0}
+            title="Lista de inscritos"
           >
-            <CIcon icon={cilPrint} className="me-1" />
-            Lista de inscritos
+            <CIcon icon={cilList} />
           </CButton>
-          <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0}>
-            <CIcon icon={cilCloudDownload} className="me-1" />
-            Exportar CSV
+          <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0} title="Exportar CSV">
+            <CIcon icon={cilCloudDownload} />
           </CButton>
-          <CButton color="secondary" variant="outline" onClick={handleNotificarPendentes} disabled={pendentes.length === 0 || notificando}>
-            <CIcon icon={cilSend} className="me-1" />
-            {notificando ? 'Enviando...' : `Notificar pendentes (${pendentes.length})`}
+          <CButton
+            color="secondary"
+            variant="outline"
+            onClick={handleNotificarPendentes}
+            disabled={pendentes.length === 0 || notificando}
+            title={notificando ? 'Enviando...' : `Notificar pendentes (${pendentes.length})`}
+          >
+            <CIcon icon={cilSend} />
           </CButton>
         </div>
       </div>
@@ -426,7 +432,7 @@ export default function EventoInscricoes() {
                               disabled={cadastrandoAlunoId === inscricao.id}
                               onClick={() => cadastrarComoAluno(inscricao)}
                             >
-                              <CIcon icon={cilPeople} className="me-2" />
+                              <CIcon icon={cilSchool} className="me-2" />
                               {cadastrandoAlunoId === inscricao.id ? 'Cadastrando...' : 'Cadastrar como Aluno'}
                             </CDropdownItem>
                           )}
