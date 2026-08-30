@@ -131,24 +131,44 @@
 }
 
 /* ==========================================================================
-   Header administrativo
+   Header administrativo — compacto (~50px), só a trilha do breadcrumb (o
+   título grande já vem do <h1> de cada página — repetir ele aqui era
+   redundante e deixava a tela mais pesada do que precisava).
    ========================================================================== */
 .admin-header {
   --cui-header-bg: var(--sanryu-card);
   border-bottom: 1px solid var(--sanryu-border);
+  min-height: 50px;
 }
 
-.admin-header__title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--sanryu-text);
+.admin-header .container-fluid {
+  min-height: 50px;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .admin-header__breadcrumb {
-  font-size: 0.75rem;
+  margin: 0;
+}
+
+.admin-header__breadcrumb .breadcrumb-item {
+  font-size: 0.8rem;
+}
+
+.admin-header__breadcrumb .breadcrumb-item a {
   color: var(--sanryu-muted);
-  margin: 0 0 2px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-header__breadcrumb .breadcrumb-item a:hover {
+  color: var(--sanryu-primary);
+}
+
+.admin-header__breadcrumb .breadcrumb-item.active {
+  color: var(--sanryu-text);
+  font-weight: 600;
 }
 
 .admin-header__user {
@@ -171,6 +191,15 @@
   color: var(--sanryu-text);
 }
 
+.admin-header__logout {
+  color: var(--sanryu-muted);
+  padding: 6px 8px;
+}
+
+.admin-header__logout:hover {
+  color: var(--sanryu-primary);
+}
+
 /* ==========================================================================
    Cards, tabelas, badges e estados vazios
    ========================================================================== */
@@ -185,10 +214,21 @@
 }
 
 .wrapper .card-header {
-  background: var(--sanryu-card);
+  background: var(--sanryu-background);
   border-bottom: 1px solid var(--sanryu-border);
   font-weight: 700;
   padding: var(--sanryu-space-3) var(--sanryu-space-4);
+}
+
+/* ==========================================================================
+   Rodapé administrativo
+   ========================================================================== */
+.admin-footer {
+  background: var(--sanryu-sidebar);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.75rem;
+  padding: var(--sanryu-space-2);
+  text-align: center;
 }
 
 .wrapper .table thead th {

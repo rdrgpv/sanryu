@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   CSidebar,
@@ -35,6 +35,7 @@ import {
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
+import AdminFooter from '../admin/components/AdminFooter.jsx';
 
 const linksPrincipal = [
   { to: '/admin', label: 'Dashboard', end: true, icon: cilSpeedometer },
@@ -76,25 +77,25 @@ const SUFIXOS_DE_ROTA = {
   'gerar-pedido-compra': 'Gerar Pedido de Compra',
 };
 
-// Deriva o título/breadcrumb do header a partir da própria URL — puramente visual (não afeta
-// rotas nem contratos de API), então não precisa vir de um estado por página.
+// Deriva o título da aba e a trilha do breadcrumb a partir da própria URL — puramente visual (não
+// afeta rotas nem contratos de API), então não precisa vir de um estado por página.
 function useTituloDaPagina(pathname) {
   return useMemo(() => {
     const segmentos = pathname.replace(/^\/admin\/?/, '').split('/').filter(Boolean);
 
     if (segmentos.length === 0) {
-      return { titulo: 'Dashboard', breadcrumb: 'San·Ryu Dojo · Painel administrativo' };
+      return { titulo: 'Dashboard', trilha: [] };
     }
 
     const base = `/admin/${segmentos[0]}`;
     const link = TODOS_OS_LINKS.find((item) => item.to === base);
-    const titulo = link?.label || 'Painel';
+    const tituloSecao = link?.label || 'Painel';
     const ultimoSegmento = segmentos[segmentos.length - 1];
     const sufixo = SUFIXOS_DE_ROTA[ultimoSegmento];
 
     return {
-      titulo: sufixo ? `${titulo} — ${sufixo}` : titulo,
-      breadcrumb: 'San·Ryu Dojo · Painel administrativo',
+      titulo: sufixo ? `${tituloSecao} — ${sufixo}` : tituloSecao,
+      trilha: sufixo ? [{ label: tituloSecao, to: base }, { label: sufixo }] : [{ label: tituloSecao }],
     };
   }, [pathname]);
 }
@@ -109,7 +110,11 @@ export default function AdminLayout({ children }) {
   // Sidebar recolhível em desktop: `unfoldable` usa o próprio modo "narrow" do CoreUI (ícones só,
   // expande no hover) — sem CSS/JS extra pra controlar largura ou tooltip manualmente.
   const [unfoldable, setUnfoldable] = useState(false);
-  const { titulo, breadcrumb } = useTituloDaPagina(location.pathname);
+  const { titulo, trilha } = useTituloDaPagina(location.pathname);
+
+  useEffect(() => {
+    document.title = `${titulo} · San·Ryu Dojo`;
+  }, [titulo]);
 
   function handleLogout() {
     logout();
@@ -189,8 +194,7 @@ export default function AdminLayout({ children }) {
 
       <div className="wrapper d-flex flex-column min-vh-100">
         <AdminHeader
-          title={titulo}
-          breadcrumb={breadcrumb}
+          trilha={trilha}
           admin={admin}
           onLogout={handleLogout}
           onToggleMobile={() => setSidebarVisible((visible) => !visible)}
@@ -198,6 +202,7 @@ export default function AdminLayout({ children }) {
         <CContainer fluid className="px-4 py-4 flex-grow-1">
           {children}
         </CContainer>
+        <AdminFooter />
       </div>
     </div>
   );
