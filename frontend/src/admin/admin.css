@@ -88,6 +88,15 @@
   --cui-btn-active-border-color: var(--sanryu-primary-dark);
 }
 
+/* Botões da toolbar viraram ícone-only com tooltip nativo (title). O Bootstrap aplica
+   pointer-events: none em botão desabilitado, o que bloqueia o hover inteiro e o tooltip nunca
+   dispara — exatamente quando mais se precisa dele (nada selecionado ainda). O clique continua
+   bloqueado pelo atributo disabled nativo, então restaurar o hover aqui é seguro. */
+.wrapper .btn:disabled,
+.wrapper .btn.disabled {
+  pointer-events: auto;
+}
+
 /* ==========================================================================
    Sidebar
    ========================================================================== */

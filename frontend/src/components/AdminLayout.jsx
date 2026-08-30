@@ -116,6 +116,23 @@ export default function AdminLayout({ children }) {
     document.title = `${titulo} · San·Ryu Dojo`;
   }, [titulo]);
 
+  // Só reage quando o breakpoint é cruzado de verdade (não em todo resize) — preserva um toggle
+  // manual feito em mobile (ex.: girar o celular não deve fechar o menu que o usuário abriu).
+  useEffect(() => {
+    let eraDesktop = window.innerWidth >= 992;
+
+    function handleResize() {
+      const agoraDesktop = window.innerWidth >= 992;
+      if (agoraDesktop !== eraDesktop) {
+        eraDesktop = agoraDesktop;
+        setSidebarVisible(agoraDesktop);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   function handleLogout() {
     logout();
     navigate('/login');
@@ -123,13 +140,18 @@ export default function AdminLayout({ children }) {
 
   return (
     <div>
+      {/* Sem onVisibleChange de propósito: o CSidebar mede internamente se o elemento está dentro
+          da viewport e usa isso pra "confirmar" a visibilidade de volta pro pai — numa medição
+          inicial (antes da posição assentar) isso pode achar que a sidebar "não está visível",
+          escondê-la de verdade, e a partir daí a medição confirma a si mesma (loop que nunca se
+          recupera sozinho). Controlamos a visibilidade só num sentido (React -> CoreUI, via
+          `visible`), nunca deixando o próprio componente sobrescrever nosso estado. */}
       <CSidebar
         className="border-end"
         colorScheme="dark"
         position="fixed"
         unfoldable={unfoldable}
         visible={sidebarVisible}
-        onVisibleChange={setSidebarVisible}
       >
         <CSidebarHeader className="border-bottom">
           <CSidebarBrand>
