@@ -9,6 +9,7 @@ const TipoEvento = require('./TipoEvento');
 const Evento = require('./Evento');
 const Banco = require('./Banco');
 const EventoAluno = require('./EventoAluno');
+const EventoAutorizacao = require('./EventoAutorizacao');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -40,6 +41,9 @@ Evento.belongsTo(TipoEvento, { foreignKey: 'tipoEventoId', as: 'tipoEvento' });
 
 Evento.hasMany(EventoAluno, { foreignKey: 'eventoId', as: 'inscricoes' });
 EventoAluno.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
+
+Evento.hasMany(EventoAutorizacao, { foreignKey: 'eventoId', as: 'autorizacoes' });
+EventoAutorizacao.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
 
 Instrutor.hasMany(Evento, { foreignKey: 'instrutorId', as: 'eventos' });
 Evento.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
@@ -110,6 +114,7 @@ module.exports = {
   Evento,
   Banco,
   EventoAluno,
+  EventoAutorizacao,
   Configuracao,
   Produto,
   Cor,

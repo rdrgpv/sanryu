@@ -24,6 +24,7 @@ import {
   cilCloudDownload,
   cilPrint,
   cilList,
+  cilDescription,
   cilSend,
   cilPeople,
   cilSchool,
@@ -303,6 +304,15 @@ export default function EventoInscricoes() {
             title="Lista de inscritos"
           >
             <CIcon icon={cilList} />
+          </CButton>
+          <CButton
+            as={Link}
+            to={`/admin/eventos/${id}/autorizacoes`}
+            color="secondary"
+            variant="outline"
+            title="Autorizações do responsável"
+          >
+            <CIcon icon={cilDescription} />
           </CButton>
           <CButton color="primary" onClick={exportarCSV} disabled={inscricoes.length === 0} title="Exportar CSV">
             <CIcon icon={cilCloudDownload} />

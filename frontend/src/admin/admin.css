@@ -424,3 +424,44 @@
     padding: 0 !important;
   }
 }
+
+/* Autorização do responsável impressa — dados, termo aceito e assinatura; nunca quebra no meio. */
+.autorizacao-impressa {
+  max-width: 718px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  border-bottom: 1px dashed #999;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.autorizacao-impressa p {
+  margin-bottom: 0.35rem;
+}
+
+.autorizacao-impressa__titulo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.autorizacao-impressa__termo {
+  white-space: pre-line;
+  text-align: justify;
+  font-size: 0.7rem;
+}
+
+.autorizacao-impressa__assinatura {
+  margin-top: 0.25rem;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+.autorizacao-impressa__assinatura img {
+  height: 70px;
+  display: block;
+  margin: 0 auto;
+  border-bottom: 1px solid #111;
+}

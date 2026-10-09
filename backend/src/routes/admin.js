@@ -19,6 +19,7 @@ const estoqueMovimentacaoController = require('../controllers/estoqueMovimentaca
 const pedidoController = require('../controllers/pedidoController');
 const fornecedorController = require('../controllers/fornecedorController');
 const pedidoCompraController = require('../controllers/pedidoCompraController');
+const autorizacaoController = require('../controllers/autorizacaoController');
 
 const router = express.Router();
 
@@ -75,6 +76,8 @@ router.post('/inscricoes/:id/verificar-pagamento', eventoController.verificarPag
 router.post('/inscricoes/:id/cancelar-pagamento', eventoController.cancelarPagamento);
 router.post('/inscricoes/:id/cadastrar-aluno', eventoController.cadastrarComoAluno);
 router.post('/inscricoes/:id/cadastrar-gatame', eventoController.cadastrarNoGatame);
+router.get('/eventos/:id/autorizacoes', autorizacaoController.listar);
+router.delete('/autorizacoes/:id', autorizacaoController.remover);
 
 router.get('/bancos', bancoController.listar);
 router.post('/bancos', bancoController.criar);

@@ -7,6 +7,7 @@ import Horarios from './pages/Horarios.jsx';
 import Contato from './pages/Contato.jsx';
 import Eventos from './pages/Eventos.jsx';
 import InscricaoEvento from './pages/InscricaoEvento.jsx';
+import AutorizacaoEvento from './pages/AutorizacaoEvento.jsx';
 import Login from './pages/Login.jsx';
 import PublicLayout from './components/PublicLayout.jsx';
 
@@ -22,6 +23,7 @@ export default function App() {
       <Route path="/contato" element={<PublicLayout><Contato /></PublicLayout>} />
       <Route path="/eventos" element={<PublicLayout><Eventos /></PublicLayout>} />
       <Route path="/eventos/:id" element={<PublicLayout><InscricaoEvento /></PublicLayout>} />
+      <Route path="/eventos/:id/autorizacao" element={<PublicLayout><AutorizacaoEvento /></PublicLayout>} />
       <Route path="/login" element={<Login />} />
 
       <Route

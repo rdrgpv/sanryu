@@ -762,3 +762,62 @@ button, input, select, textarea {
     padding: 3rem 0;
   }
 }
+
+/* Autorização do responsável (página pública, usada principalmente no celular) */
+.form__linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* 16px evita o zoom automático do iOS ao focar o campo. */
+.form--autorizacao .form__field input,
+.form--autorizacao .form__field select {
+  font-size: 16px;
+  padding: 0.75rem;
+}
+
+.termo-autorizacao {
+  white-space: pre-line;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  background: var(--cor-branco);
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  border-left: 3px solid var(--cor-hanko);
+  border-radius: var(--raio);
+  padding: 1rem;
+}
+
+.assinatura-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  background: var(--cor-branco);
+  border: 2px dashed rgba(17, 17, 17, 0.3);
+  border-radius: var(--raio);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.assinatura-rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn--bloco {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .page-header--compacto {
+    padding: 1.75rem 0 1.25rem;
+  }
+
+  .section--compacta {
+    padding: 1.25rem 0 2.5rem;
+  }
+}
