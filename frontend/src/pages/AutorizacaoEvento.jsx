@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import AssinaturaCanvas from '../components/AssinaturaCanvas.jsx';
 
-const DADOS_INICIAIS = { nomeAluno: '', faixa: '', idade: '', nomeResponsavel: '' };
+const DADOS_INICIAIS = { nomeAluno: '', faixa: '', idade: '', turmaId: '', nomeResponsavel: '' };
 
 // Página avulsa (link por evento) pro responsável preencher e assinar no celular — não depende de
 // inscrição. Feita mobile-first: uma coluna, campos grandes e o quadro de assinatura em largura total.
@@ -13,6 +13,7 @@ export default function AutorizacaoEvento() {
 
   const [evento, setEvento] = useState(null);
   const [termo, setTermo] = useState('');
+  const [turmas, setTurmas] = useState([]);
   const [eventoErro, setEventoErro] = useState(null);
   const [faixas, setFaixas] = useState([]);
 
@@ -28,6 +29,7 @@ export default function AutorizacaoEvento() {
       .then((res) => {
         setEvento(res.data.evento);
         setTermo(res.data.termo);
+        setTurmas(res.data.turmas || []);
       })
       .catch(() => setEventoErro('Evento não encontrado ou não está disponível.'));
 
@@ -56,6 +58,7 @@ export default function AutorizacaoEvento() {
       const res = await api.post(`/eventos/${id}/autorizacoes`, {
         ...dados,
         idade: Number(dados.idade),
+        turmaId: Number(dados.turmaId),
         assinatura: assinaturaRef.current.paraDataUrl(),
       });
       setEnviada(res.data);
@@ -116,6 +119,9 @@ export default function AutorizacaoEvento() {
                 <strong>Idade:</strong> {enviada.idade} anos
               </p>
               <p>
+                <strong>Turma:</strong> {enviada.turma}
+              </p>
+              <p>
                 <strong>Responsável:</strong> {enviada.nomeResponsavel}
               </p>
               <button type="button" className="btn btn--ghost btn--bloco" onClick={handleNovaAutorizacao}>
@@ -162,6 +168,18 @@ export default function AutorizacaoEvento() {
                     />
                   </label>
                 </div>
+
+                <label className="form__field">
+                  <span>Turma</span>
+                  <select value={dados.turmaId} onChange={(event) => atualizar('turmaId', event.target.value)} required>
+                    <option value="">Selecione</option>
+                    {turmas.map((turma) => (
+                      <option key={turma.id} value={turma.id}>
+                        {turma.descricao}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
                 <label className="form__field">
                   <span>Nome completo do responsável</span>

@@ -20,6 +20,18 @@ const EventoAutorizacao = sequelize.define('EventoAutorizacao', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  // Obrigatória no envio (validada no controller); nullable no banco só pra coluna poder ser
+  // adicionada pelo sync com alter em tabelas que já tenham autorizações gravadas.
+  turmaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  // Descrição da turma no momento do envio — a autorização continua legível mesmo se a turma for
+  // renomeada ou excluída depois.
+  turma: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   nomeResponsavel: {
     type: DataTypes.STRING,
     allowNull: false,

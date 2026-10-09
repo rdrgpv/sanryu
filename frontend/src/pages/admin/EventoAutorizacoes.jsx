@@ -73,6 +73,7 @@ export default function EventoAutorizacoes() {
                 <CTableHeaderCell>Aluno</CTableHeaderCell>
                 <CTableHeaderCell>Faixa</CTableHeaderCell>
                 <CTableHeaderCell>Idade</CTableHeaderCell>
+                <CTableHeaderCell>Turma</CTableHeaderCell>
                 <CTableHeaderCell>Responsável</CTableHeaderCell>
                 <CTableHeaderCell>Assinatura</CTableHeaderCell>
                 <CTableHeaderCell>Enviada em</CTableHeaderCell>
@@ -85,6 +86,7 @@ export default function EventoAutorizacoes() {
                   <CTableDataCell>{autorizacao.nomeAluno}</CTableDataCell>
                   <CTableDataCell>{autorizacao.faixa}</CTableDataCell>
                   <CTableDataCell>{autorizacao.idade}</CTableDataCell>
+                  <CTableDataCell>{autorizacao.turma || '-'}</CTableDataCell>
                   <CTableDataCell>{autorizacao.nomeResponsavel}</CTableDataCell>
                   <CTableDataCell>
                     <img src={autorizacao.assinatura} alt="Assinatura" style={{ height: 40 }} />
@@ -109,6 +111,9 @@ export default function EventoAutorizacoes() {
             <p>
               <strong>Aluno:</strong> {autorizacao.nomeAluno} &nbsp; <strong>Faixa:</strong> {autorizacao.faixa} &nbsp;{' '}
               <strong>Idade:</strong> {autorizacao.idade} anos
+            </p>
+            <p>
+              <strong>Turma:</strong> {autorizacao.turma || '-'}
             </p>
             <p>
               <strong>Responsável:</strong> {autorizacao.nomeResponsavel}
