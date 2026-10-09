@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Evento, EventoAutorizacao, Turma } = require('../models');
+const { Evento, EventoAutorizacao, Turma, Instrutor } = require('../models');
 const { TERMO_AUTORIZACAO } = require('../utils/termoAutorizacao');
 const { logErro } = require('../utils/logger');
 
@@ -19,11 +19,13 @@ function whereIdOuSlug(param) {
   return { [Op.or]: filtros };
 }
 
-// Texto da turma no combo da página pública e na cópia gravada na autorização (ex.: "Kids — seg, qua · 18:00–19:00").
+// Texto da turma no combo da página pública e na cópia gravada na autorização (ex.: "Kids — Sensei João").
+// Precisa da turma carregada com o include do instrutor.
 function descricaoTurma(turma) {
-  const dias = (turma.diaSemana || '').split(',').map((dia) => dia.trim()).filter(Boolean).join(', ');
-  return `${turma.nome} — ${dias} · ${turma.horaInicio}–${turma.horaFim}`;
+  return turma.instrutor?.nome ? `${turma.nome} — Sensei ${turma.instrutor.nome}` : turma.nome;
 }
+
+const INCLUDE_INSTRUTOR = { model: Instrutor, as: 'instrutor', attributes: ['nome'] };
 
 async function buscarPublico(req, res) {
   const evento = await Evento.findOne({
@@ -35,7 +37,7 @@ async function buscarPublico(req, res) {
     return res.status(404).json({ error: 'Evento não encontrado.' });
   }
 
-  const turmas = await Turma.findAll({ order: [['nome', 'ASC']] });
+  const turmas = await Turma.findAll({ include: INCLUDE_INSTRUTOR, order: [['nome', 'ASC']] });
 
   res.json({
     evento,
@@ -62,7 +64,7 @@ async function criar(req, res) {
   }
 
   const turmaId = Number(req.body.turmaId);
-  const turma = Number.isInteger(turmaId) ? await Turma.findByPk(turmaId) : null;
+  const turma = Number.isInteger(turmaId) ? await Turma.findByPk(turmaId, { include: INCLUDE_INSTRUTOR }) : null;
 
   if (!turma) {
     return res.status(400).json({ error: 'Selecione a turma.' });
