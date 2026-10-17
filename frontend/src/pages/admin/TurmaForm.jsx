@@ -12,6 +12,7 @@ const estadoInicial = {
   horaInicio: '',
   horaFim: '',
   vagas: 20,
+  unidadeId: '',
 };
 
 export default function TurmaForm() {
@@ -20,11 +21,20 @@ export default function TurmaForm() {
   const editando = !!id;
   const [form, setForm] = useState(estadoInicial);
   const [instrutores, setInstrutores] = useState([]);
+  const [unidades, setUnidades] = useState([]);
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
     api.get('/admin/instrutores').then((res) => setInstrutores(res.data));
-  }, []);
+    api.get('/admin/unidades').then((res) => {
+      setUnidades(res.data);
+      // Turma nova com uma unidade só cadastrada: já vem selecionada.
+      const ativas = res.data.filter((unidade) => unidade.ativo);
+      if (!editando && ativas.length === 1) {
+        setForm((prev) => ({ ...prev, unidadeId: prev.unidadeId || String(ativas[0].id) }));
+      }
+    });
+  }, [editando]);
 
   useEffect(() => {
     if (!editando) return;
@@ -39,6 +49,7 @@ export default function TurmaForm() {
         horaInicio: turma.horaInicio,
         horaFim: turma.horaFim,
         vagas: turma.vagas,
+        unidadeId: turma.unidadeId || '',
       });
     });
   }, [id, editando]);
@@ -52,7 +63,7 @@ export default function TurmaForm() {
     event.preventDefault();
     setErro(null);
 
-    const payload = { ...form, vagas: Number(form.vagas), instrutorId: form.instrutorId || null };
+    const payload = { ...form, vagas: Number(form.vagas), instrutorId: form.instrutorId || null, unidadeId: form.unidadeId || null };
 
     try {
       if (editando) {
@@ -88,6 +99,17 @@ export default function TurmaForm() {
               <CCol md={4}>
                 <CFormLabel>Nível</CFormLabel>
                 <CFormInput name="nivel" value={form.nivel} onChange={handleChange} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Unidade</CFormLabel>
+                <CFormSelect name="unidadeId" value={form.unidadeId} onChange={handleChange} required>
+                  <option value="">Selecione</option>
+                  {unidades.map((unidade) => (
+                    <option key={unidade.id} value={unidade.id} disabled={!unidade.ativo}>
+                      {unidade.nome}
+                    </option>
+                  ))}
+                </CFormSelect>
               </CCol>
               <CCol md={4}>
                 <CFormLabel>Instrutor</CFormLabel>

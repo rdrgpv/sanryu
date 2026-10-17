@@ -28,3 +28,45 @@ export function formatarTelefone(valor) {
   if (digitos.length <= 10) return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 6)}-${digitos.slice(6)}`;
   return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
 }
+
+// Máscara progressiva de CPF (000.000.000-00) a partir dos dígitos digitados ou colados.
+export function formatarCpf(valor) {
+  const digitos = (valor || '').replace(/\D/g, '').slice(0, 11);
+  return digitos
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1-$2');
+}
+
+// Confere os dois dígitos verificadores — pega CPF digitado errado antes de salvar.
+export function cpfValido(valor) {
+  const digitos = (valor || '').replace(/\D/g, '');
+  if (digitos.length !== 11 || /^(\d)\1{10}$/.test(digitos)) return false;
+
+  const verificador = (tamanho) => {
+    let soma = 0;
+    for (let i = 0; i < tamanho; i += 1) soma += Number(digitos[i]) * (tamanho + 1 - i);
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+
+  return verificador(9) === Number(digitos[9]) && verificador(10) === Number(digitos[10]);
+}
+
+export function formatarCep(valor) {
+  const digitos = (valor || '').replace(/\D/g, '').slice(0, 8);
+  return digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+}
+
+// Idade em anos a partir de "YYYY-MM-DD" — lê a string direto em vez de new Date(string), que
+// interpreta como meia-noite UTC e "volta" um dia no fuso do Brasil.
+export function calcularIdade(dataNascimento) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dataNascimento || '');
+  if (!match) return null;
+
+  const [, ano, mes, dia] = match.map(Number);
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - ano;
+  if (hoje.getMonth() + 1 < mes || (hoje.getMonth() + 1 === mes && hoje.getDate() < dia)) idade -= 1;
+  return idade;
+}

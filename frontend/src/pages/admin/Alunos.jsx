@@ -2,10 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CFormInput, CFormSelect, CButton, CInputGroup } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilSchool, cilSearch, cilUserPlus } from '@coreui/icons';
+import { cilSchool, cilSearch, cilUserPlus, cilNotes } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+
+const SITUACOES = {
+  ativo: { label: 'Ativo', classe: 'text-bg-success' },
+  trancado: { label: 'Trancado', classe: 'text-bg-warning' },
+  cancelado: { label: 'Cancelado', classe: 'text-bg-secondary' },
+};
 
 export default function Alunos() {
   const navigate = useNavigate();
@@ -13,6 +19,9 @@ export default function Alunos() {
   const [turmas, setTurmas] = useState([]);
   const [busca, setBusca] = useState('');
   const [turmaFiltro, setTurmaFiltro] = useState('');
+  const [unidades, setUnidades] = useState([]);
+  const [unidadeFiltro, setUnidadeFiltro] = useState('');
+  const [situacaoFiltro, setSituacaoFiltro] = useState('ativo');
   const [selecionadoId, setSelecionadoId] = useState(null);
   const [matriculando, setMatriculando] = useState(false);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
@@ -25,13 +34,18 @@ export default function Alunos() {
     : alunos;
 
   async function carregarAlunos() {
-    const res = await api.get('/admin/alunos', { params: busca ? { busca } : {} });
+    const params = {};
+    if (busca) params.busca = busca;
+    if (unidadeFiltro) params.unidadeId = unidadeFiltro;
+    if (situacaoFiltro) params.situacao = situacaoFiltro;
+    const res = await api.get('/admin/alunos', { params });
     setAlunos(res.data);
   }
 
   useEffect(() => {
     carregarAlunos();
     api.get('/admin/turmas').then((res) => setTurmas(res.data));
+    api.get('/admin/unidades').then((res) => setUnidades(res.data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -41,7 +55,7 @@ export default function Alunos() {
     }, 300);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busca]);
+  }, [busca, unidadeFiltro, situacaoFiltro]);
 
   function selecionarLinha(id) {
     setSelecionadoId((atual) => (atual === id ? null : id));
@@ -52,7 +66,13 @@ export default function Alunos() {
   // vista, os botões da toolbar continuavam habilitados apontando pra uma linha que já não aparece.
   useEffect(() => {
     setSelecionadoId(null);
-  }, [turmaFiltro]);
+  }, [turmaFiltro, unidadeFiltro, situacaoFiltro]);
+
+  // Na matrícula, só oferece turmas da unidade do aluno (turmas sem unidade continuam aparecendo).
+  const turmasParaMatricula = turmas.filter(
+    (turma) => !alunoSelecionado?.unidadeId || !turma.unidadeId || turma.unidadeId === alunoSelecionado.unidadeId
+  );
+  const turmasDoFiltro = unidadeFiltro ? turmas.filter((turma) => String(turma.unidadeId) === unidadeFiltro) : turmas;
 
   async function handleExcluir() {
     if (!selecionadoId) return;
@@ -132,6 +152,15 @@ export default function Alunos() {
               <CIcon icon={cilSchool} />
             </CButton>
             <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionadoId}
+              onClick={() => navigate(`/admin/contratos/novo?alunoId=${selecionadoId}`)}
+              title="Novo contrato (plano)"
+            >
+              <CIcon icon={cilNotes} />
+            </CButton>
+            <CButton
               color="info"
               variant="outline"
               disabled={!selecionadoId || verificandoGatame}
@@ -163,7 +192,7 @@ export default function Alunos() {
         <CInputGroup className="mb-3" style={{ maxWidth: 420 }}>
           <CFormSelect value={turmaSelecionada} onChange={(event) => setTurmaSelecionada(event.target.value)}>
             <option value="">Selecione a turma</option>
-            {turmas.map((turma) => (
+            {turmasParaMatricula.map((turma) => (
               <option key={turma.id} value={turma.id}>
                 {turma.nome}
               </option>
@@ -178,7 +207,7 @@ export default function Alunos() {
       <div className="d-flex flex-wrap gap-2 mb-3">
         <CFormInput
           style={{ maxWidth: 360 }}
-          placeholder="Buscar por nome ou email..."
+          placeholder="Buscar por nome, email ou CPF..."
           value={busca}
           onChange={(event) => setBusca(event.target.value)}
         />
@@ -188,11 +217,27 @@ export default function Alunos() {
           onChange={(event) => setTurmaFiltro(event.target.value)}
         >
           <option value="">Todas as turmas</option>
-          {turmas.map((turma) => (
+          {turmasDoFiltro.map((turma) => (
             <option key={turma.id} value={turma.id}>
               {turma.nome}
             </option>
           ))}
+        </CFormSelect>
+        {unidades.length > 1 && (
+          <CFormSelect style={{ maxWidth: 220 }} value={unidadeFiltro} onChange={(event) => setUnidadeFiltro(event.target.value)}>
+            <option value="">Todas as unidades</option>
+            {unidades.map((unidade) => (
+              <option key={unidade.id} value={unidade.id}>
+                {unidade.nome}
+              </option>
+            ))}
+          </CFormSelect>
+        )}
+        <CFormSelect style={{ maxWidth: 200 }} value={situacaoFiltro} onChange={(event) => setSituacaoFiltro(event.target.value)}>
+          <option value="ativo">Ativos</option>
+          <option value="trancado">Trancados</option>
+          <option value="cancelado">Cancelados</option>
+          <option value="">Todas as situações</option>
         </CFormSelect>
       </div>
 
@@ -203,7 +248,7 @@ export default function Alunos() {
         emptyMessage={turmaFiltro ? 'Nenhum aluno matriculado nessa turma.' : 'Nenhum aluno encontrado.'}
         columns={[
           { key: 'nome', label: 'Nome', sortable: true },
-          { key: 'email', label: 'Email', sortable: true },
+          { key: 'email', label: 'Email', sortable: true, render: (aluno) => aluno.email || '-' },
           { key: 'telefone', label: 'Telefone', render: (aluno) => aluno.telefone || '-' },
           {
             key: 'faixa',
@@ -231,12 +276,30 @@ export default function Alunos() {
               ),
           },
           {
-            key: 'ativo',
-            label: 'Status',
+            key: 'responsavel',
+            label: 'Responsável',
+            sortable: true,
+            sortValue: (aluno) => aluno.responsavel?.nome || '',
+            render: (aluno) => aluno.responsavel?.nome || '-',
+          },
+          ...(unidades.length > 1
+            ? [
+                {
+                  key: 'unidade',
+                  label: 'Unidade',
+                  sortable: true,
+                  sortValue: (aluno) => aluno.unidade?.nome || '',
+                  render: (aluno) => aluno.unidade?.nome || '-',
+                },
+              ]
+            : []),
+          {
+            key: 'situacao',
+            label: 'Situação',
             sortable: true,
             render: (aluno) => (
-              <span className={`badge ${aluno.ativo ? 'text-bg-success' : 'text-bg-secondary'}`}>
-                {aluno.ativo ? 'Ativo' : 'Inativo'}
+              <span className={`badge ${SITUACOES[aluno.situacao]?.classe || 'text-bg-secondary'}`}>
+                {SITUACOES[aluno.situacao]?.label || aluno.situacao}
               </span>
             ),
           },

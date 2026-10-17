@@ -32,6 +32,11 @@ import {
   cilTruck,
   cilBriefcase,
   cilSettings,
+  cilBuilding,
+  cilUser,
+  cilWallet,
+  cilNotes,
+  cilDollar,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -40,9 +45,14 @@ import AdminFooter from '../admin/components/AdminFooter.jsx';
 const linksPrincipal = [
   { to: '/admin', label: 'Dashboard', end: true, icon: cilSpeedometer },
   { to: '/admin/alunos', label: 'Alunos', icon: cilPeople },
+  { to: '/admin/responsaveis', label: 'Responsáveis', icon: cilUser },
+  { to: '/admin/contratos', label: 'Contratos', icon: cilNotes },
+  { to: '/admin/mensalidades', label: 'Mensalidades', icon: cilDollar },
+  { to: '/admin/planos', label: 'Planos', icon: cilWallet },
   { to: '/admin/turmas', label: 'Turmas', icon: cilSchool },
   { to: '/admin/instrutores', label: 'Instrutores', icon: cilContact },
   { to: '/admin/faixas', label: 'Faixas', icon: cilLayers },
+  { to: '/admin/unidades', label: 'Unidades', icon: cilBuilding },
 ];
 
 const linksEventos = [
@@ -62,7 +72,10 @@ const linksLoja = [
   { to: '/admin/pedidos-compra', label: 'Pedidos de Compra', icon: cilBriefcase },
 ];
 
-const linksSistema = [{ to: '/admin/configuracoes', label: 'Configurações', icon: cilSettings }];
+const linksSistema = [
+  { to: '/admin/configuracao-academia', label: 'Config. da academia', icon: cilSettings },
+  { to: '/admin/configuracoes', label: 'Configurações', icon: cilSettings },
+];
 
 const TODOS_OS_LINKS = [...linksPrincipal, ...linksEventos, ...linksLoja, ...linksSistema];
 

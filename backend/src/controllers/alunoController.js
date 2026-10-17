@@ -1,24 +1,74 @@
-const { Aluno, Turma, Matricula, Faixa, Instrutor } = require('../models');
+const { Op } = require('sequelize');
+const { sequelize, Aluno, Turma, Matricula, Faixa, Instrutor, Unidade, Responsavel } = require('../models');
 const gatameService = require('../services/gatameService');
 const { logErro } = require('../utils/logger');
 
+// Campos que o formulário do admin pode gravar — o resto (id, ativo, cadastradoNoGatame...) é
+// controlado pelo sistema. Texto vazio vira null pra não gravar "" em data/enum/email.
+const CAMPOS_EDITAVEIS = [
+  'nome', 'email', 'telefone', 'dataNascimento', 'cpf', 'rg', 'sexo', 'foto',
+  'unidadeId', 'faixaId', 'tamanhoFaixa', 'dataInicio', 'situacao',
+  'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'uf',
+  'responsavelId', 'parentescoResponsavel',
+  'contatoEmergenciaNome', 'contatoEmergenciaTelefone', 'contatoEmergenciaParentesco',
+  'tipoSanguineo', 'alergias', 'medicamentos', 'restricoesMedicas', 'observacoes',
+];
+
+function dadosAluno(body) {
+  const dados = {};
+
+  CAMPOS_EDITAVEIS.forEach((campo) => {
+    if (body[campo] === undefined) return;
+    const valor = typeof body[campo] === 'string' ? body[campo].trim() : body[campo];
+    dados[campo] = valor === '' ? null : valor;
+  });
+
+  return dados;
+}
+
+// O formulário pode mandar um responsável novo (responsavelNovo) em vez de escolher um existente —
+// cria os dois na mesma transação pra não sobrar responsável solto se o aluno falhar na validação.
+async function salvarAluno(aluno, body) {
+  return sequelize.transaction(async (transaction) => {
+    const dados = dadosAluno(body);
+
+    if (body.responsavelNovo?.nome?.trim()) {
+      const responsavel = await Responsavel.create(body.responsavelNovo, { transaction });
+      dados.responsavelId = responsavel.id;
+    }
+
+    if (aluno) {
+      return aluno.update(dados, { transaction });
+    }
+
+    return Aluno.create(dados, { transaction });
+  });
+}
+
 async function listar(req, res) {
-  const { busca } = req.query;
+  const { busca, unidadeId, situacao } = req.query;
   const where = {};
 
   if (busca) {
-    const { Op } = require('sequelize');
     where[Op.or] = [
       { nome: { [Op.like]: `%${busca}%` } },
       { email: { [Op.like]: `%${busca}%` } },
+      { cpf: { [Op.like]: `%${busca}%` } },
     ];
   }
 
+  if (unidadeId) where.unidadeId = unidadeId;
+  if (situacao) where.situacao = situacao;
+
   const alunos = await Aluno.findAll({
     where,
+    // Sem a foto: na listagem ela só pesaria a resposta (vem no buscarPorId).
+    attributes: { exclude: ['foto'] },
     include: [
       { model: Turma, as: 'turmas', through: { attributes: ['status', 'dataMatricula'] } },
       { model: Faixa, as: 'faixa' },
+      { model: Unidade, as: 'unidade', attributes: ['id', 'nome'] },
+      { model: Responsavel, as: 'responsavel', attributes: ['id', 'nome', 'telefone'] },
     ],
     order: [['nome', 'ASC']],
   });
@@ -31,6 +81,8 @@ async function buscarPorId(req, res) {
     include: [
       { model: Turma, as: 'turmas', through: { attributes: ['status', 'dataMatricula'] } },
       { model: Faixa, as: 'faixa' },
+      { model: Unidade, as: 'unidade', attributes: ['id', 'nome'] },
+      { model: Responsavel, as: 'responsavel' },
     ],
   });
 
@@ -43,7 +95,7 @@ async function buscarPorId(req, res) {
 
 async function criar(req, res) {
   try {
-    const aluno = await Aluno.create(req.body);
+    const aluno = await salvarAluno(null, req.body);
     res.status(201).json(aluno);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -58,7 +110,7 @@ async function atualizar(req, res) {
   }
 
   try {
-    await aluno.update(req.body);
+    await salvarAluno(aluno, req.body);
     res.json(aluno);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -165,6 +217,10 @@ async function cadastrarNoGatame(req, res) {
 
   if (aluno.cadastradoNoGatame) {
     return res.status(400).json({ error: 'Este aluno já foi cadastrado no Gatame.' });
+  }
+
+  if (!aluno.email) {
+    return res.status(400).json({ error: 'Aluno sem email cadastrado — o Gatame exige um email.' });
   }
 
   const instrutoresComEmail = [

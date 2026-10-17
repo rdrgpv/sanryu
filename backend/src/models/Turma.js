@@ -30,6 +30,10 @@ const Turma = sequelize.define('Turma', {
     type: DataTypes.INTEGER,
     defaultValue: 20,
   },
+  unidadeId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 
 module.exports = Turma;

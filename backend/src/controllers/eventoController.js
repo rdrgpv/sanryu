@@ -237,18 +237,22 @@ async function cadastrarComoAluno(req, res) {
       }
     }
 
-    let aluno = await Aluno.findOne({ where: { email: inscricao.email } });
+    // Email + nome: o email do aluno pode se repetir (irmãos usando o dos pais), então só o email
+    // reaproveitaria o irmão errado.
+    const nomeAluno = inscricao.nome || inscricao.email;
+    let aluno = await Aluno.findOne({ where: { email: inscricao.email, nome: nomeAluno } });
 
     if (!aluno) {
       const faixaNome = inscricao.faixaAtual || inscricao.faixa || null;
       const faixa = faixaNome ? await Faixa.findOne({ where: { nome: faixaNome } }) : null;
 
       aluno = await Aluno.create({
-        nome: inscricao.nome || inscricao.email,
+        nome: nomeAluno,
         email: inscricao.email,
         telefone: inscricao.telefone || null,
         dataNascimento: inscricao.dataNascimento || null,
         faixaId: faixa ? faixa.id : null,
+        unidadeId: turma ? turma.unidadeId : null,
       });
     }
 

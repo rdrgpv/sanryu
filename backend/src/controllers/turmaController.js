@@ -1,16 +1,23 @@
-const { Turma, Instrutor } = require('../models');
+const { Turma, Instrutor, Unidade } = require('../models');
 
 async function listar(req, res) {
-  const { modalidade } = req.query;
+  const { modalidade, unidadeId } = req.query;
   const where = {};
 
   if (modalidade) {
     where.modalidade = modalidade;
   }
 
+  if (unidadeId) {
+    where.unidadeId = unidadeId;
+  }
+
   const turmas = await Turma.findAll({
     where,
-    include: [{ model: Instrutor, as: 'instrutor' }],
+    include: [
+      { model: Instrutor, as: 'instrutor' },
+      { model: Unidade, as: 'unidade', attributes: ['id', 'nome'] },
+    ],
     order: [['diaSemana', 'ASC'], ['horaInicio', 'ASC']],
   });
 

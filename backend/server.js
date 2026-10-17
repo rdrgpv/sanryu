@@ -6,6 +6,8 @@ const authRoutes = require('./src/routes/auth');
 const publicRoutes = require('./src/routes/public');
 const adminRoutes = require('./src/routes/admin');
 const seed = require('./seed');
+const { aplicarAjustesIniciais } = require('./src/config/ajustesIniciais');
+const { rotinaCobranca } = require('./src/services/mensalidadeService');
 const { logErro } = require('./src/utils/logger');
 
 const app = express();
@@ -75,8 +77,27 @@ app.listen(PORT, '0.0.0.0', async () => {
     // completo), o que corrompe índices únicos compostos — mantém sync() simples ali e
     // só usa alter no MySQL (ALTER TABLE nativo, seguro para esse tipo de mudança aditiva).
     await sincronizarBanco({ alter: sequelize.getDialect() !== 'sqlite' });
+    await aplicarAjustesIniciais();
     console.log('Banco de dados conectado.');
+    agendarRotinaCobranca();
   } catch (error) {
     logErro('Erro ao conectar/sincronizar o banco de dados:', error);
   }
 });
+
+// Mensalidades: gera as cobranças que faltam, confere Pix pendentes (reserva do webhook) e manda os
+// e-mails do dia. Roda 1 min depois de subir e depois de hora em hora — tudo idempotente, então
+// rodar a mais (ou o servidor reiniciar) não duplica nada. Desligável com ROTINA_COBRANCA=off.
+function agendarRotinaCobranca() {
+  if (process.env.ROTINA_COBRANCA === 'off') return;
+
+  const executar = () =>
+    rotinaCobranca().then((resultado) => {
+      if (resultado && (resultado.geradas || resultado.baixadas || resultado.avisos)) {
+        console.log('Rotina de cobrança:', resultado);
+      }
+    });
+
+  setTimeout(executar, 60 * 1000);
+  setInterval(executar, 60 * 60 * 1000);
+}

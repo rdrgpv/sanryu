@@ -821,3 +821,32 @@ button, input, select, textarea {
     padding: 1.25rem 0 2.5rem;
   }
 }
+
+/* Pagamento de mensalidade (link público) */
+.pagamento-mensalidade__valores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.pagamento-mensalidade__valores > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pagamento-mensalidade__total {
+  border-top: 1px solid rgba(17, 17, 17, 0.12);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.pagamento-mensalidade__qr {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto 1rem;
+}

@@ -163,4 +163,65 @@ async function enviarLembretePagamentoPendente({ evento, eventoAluno }) {
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente };
+const TEXTOS_COBRANCA = {
+  cobranca: {
+    assunto: (dados) => `Mensalidade ${dados.competencia} — ${dados.aluno}`,
+    abertura: (dados) => `A mensalidade de <strong>${dados.aluno}</strong> referente a ${dados.competencia} já está disponível.`,
+  },
+  vencimento: {
+    assunto: (dados) => `Vence hoje: mensalidade ${dados.competencia} — ${dados.aluno}`,
+    abertura: (dados) => `Lembrete: a mensalidade de <strong>${dados.aluno}</strong> (${dados.competencia}) vence hoje.`,
+  },
+  atraso: {
+    assunto: (dados) => `Mensalidade em atraso — ${dados.aluno}`,
+    abertura: (dados) =>
+      `A mensalidade de <strong>${dados.aluno}</strong> (${dados.competencia}) venceu em ${dados.vencimento} e ainda consta em aberto. Se já pagou, desconsidere este aviso.`,
+  },
+};
+
+// Cobrança de mensalidade (gerada / vence hoje / em atraso). Manda só o link: o Pix é gerado quando
+// a pessoa abre, já com o valor do dia (com multa/juros se houver) — um QR no e-mail ficaria velho.
+// Devolve true/false (quem chama marca o aviso como enviado só se saiu); nunca lança.
+async function enviarCobrancaMensalidade({ tipo, destinatario, nome, aluno, competencia, vencimento, valor, link }) {
+  try {
+    const transportador = await obterTransportador();
+
+    if (!transportador) {
+      logErro('SMTP não configurado em Configurações; e-mail de mensalidade não enviado.');
+      return false;
+    }
+
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+    const copiaPara = await configService.obterValor('SMTP_BCC');
+    const textos = TEXTOS_COBRANCA[tipo] || TEXTOS_COBRANCA.cobranca;
+    const dados = { aluno, competencia, vencimento };
+
+    const html = `
+      <p>Olá, ${nome}!</p>
+      <p>${textos.abertura(dados)}</p>
+      <ul>
+        <li><strong>Vencimento:</strong> ${vencimento}</li>
+        <li><strong>Valor:</strong> ${valor}</li>
+      </ul>
+      <p><a href="${link}" style="display:inline-block;background:#B23A2F;color:#fff;padding:10px 18px;border-radius:4px;text-decoration:none;">Pagar com Pix</a></p>
+      <p style="font-size:12px;color:#666;">Ou copie o link: ${link}</p>
+      <p>Qualquer dúvida, é só responder este e-mail.</p>
+    `;
+
+    const info = await transportador.sendMail({
+      from: remetente,
+      to: destinatario,
+      bcc: copiaPara || undefined,
+      subject: textos.assunto(dados),
+      html,
+    });
+
+    console.log(`E-mail de mensalidade (${tipo}) enviado:`, info.messageId);
+    return true;
+  } catch (err) {
+    logErro('Erro ao enviar e-mail de mensalidade:', err);
+    return false;
+  }
+}
+
+module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade };

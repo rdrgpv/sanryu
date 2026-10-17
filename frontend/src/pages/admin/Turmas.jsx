@@ -7,6 +7,7 @@ import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 export default function Turmas() {
   const navigate = useNavigate();
   const [turmas, setTurmas] = useState([]);
+  const [unidades, setUnidades] = useState([]);
   const [selecionadoId, setSelecionadoId] = useState(null);
 
   async function carregarTurmas() {
@@ -16,6 +17,7 @@ export default function Turmas() {
 
   useEffect(() => {
     carregarTurmas();
+    api.get('/admin/unidades').then((res) => setUnidades(res.data));
   }, []);
 
   function selecionarLinha(id) {
@@ -65,6 +67,17 @@ export default function Turmas() {
             render: (turma) => `${turma.horaInicio} — ${turma.horaFim}`,
           },
           { key: 'vagas', label: 'Vagas', align: 'center', sortable: true },
+          ...(unidades.length > 1
+            ? [
+                {
+                  key: 'unidade',
+                  label: 'Unidade',
+                  sortable: true,
+                  sortValue: (turma) => turma.unidade?.nome || '',
+                  render: (turma) => turma.unidade?.nome || '-',
+                },
+              ]
+            : []),
         ]}
       />
     </div>

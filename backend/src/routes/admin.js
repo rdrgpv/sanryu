@@ -20,6 +20,12 @@ const pedidoController = require('../controllers/pedidoController');
 const fornecedorController = require('../controllers/fornecedorController');
 const pedidoCompraController = require('../controllers/pedidoCompraController');
 const autorizacaoController = require('../controllers/autorizacaoController');
+const unidadeController = require('../controllers/unidadeController');
+const responsavelController = require('../controllers/responsavelController');
+const planoController = require('../controllers/planoController');
+const contratoController = require('../controllers/contratoController');
+const configuracaoAcademiaController = require('../controllers/configuracaoAcademiaController');
+const mensalidadeController = require('../controllers/mensalidadeController');
 
 const router = express.Router();
 
@@ -35,6 +41,44 @@ router.delete('/alunos/:id', alunoController.remover);
 router.post('/alunos/:id/matricular', alunoController.matricular);
 router.get('/alunos/:id/verificar-gatame', alunoController.verificarGatame);
 router.post('/alunos/:id/cadastrar-gatame', alunoController.cadastrarNoGatame);
+
+router.get('/unidades', unidadeController.listar);
+router.post('/unidades', unidadeController.criar);
+router.get('/unidades/:id', unidadeController.buscarPorId);
+router.put('/unidades/:id', unidadeController.atualizar);
+router.delete('/unidades/:id', unidadeController.remover);
+
+router.get('/responsaveis', responsavelController.listar);
+router.post('/responsaveis', responsavelController.criar);
+router.get('/responsaveis/:id', responsavelController.buscarPorId);
+router.put('/responsaveis/:id', responsavelController.atualizar);
+router.delete('/responsaveis/:id', responsavelController.remover);
+
+router.get('/planos', planoController.listar);
+router.post('/planos', planoController.criar);
+router.get('/planos/:id', planoController.buscarPorId);
+router.put('/planos/:id', planoController.atualizar);
+router.delete('/planos/:id', planoController.remover);
+
+router.get('/contratos', contratoController.listar);
+router.post('/contratos', contratoController.criar);
+router.post('/contratos/simular', contratoController.simular);
+router.get('/contratos/:id', contratoController.buscarPorId);
+router.put('/contratos/:id', contratoController.atualizar);
+router.delete('/contratos/:id', contratoController.remover);
+router.post('/contratos/:id/encerrar', contratoController.encerrar);
+router.post('/contratos/:id/assinar', contratoController.assinarRecepcao);
+
+router.get('/mensalidades', mensalidadeController.listar);
+router.post('/mensalidades/gerar', mensalidadeController.gerar);
+router.post('/mensalidades/:id/pagamento', mensalidadeController.registrarPagamento);
+router.post('/mensalidades/:id/reabrir', mensalidadeController.reabrir);
+router.post('/mensalidades/:id/cancelar', mensalidadeController.cancelar);
+router.post('/mensalidades/:id/verificar-pagamento', mensalidadeController.verificarPagamento);
+router.post('/mensalidades/:id/enviar-email', mensalidadeController.enviarEmail);
+
+router.get('/configuracao-academia', configuracaoAcademiaController.buscar);
+router.put('/configuracao-academia', configuracaoAcademiaController.atualizar);
 
 router.get('/turmas', turmaController.listar);
 router.post('/turmas', turmaController.criar);

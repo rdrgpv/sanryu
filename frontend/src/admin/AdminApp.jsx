@@ -3,6 +3,17 @@ import { Routes, Route } from 'react-router-dom';
 import Dashboard from '../pages/admin/Dashboard.jsx';
 import Alunos from '../pages/admin/Alunos.jsx';
 import AlunoForm from '../pages/admin/AlunoForm.jsx';
+import Responsaveis from '../pages/admin/Responsaveis.jsx';
+import ResponsavelForm from '../pages/admin/ResponsavelForm.jsx';
+import Unidades from '../pages/admin/Unidades.jsx';
+import UnidadeForm from '../pages/admin/UnidadeForm.jsx';
+import Planos from '../pages/admin/Planos.jsx';
+import PlanoForm from '../pages/admin/PlanoForm.jsx';
+import Contratos from '../pages/admin/Contratos.jsx';
+import ContratoForm from '../pages/admin/ContratoForm.jsx';
+import ContratoDetalhe from '../pages/admin/ContratoDetalhe.jsx';
+import ConfiguracaoAcademia from '../pages/admin/ConfiguracaoAcademia.jsx';
+import Mensalidades from '../pages/admin/Mensalidades.jsx';
 import Turmas from '../pages/admin/Turmas.jsx';
 import TurmaForm from '../pages/admin/TurmaForm.jsx';
 import Instrutores from '../pages/admin/Instrutores.jsx';
@@ -65,6 +76,26 @@ export default function AdminApp() {
       <Route path="alunos" element={<AdminRoute><Alunos /></AdminRoute>} />
       <Route path="alunos/novo" element={<AdminRoute><AlunoForm /></AdminRoute>} />
       <Route path="alunos/:id/editar" element={<AdminRoute><AlunoForm /></AdminRoute>} />
+
+      <Route path="responsaveis" element={<AdminRoute><Responsaveis /></AdminRoute>} />
+      <Route path="responsaveis/novo" element={<AdminRoute><ResponsavelForm /></AdminRoute>} />
+      <Route path="responsaveis/:id/editar" element={<AdminRoute><ResponsavelForm /></AdminRoute>} />
+
+      <Route path="unidades" element={<AdminRoute><Unidades /></AdminRoute>} />
+      <Route path="unidades/novo" element={<AdminRoute><UnidadeForm /></AdminRoute>} />
+      <Route path="unidades/:id/editar" element={<AdminRoute><UnidadeForm /></AdminRoute>} />
+
+      <Route path="planos" element={<AdminRoute><Planos /></AdminRoute>} />
+      <Route path="planos/novo" element={<AdminRoute><PlanoForm /></AdminRoute>} />
+      <Route path="planos/:id/editar" element={<AdminRoute><PlanoForm /></AdminRoute>} />
+
+      <Route path="contratos" element={<AdminRoute><Contratos /></AdminRoute>} />
+      <Route path="contratos/novo" element={<AdminRoute><ContratoForm /></AdminRoute>} />
+      <Route path="contratos/:id" element={<AdminRoute><ContratoDetalhe /></AdminRoute>} />
+      <Route path="contratos/:id/editar" element={<AdminRoute><ContratoForm /></AdminRoute>} />
+
+      <Route path="configuracao-academia" element={<AdminRoute><ConfiguracaoAcademia /></AdminRoute>} />
+      <Route path="mensalidades" element={<AdminRoute><Mensalidades /></AdminRoute>} />
 
       <Route path="turmas" element={<AdminRoute><Turmas /></AdminRoute>} />
       <Route path="turmas/novo" element={<AdminRoute><TurmaForm /></AdminRoute>} />

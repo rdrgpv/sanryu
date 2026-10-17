@@ -10,6 +10,12 @@ const Evento = require('./Evento');
 const Banco = require('./Banco');
 const EventoAluno = require('./EventoAluno');
 const EventoAutorizacao = require('./EventoAutorizacao');
+const Unidade = require('./Unidade');
+const Responsavel = require('./Responsavel');
+const Plano = require('./Plano');
+const Contrato = require('./Contrato');
+const ConfiguracaoAcademia = require('./ConfiguracaoAcademia');
+const Mensalidade = require('./Mensalidade');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -50,6 +56,30 @@ Evento.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
 
 Aluno.hasMany(EventoAluno, { foreignKey: 'alunoId', as: 'inscricoesEvento' });
 EventoAluno.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
+
+Unidade.hasMany(Aluno, { foreignKey: 'unidadeId', as: 'alunos' });
+Aluno.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
+
+Unidade.hasMany(Turma, { foreignKey: 'unidadeId', as: 'turmas' });
+Turma.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
+
+Responsavel.hasMany(Aluno, { foreignKey: 'responsavelId', as: 'alunos' });
+Aluno.belongsTo(Responsavel, { foreignKey: 'responsavelId', as: 'responsavel' });
+
+Unidade.hasMany(Plano, { foreignKey: 'unidadeId', as: 'planos' });
+Plano.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
+
+Aluno.hasMany(Contrato, { foreignKey: 'alunoId', as: 'contratos' });
+Contrato.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
+
+Plano.hasMany(Contrato, { foreignKey: 'planoId', as: 'contratos' });
+Contrato.belongsTo(Plano, { foreignKey: 'planoId', as: 'plano' });
+
+Contrato.hasMany(Mensalidade, { foreignKey: 'contratoId', as: 'mensalidades' });
+Mensalidade.belongsTo(Contrato, { foreignKey: 'contratoId', as: 'contrato' });
+
+Aluno.hasMany(Mensalidade, { foreignKey: 'alunoId', as: 'mensalidades' });
+Mensalidade.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
 
 Faixa.hasMany(Aluno, { foreignKey: 'faixaId', as: 'alunos' });
 Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
@@ -115,6 +145,12 @@ module.exports = {
   Banco,
   EventoAluno,
   EventoAutorizacao,
+  Unidade,
+  Responsavel,
+  Plano,
+  Contrato,
+  ConfiguracaoAcademia,
+  Mensalidade,
   Configuracao,
   Produto,
   Cor,

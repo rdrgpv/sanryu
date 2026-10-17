@@ -465,3 +465,62 @@
   margin: 0 auto;
   border-bottom: 1px solid #111;
 }
+
+/* Foto do aluno no formulário (já reduzida pra ~480px antes de salvar). */
+.aluno-foto {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--cui-tertiary-bg, #f3f4f7);
+  border: 1px solid var(--cui-border-color, #dbdfe6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cui-secondary-color, #6b7785);
+  font-size: 0.85rem;
+}
+
+.aluno-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Contrato de matrícula: na tela fica como um documento dentro do admin; na impressão sai só ele. */
+.contrato-impresso {
+  max-width: 718px;
+  background: #fff;
+  color: #111;
+  border: 1px solid var(--cui-border-color, #dbdfe6);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+.contrato-impresso__texto {
+  white-space: pre-line;
+  text-align: justify;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.contrato-impresso__assinatura {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.contrato-impresso__assinatura img {
+  height: 80px;
+  display: block;
+  margin: 0 auto;
+  border-bottom: 1px solid #111;
+}
+
+@media print {
+  .contrato-impresso {
+    border: none;
+    padding: 0;
+  }
+}

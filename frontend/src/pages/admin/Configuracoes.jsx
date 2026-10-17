@@ -11,6 +11,8 @@ const CAMPOS = [
   { parametro: 'GATAME_EMAIL', label: 'E-mail da credencial do Gatame', tipo: 'text', sensivel: false },
   { parametro: 'GATAME_SENHA', label: 'Senha da credencial do Gatame', tipo: 'text', sensivel: true },
   { parametro: 'MP_ACCESS_TOKEN', label: 'Access Token do Mercado Pago', tipo: 'text', sensivel: true },
+  { parametro: 'SITE_URL', label: 'URL pública do site (links de pagamento nos e-mails, ex.: https://sanryu.com.br)', tipo: 'text', sensivel: false },
+  { parametro: 'API_PUBLICA_URL', label: 'URL pública da API (aviso automático de Pix pago, ex.: https://api.sanryu.com.br)', tipo: 'text', sensivel: false },
   { parametro: 'SMTP_HOST', label: 'Servidor SMTP (host)', tipo: 'text', sensivel: false },
   { parametro: 'SMTP_PORT', label: 'Porta SMTP', tipo: 'text', sensivel: false },
   { parametro: 'SMTP_USER', label: 'Usuário SMTP', tipo: 'text', sensivel: false },

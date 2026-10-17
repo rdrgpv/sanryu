@@ -8,15 +8,25 @@ async function obterAccessToken() {
   return configService.obterValor('MP_ACCESS_TOKEN');
 }
 
+// URL que o Mercado Pago chama quando o status de um pagamento muda (ver webhookController). Só
+// existe se a URL pública da API estiver em Configurações — sem ela, a baixa fica pela verificação
+// periódica/manual.
+async function urlNotificacao() {
+  const base = (await configService.obterValor('API_PUBLICA_URL')) || '';
+  return base ? `${base.replace(/\/+$/, '')}/api/webhooks/mercadopago` : null;
+}
+
 // Cria uma cobrança Pix dinâmica no Mercado Pago. Retorna null se o Access Token ainda não
 // foi configurado em /admin/configuracoes, permitindo que o chamador caia no QR estático.
-async function criarPagamentoPix({ valor, descricao, email, referenciaExterna }) {
+// dataExpiracao (Date, opcional): até quando o Pix pode ser pago — sem ela, o MP usa o padrão (24h).
+async function criarPagamentoPix({ valor, descricao, email, referenciaExterna, dataExpiracao }) {
   const accessToken = await obterAccessToken();
 
   if (!accessToken) {
     return null;
   }
 
+  const notificacao = await urlNotificacao();
   const resposta = await axios.post(
     MP_API_URL,
     {
@@ -25,6 +35,8 @@ async function criarPagamentoPix({ valor, descricao, email, referenciaExterna })
       payment_method_id: 'pix',
       payer: { email },
       external_reference: referenciaExterna,
+      ...(dataExpiracao ? { date_of_expiration: dataExpiracao.toISOString().replace('Z', '+00:00') } : {}),
+      ...(notificacao ? { notification_url: notificacao } : {}),
     },
     {
       headers: {
@@ -68,7 +80,13 @@ async function consultarPagamento(paymentId) {
     timeout: 15000,
   });
 
-  return { statusMp: resposta.data.status, statusPagamento: mapearStatusPagamento(resposta.data.status) };
+  return {
+    statusMp: resposta.data.status,
+    statusPagamento: mapearStatusPagamento(resposta.data.status),
+    referenciaExterna: resposta.data.external_reference || null,
+    valor: resposta.data.transaction_amount,
+    aprovadoEm: resposta.data.date_approved || null,
+  };
 }
 
 // Cancela a cobrança Pix no Mercado Pago. A própria API do MP só aceita esse cancelamento enquanto
