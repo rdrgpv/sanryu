@@ -4,3 +4,6 @@ dist/
 dev.pid
 dev.out.log
 dev.err.log
+
+# Copiados de node_modules por scripts/copiar-modelos-face.mjs
+public/modelos-face/

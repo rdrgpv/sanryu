@@ -12,6 +12,7 @@ const CAMPOS_EDITAVEIS = [
   'responsavelId', 'parentescoResponsavel',
   'contatoEmergenciaNome', 'contatoEmergenciaTelefone', 'contatoEmergenciaParentesco',
   'tipoSanguineo', 'alergias', 'medicamentos', 'restricoesMedicas', 'observacoes',
+  'consentimentoBiometria',
 ];
 
 function dadosAluno(body) {
@@ -31,6 +32,15 @@ function dadosAluno(body) {
 async function salvarAluno(aluno, body) {
   return sequelize.transaction(async (transaction) => {
     const dados = dadosAluno(body);
+
+    // Data/origem do consentimento só mudam quando ele muda (marcar de novo não "renova" a data).
+    if (dados.consentimentoBiometria !== undefined) {
+      const antes = Boolean(aluno?.consentimentoBiometria);
+      const depois = Boolean(dados.consentimentoBiometria);
+      dados.consentimentoBiometria = depois;
+      if (depois && !antes) Object.assign(dados, { consentimentoBiometriaEm: new Date(), consentimentoBiometriaOrigem: 'cadastro' });
+      if (!depois) Object.assign(dados, { consentimentoBiometriaEm: null, consentimentoBiometriaOrigem: null });
+    }
 
     if (body.responsavelNovo?.nome?.trim()) {
       const responsavel = await Responsavel.create(body.responsavelNovo, { transaction });

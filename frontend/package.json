@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/copiar-modelos-face.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/copiar-modelos-face.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -13,6 +15,7 @@
     "@coreui/icons": "^3.1.0",
     "@coreui/icons-react": "^2.3.0",
     "@coreui/react": "^5.13.0",
+    "@vladmandic/face-api": "^1.7.15",
     "axios": "^1.7.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

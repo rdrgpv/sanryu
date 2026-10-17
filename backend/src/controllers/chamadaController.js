@@ -103,7 +103,7 @@ async function buscarChamada(req, res) {
     where: {
       [Op.or]: [{ id: idsMatriculados, situacao: 'ativo' }, { id: [...presentes] }],
     },
-    attributes: ['id', 'nome', 'foto', 'dataNascimento', 'restricoesMedicas', 'alergias'],
+    attributes: ['id', 'nome', 'foto', 'dataNascimento', 'restricoesMedicas', 'alergias', 'consentimentoBiometria'],
     include: { model: Faixa, as: 'faixa', attributes: ['nome', 'cor'] },
     order: [['nome', 'ASC']],
   });
@@ -131,6 +131,8 @@ async function buscarChamada(req, res) {
       presente: presentes.has(aluno.id),
       mensalidadeEmAtraso: idsEmAtraso.has(aluno.id),
       foraDaTurma: !idsMatriculados.includes(aluno.id),
+      // Só quem autorizou entra na comparação da chamada por foto (feita no celular, ver Chamada.jsx).
+      reconhecimentoPermitido: Boolean(aluno.consentimentoBiometria && aluno.foto),
     })),
   });
 }

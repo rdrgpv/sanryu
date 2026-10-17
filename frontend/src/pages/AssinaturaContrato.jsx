@@ -18,6 +18,7 @@ export default function AssinaturaContrato() {
   const [erroCarregar, setErroCarregar] = useState(null);
   const [nomeAssinante, setNomeAssinante] = useState('');
   const [assinou, setAssinou] = useState(false);
+  const [autorizaReconhecimento, setAutorizaReconhecimento] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(null);
 
@@ -42,7 +43,11 @@ export default function AssinaturaContrato() {
 
     setEnviando(true);
     try {
-      const res = await api.post(`/contratos/${token}/assinatura`, { nomeAssinante, assinatura: assinaturaRef.current.paraDataUrl() });
+      const res = await api.post(`/contratos/${token}/assinatura`, {
+        nomeAssinante,
+        assinatura: assinaturaRef.current.paraDataUrl(),
+        autorizaReconhecimentoFacial: autorizaReconhecimento,
+      });
       setContrato((prev) => ({ ...prev, assinado: true, assinadoEm: res.data.assinadoEm, nomeAssinante: res.data.nomeAssinante }));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -118,6 +123,14 @@ export default function AssinaturaContrato() {
                     </button>
                   </div>
                 </div>
+
+                {/* Consentimento à parte e opcional (LGPD exige que seja específico, não embutido no contrato). */}
+                <label className="consentimento">
+                  <input type="checkbox" checked={autorizaReconhecimento} onChange={(event) => setAutorizaReconhecimento(event.target.checked)} />
+                  <span>
+                    <strong>Opcional:</strong> Autorizo o uso da imagem do rosto do(a) aluno(a) para reconhecimento facial no registro de presença das aulas. O reconhecimento é feito no aparelho do instrutor, a foto da turma não é guardada, e posso revogar esta autorização a qualquer momento.
+                  </span>
+                </label>
 
                 {erro && <p className="alert alert--error">{erro}</p>}
 

@@ -15,10 +15,11 @@ import {
   CNavItem,
   CNavLink,
   CBadge,
+  CFormCheck,
 } from '@coreui/react';
 import api from '../../services/api';
 import { OPCOES_TAMANHO_FAIXA } from '../../utils/opcoesTamanhoFaixa.js';
-import { formatarCpf, cpfValido, formatarCep, formatarTelefone, calcularIdade } from '../../utils/formato.js';
+import { formatarCpf, cpfValido, formatarCep, formatarTelefone, calcularIdade, formatarDataHora } from '../../utils/formato.js';
 import { reduzirImagem } from '../../utils/imagem.js';
 
 const estadoInicial = {
@@ -52,6 +53,9 @@ const estadoInicial = {
   medicamentos: '',
   restricoesMedicas: '',
   observacoes: '',
+  consentimentoBiometria: false,
+  consentimentoBiometriaEm: null,
+  consentimentoBiometriaOrigem: null,
 };
 
 const responsavelNovoInicial = { nome: '', cpf: '', telefone: '', email: '' };
@@ -556,6 +560,21 @@ export default function AlunoForm() {
                 <CCol md={6}>
                   <CFormLabel>Observações</CFormLabel>
                   <CFormTextarea rows={2} name="observacoes" value={form.observacoes} onChange={handleChange} />
+                </CCol>
+
+                <CCol xs={12}>
+                  <h2 className="h6 mb-1 mt-2">Reconhecimento facial na chamada</h2>
+                  <CFormCheck
+                    id="consentimentoBiometria"
+                    label="O aluno (ou o responsável, se menor) autorizou por escrito o uso do rosto para a chamada por foto"
+                    checked={!!form.consentimentoBiometria}
+                    onChange={(event) => atualizar('consentimentoBiometria', event.target.checked)}
+                  />
+                  <small className="text-body-secondary d-block">
+                    {form.consentimentoBiometria && form.consentimentoBiometriaEm
+                      ? `Autorizado em ${formatarDataHora(form.consentimentoBiometriaEm)} ${form.consentimentoBiometriaOrigem === 'contrato' ? 'na assinatura do contrato' : 'no cadastro'}. Desmarque se a pessoa revogar.`
+                      : 'Biometria é dado sensível (LGPD): sem autorização, o aluno fica fora da chamada por foto. Precisa também de uma boa foto de rosto na aba Dados pessoais.'}
+                  </small>
                 </CCol>
               </CRow>
             )}

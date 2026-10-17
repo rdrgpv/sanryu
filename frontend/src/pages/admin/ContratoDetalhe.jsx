@@ -21,6 +21,7 @@ export default function ContratoDetalhe() {
   const [assinando, setAssinando] = useState(false);
   const [nomeAssinante, setNomeAssinante] = useState('');
   const [assinou, setAssinou] = useState(false);
+  const [autorizaReconhecimento, setAutorizaReconhecimento] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [linkCopiado, setLinkCopiado] = useState(false);
   const [erro, setErro] = useState(null);
@@ -62,7 +63,11 @@ export default function ContratoDetalhe() {
 
     setSalvando(true);
     try {
-      await api.post(`/admin/contratos/${id}/assinar`, { nomeAssinante, assinatura: assinaturaRef.current.paraDataUrl() });
+      await api.post(`/admin/contratos/${id}/assinar`, {
+        nomeAssinante,
+        assinatura: assinaturaRef.current.paraDataUrl(),
+        autorizaReconhecimentoFacial: autorizaReconhecimento,
+      });
       setAssinando(false);
       await carregar();
     } catch (err) {
@@ -181,6 +186,12 @@ export default function ContratoDetalhe() {
                 <CFormLabel>Nome de quem está assinando</CFormLabel>
                 <CFormInput className="mb-2" value={nomeAssinante} onChange={(event) => setNomeAssinante(event.target.value)} />
                 <AssinaturaCanvas ref={assinaturaRef} onChange={setAssinou} disabled={salvando} />
+                <label className="d-flex gap-2 align-items-start small mt-2">
+                  <input type="checkbox" className="mt-1" checked={autorizaReconhecimento} onChange={(event) => setAutorizaReconhecimento(event.target.checked)} />
+                  <span>
+                    <strong>Opcional (pergunte):</strong> Autorizo o uso da imagem do rosto do(a) aluno(a) para reconhecimento facial no registro de presença das aulas. O reconhecimento é feito no aparelho do instrutor, a foto da turma não é guardada, e posso revogar esta autorização a qualquer momento.
+                  </span>
+                </label>
                 <div className="d-flex gap-2 mt-2">
                   <CButton color="primary" onClick={handleAssinar} disabled={salvando}>
                     {salvando ? 'Salvando...' : 'Confirmar assinatura'}

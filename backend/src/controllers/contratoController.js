@@ -189,7 +189,7 @@ async function remover(req, res) {
   res.status(204).send();
 }
 
-async function registrarAssinatura(contrato, { assinatura, nomeAssinante }, via, ip) {
+async function registrarAssinatura(contrato, { assinatura, nomeAssinante, autorizaReconhecimentoFacial }, via, ip) {
   const nome = (nomeAssinante || '').trim();
 
   if (!nome) return 'Informe o nome de quem está assinando.';
@@ -207,6 +207,15 @@ async function registrarAssinatura(contrato, { assinatura, nomeAssinante }, via,
     assinadoVia: via,
     ipAssinatura: ip || null,
   });
+
+  // Opcional e separado do contrato (consentimento específico, LGPD art. 11) — só liga, nunca
+  // desliga: quem não marcou não perde uma autorização dada antes por escrito.
+  if (autorizaReconhecimentoFacial === true) {
+    await Aluno.update(
+      { consentimentoBiometria: true, consentimentoBiometriaEm: new Date(), consentimentoBiometriaOrigem: 'contrato' },
+      { where: { id: contrato.alunoId, consentimentoBiometria: false } }
+    );
+  }
 
   return null;
 }

@@ -145,6 +145,24 @@ const Aluno = sequelize.define('Aluno', {
     allowNull: true,
   },
 
+  // Consentimento pro reconhecimento facial na chamada por foto. Biometria é dado sensível na LGPD
+  // (art. 11; de menor, consentimento do responsável — art. 14): sem isto, o aluno fica fora da
+  // comparação. Origem: "contrato" (marcado ao assinar pelo link/recepção) ou "cadastro" (admin
+  // registrou autorização por escrito). Desmarcar = revogação.
+  consentimentoBiometria: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
+  consentimentoBiometriaEm: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  consentimentoBiometriaOrigem: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+  },
+
   // Marca que esse aluno já foi cadastrado no Gatame a partir desta tela (ver
   // alunoController.cadastrarNoGatame) — evita tentar de novo à toa.
   cadastradoNoGatame: {

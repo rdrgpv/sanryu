@@ -16,6 +16,10 @@ export default function Chamada({ turmaId }) {
   const [alterado, setAlterado] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState(null);
+  // Chamada por foto: quem foi marcado pelo reconhecimento (pra destacar) e o andamento/resultado.
+  const [pelaFoto, setPelaFoto] = useState(new Set());
+  const [processandoFoto, setProcessandoFoto] = useState(null);
+  const [resultadoFoto, setResultadoFoto] = useState(null);
 
   useEffect(() => {
     setChamada(null);
@@ -27,6 +31,8 @@ export default function Chamada({ turmaId }) {
         setPresentes(new Set(res.data.alunos.filter((aluno) => aluno.presente).map((aluno) => aluno.id)));
         setObservacoes(res.data.observacoes || '');
         setAlterado(false);
+        setPelaFoto(new Set());
+        setResultadoFoto(null);
       })
       .catch((err) => setMensagem({ tipo: 'erro', texto: err.response?.data?.error || 'Não foi possível carregar a chamada.' }));
   }, [turmaId, data]);
@@ -45,6 +51,29 @@ export default function Chamada({ turmaId }) {
   function marcarTodos(presente) {
     setPresentes(presente ? new Set(chamada.alunos.map((aluno) => aluno.id)) : new Set());
     setAlterado(true);
+  }
+
+  // Junta os reconhecidos aos já marcados (dá pra tirar mais de uma foto, de ângulos diferentes).
+  async function handleFotoTurma(event) {
+    const arquivo = event.target.files?.[0];
+    event.target.value = '';
+    if (!arquivo) return;
+
+    setMensagem(null);
+    setProcessandoFoto('Preparando...');
+    try {
+      const { reconhecerAlunos } = await import('../utils/reconhecimentoFacial.js');
+      const resultado = await reconhecerAlunos(arquivo, chamada.alunos, setProcessandoFoto);
+      const ids = resultado.reconhecidos.map((item) => item.alunoId);
+      setPresentes((prev) => new Set([...prev, ...ids]));
+      setPelaFoto((prev) => new Set([...prev, ...ids]));
+      setResultadoFoto(resultado);
+      if (ids.length > 0) setAlterado(true);
+    } catch (err) {
+      setMensagem({ tipo: 'erro', texto: 'Não foi possível analisar a foto neste aparelho. Faça a chamada manualmente.' });
+    } finally {
+      setProcessandoFoto(null);
+    }
   }
 
   async function salvar() {
@@ -94,6 +123,27 @@ export default function Chamada({ turmaId }) {
             </span>
           </div>
 
+          {chamada.alunos.some((aluno) => aluno.reconhecimentoPermitido) && (
+            <div className="chamada__foto-turma">
+              <label className={`btn btn--ghost btn--bloco${processandoFoto ? ' chamada__foto-turma--ocupado' : ''}`}>
+                {processandoFoto || '📷 Chamada por foto'}
+                <input type="file" accept="image/*" capture="environment" hidden onChange={handleFotoTurma} disabled={!!processandoFoto} />
+              </label>
+              {resultadoFoto && (
+                <p className="chamada__foto-resultado">
+                  {resultadoFoto.rostosNaFoto} rosto(s) na foto · <strong>{resultadoFoto.reconhecidos.length} reconhecido(s)</strong>
+                  {resultadoFoto.rostosSemCorrespondencia > 0 && ` · ${resultadoFoto.rostosSemCorrespondencia} sem correspondência`}
+                  . Confira a lista antes de salvar — dá para tirar outra foto para pegar quem faltou.
+                  {resultadoFoto.semRostoNoCadastro.length > 0 && (
+                    <span className="chamada__foto-alerta">
+                      Foto do cadastro sem rosto visível: {resultadoFoto.semRostoNoCadastro.join(', ')}.
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
+
           {chamada.alunos.length === 0 && <p className="chamada__vazio">Nenhum aluno ativo matriculado nesta turma.</p>}
 
           <ul className="chamada__lista">
@@ -119,6 +169,7 @@ export default function Chamada({ turmaId }) {
                         {aluno.faixa?.nome}
                         {aluno.mensalidadeEmAtraso && <span className="chamada__aviso">mensalidade em atraso</span>}
                         {aluno.foraDaTurma && <span className="chamada__aviso">saiu da turma</span>}
+                        {pelaFoto.has(aluno.id) && presente && <span className="chamada__pela-foto">pela foto</span>}
                       </span>
                       {aluno.atencaoSaude && <span className="chamada__saude">⚠ {aluno.atencaoSaude}</span>}
                     </span>
