@@ -42,6 +42,7 @@ import {
   cilArrowCircleTop,
   cilArrowCircleBottom,
   cilLoopCircular,
+  cilUserFollow,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -49,6 +50,7 @@ import AdminFooter from '../admin/components/AdminFooter.jsx';
 
 const linksPrincipal = [
   { to: '/admin', label: 'Dashboard', end: true, icon: cilSpeedometer },
+  { to: '/admin/interessados', label: 'Interessados', icon: cilUserFollow },
   { to: '/admin/alunos', label: 'Alunos', icon: cilPeople },
   { to: '/admin/responsaveis', label: 'Responsáveis', icon: cilUser },
   { to: '/admin/contratos', label: 'Contratos', icon: cilNotes },

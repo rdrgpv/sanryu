@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { sequelize, Turma, Aluno, Matricula, Presenca, Aula, Mensalidade, Faixa, Unidade, Instrutor } = require('../models');
+const { sequelize, Turma, Aluno, Matricula, Presenca, Aula, Mensalidade, Faixa, Unidade, Instrutor, Lead } = require('../models');
 const { perfilDo } = require('../middleware/auth');
 const { hoje } = require('../services/mensalidadeService');
 
@@ -96,6 +96,13 @@ async function buscarChamada(req, res) {
     Aula.findOne({ where: { turmaId: turma.id, data } }),
   ]);
 
+  // Aulas experimentais agendadas pra esta turma neste dia (o sensei marca quem veio).
+  const experimentais = await Lead.findAll({
+    where: { turmaId: turma.id, dataAula: data, status: ['agendado', 'compareceu', 'matriculado'] },
+    attributes: ['id', 'nome', 'dataNascimento', 'status', 'nomeResponsavel', 'observacoes'],
+    order: [['nome', 'ASC']],
+  });
+
   const presentes = new Set(presencas.map((presenca) => presenca.alunoId));
   const idsMatriculados = matriculas.map((matricula) => matricula.alunoId);
 
@@ -121,6 +128,15 @@ async function buscarChamada(req, res) {
     data,
     chamadaFeita: Boolean(aula),
     observacoes: aula?.observacoes || '',
+    experimentais: experimentais.map((lead) => ({
+      id: lead.id,
+      nome: lead.nome,
+      responsavel: lead.nomeResponsavel,
+      observacoes: lead.observacoes,
+      // "matriculado" já veio (e virou aluno) — conta como presente.
+      presente: lead.status !== 'agendado',
+      travado: lead.status === 'matriculado',
+    })),
     alunos: alunos.map((aluno) => ({
       id: aluno.id,
       nome: aluno.nome,
@@ -179,6 +195,16 @@ async function salvarChamada(req, res) {
       );
     }
   });
+
+  // Experimentais: marcado = compareceu; desmarcado volta pra agendado (convertido não mexe).
+  if (Array.isArray(req.body.experimentaisPresentes)) {
+    const vieram = req.body.experimentaisPresentes.map(Number);
+    const doDia = await Lead.findAll({ where: { turmaId: turma.id, dataAula: data, status: ['agendado', 'compareceu'] } });
+    for (const lead of doDia) {
+      const status = vieram.includes(lead.id) ? 'compareceu' : 'agendado';
+      if (lead.status !== status) await lead.update({ status });
+    }
+  }
 
   res.json({ salvo: true, presentes: presentes.length });
 }

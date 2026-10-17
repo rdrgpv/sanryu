@@ -255,4 +255,43 @@ async function enviarCodigoAcesso({ destinatario, codigo, minutos }) {
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso };
+// Aula experimental: confirmação ao agendar e lembrete na véspera. Devolve true/false; nunca lança.
+async function enviarAulaExperimental({ tipo, destinatario, nome, aluno, turma, data, horario, endereco }) {
+  try {
+    const transportador = await obterTransportador();
+
+    if (!transportador) {
+      logErro('SMTP não configurado em Configurações; e-mail de aula experimental não enviado.');
+      return false;
+    }
+
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+    const copiaPara = await configService.obterValor('SMTP_BCC');
+    const lembrete = tipo === 'lembrete';
+
+    await transportador.sendMail({
+      from: remetente,
+      to: destinatario,
+      bcc: copiaPara || undefined,
+      subject: lembrete ? `Amanhã: aula experimental — ${turma}` : `Aula experimental agendada — ${turma}`,
+      html: `
+        <p>Olá, ${nome}!</p>
+        <p>${lembrete ? 'Passando para lembrar da aula experimental de amanhã' : 'Sua aula experimental está agendada'}${aluno !== nome ? ` para <strong>${aluno}</strong>` : ''}:</p>
+        <ul>
+          <li><strong>Turma:</strong> ${turma}</li>
+          <li><strong>Quando:</strong> ${data}${horario ? `, ${horario}` : ''}</li>
+          ${endereco ? `<li><strong>Onde:</strong> ${endereco}</li>` : ''}
+        </ul>
+        <p>Venha com roupa confortável e chegue uns 10 minutos antes.</p>
+        <p>Se não puder vir, responda este e-mail para remarcar.</p>
+      `,
+    });
+
+    return true;
+  } catch (err) {
+    logErro('Erro ao enviar e-mail de aula experimental:', err);
+    return false;
+  }
+}
+
+module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental };

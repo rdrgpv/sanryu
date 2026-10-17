@@ -8,6 +8,7 @@ const autorizacaoController = require('../controllers/autorizacaoController');
 const contratoController = require('../controllers/contratoController');
 const mensalidadeController = require('../controllers/mensalidadeController');
 const webhookController = require('../controllers/webhookController');
+const leadController = require('../controllers/leadController');
 
 const router = express.Router();
 
@@ -30,5 +31,8 @@ router.get('/mensalidades/:token', mensalidadeController.buscarPublico);
 router.get('/mensalidades/:token/status', mensalidadeController.statusPublico);
 
 router.post('/webhooks/mercadopago', webhookController.mercadoPago);
+
+router.get('/aula-experimental/opcoes', leadController.opcoesPublicas);
+router.post('/aula-experimental', leadController.agendarPublico);
 
 module.exports = router;

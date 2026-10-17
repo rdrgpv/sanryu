@@ -7,6 +7,7 @@ const links = [
   { to: '/aulas', label: 'Aulas' },
   { to: '/horarios', label: 'Horários' },
   { to: '/eventos', label: 'Eventos' },
+  { to: '/aula-experimental', label: 'Aula experimental' },
   { to: '/contato', label: 'Contato' },
 ];
 

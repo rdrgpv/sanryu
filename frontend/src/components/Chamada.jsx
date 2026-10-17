@@ -12,6 +12,7 @@ export default function Chamada({ turmaId }) {
   const [data, setData] = useState(hoje());
   const [chamada, setChamada] = useState(null);
   const [presentes, setPresentes] = useState(new Set());
+  const [experimentaisPresentes, setExperimentaisPresentes] = useState(new Set());
   const [observacoes, setObservacoes] = useState('');
   const [alterado, setAlterado] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -29,6 +30,7 @@ export default function Chamada({ turmaId }) {
       .then((res) => {
         setChamada(res.data);
         setPresentes(new Set(res.data.alunos.filter((aluno) => aluno.presente).map((aluno) => aluno.id)));
+        setExperimentaisPresentes(new Set((res.data.experimentais || []).filter((lead) => lead.presente).map((lead) => lead.id)));
         setObservacoes(res.data.observacoes || '');
         setAlterado(false);
         setPelaFoto(new Set());
@@ -42,6 +44,18 @@ export default function Chamada({ turmaId }) {
       const proximo = new Set(prev);
       if (proximo.has(alunoId)) proximo.delete(alunoId);
       else proximo.add(alunoId);
+      return proximo;
+    });
+    setAlterado(true);
+    setMensagem(null);
+  }
+
+  function alternarExperimental(lead) {
+    if (lead.travado) return;
+    setExperimentaisPresentes((prev) => {
+      const proximo = new Set(prev);
+      if (proximo.has(lead.id)) proximo.delete(lead.id);
+      else proximo.add(lead.id);
       return proximo;
     });
     setAlterado(true);
@@ -80,7 +94,7 @@ export default function Chamada({ turmaId }) {
     setSalvando(true);
     setMensagem(null);
     try {
-      await api.put(`/sensei/turmas/${turmaId}/chamada`, { data, presentes: [...presentes], observacoes });
+      await api.put(`/sensei/turmas/${turmaId}/chamada`, { data, presentes: [...presentes], experimentaisPresentes: [...experimentaisPresentes], observacoes });
       setAlterado(false);
       setChamada((prev) => ({ ...prev, chamadaFeita: true }));
       setMensagem({ tipo: 'ok', texto: `Chamada salva: ${presentes.size} presente(s).` });
@@ -179,6 +193,40 @@ export default function Chamada({ turmaId }) {
               );
             })}
           </ul>
+
+          {chamada.experimentais?.length > 0 && (
+            <>
+              <h3 className="chamada__subtitulo">Aula experimental hoje</h3>
+              <ul className="chamada__lista">
+                {chamada.experimentais.map((lead) => {
+                  const veio = experimentaisPresentes.has(lead.id);
+                  return (
+                    <li key={lead.id}>
+                      <button
+                        type="button"
+                        className={`chamada__aluno chamada__aluno--experimental${veio ? ' chamada__aluno--presente' : ''}`}
+                        onClick={() => alternarExperimental(lead)}
+                        aria-pressed={veio}
+                        disabled={lead.travado}
+                      >
+                        <span className="chamada__foto">{lead.nome.slice(0, 1)}</span>
+                        <span className="chamada__nome">
+                          {lead.nome}
+                          <span className="chamada__detalhes">
+                            <span className="chamada__pela-foto">experimental</span>
+                            {lead.responsavel && `resp.: ${lead.responsavel}`}
+                            {lead.travado && ' · já matriculado'}
+                          </span>
+                          {lead.observacoes && <span className="chamada__saude">{lead.observacoes}</span>}
+                        </span>
+                        <span className="chamada__marca">{veio ? '✓' : ''}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
 
           <label className="chamada__obs">
             <span>Observações da aula</span>

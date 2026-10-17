@@ -36,7 +36,7 @@ export default function Home() {
             </p>
             <p className="hero__slogan">"Quem teme perder já está vencido."</p>
             <div className="hero__actions">
-              <Link to="/contato" className="btn btn--primary">
+              <Link to="/aula-experimental" className="btn btn--primary">
                 Agendar aula experimental
               </Link>
               <Link to="/aulas" className="btn btn--outline">

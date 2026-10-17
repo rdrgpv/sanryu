@@ -10,6 +10,7 @@ import InscricaoEvento from './pages/InscricaoEvento.jsx';
 import AutorizacaoEvento from './pages/AutorizacaoEvento.jsx';
 import AssinaturaContrato from './pages/AssinaturaContrato.jsx';
 import PagamentoMensalidade from './pages/PagamentoMensalidade.jsx';
+import AulaExperimental from './pages/AulaExperimental.jsx';
 import Login from './pages/Login.jsx';
 import PublicLayout from './components/PublicLayout.jsx';
 
@@ -30,6 +31,7 @@ export default function App() {
       <Route path="/eventos/:id/autorizacao" element={<PublicLayout><AutorizacaoEvento /></PublicLayout>} />
       <Route path="/contratos/:token" element={<PublicLayout><AssinaturaContrato /></PublicLayout>} />
       <Route path="/mensalidades/:token" element={<PublicLayout><PagamentoMensalidade /></PublicLayout>} />
+      <Route path="/aula-experimental" element={<PublicLayout><AulaExperimental /></PublicLayout>} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/portal/*"

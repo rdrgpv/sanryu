@@ -29,6 +29,7 @@ const configuracaoAcademiaController = require('../controllers/configuracaoAcade
 const mensalidadeController = require('../controllers/mensalidadeController');
 const chamadaController = require('../controllers/chamadaController');
 const financeiroController = require('../controllers/financeiroController');
+const leadController = require('../controllers/leadController');
 
 const router = express.Router();
 
@@ -82,6 +83,12 @@ router.post('/mensalidades/:id/verificar-pagamento', mensalidadeController.verif
 router.post('/mensalidades/:id/enviar-email', mensalidadeController.enviarEmail);
 
 router.get('/frequencia', chamadaController.frequencia);
+
+router.get('/leads', leadController.listar);
+router.post('/leads', leadController.criar);
+router.put('/leads/:id', leadController.atualizar);
+router.delete('/leads/:id', leadController.remover);
+router.post('/leads/:id/converter', leadController.converter);
 router.post('/instrutores/:id/acesso', instrutorController.salvarAcesso);
 router.delete('/instrutores/:id/acesso', instrutorController.removerAcesso);
 

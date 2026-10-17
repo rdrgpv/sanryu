@@ -1346,3 +1346,57 @@ button, input, select, textarea {
   color: var(--cor-cinza);
   white-space: nowrap;
 }
+
+/* Aula experimental */
+.campo-armadilha {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.aula-dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.aula-dias__opcao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.2rem;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid rgba(17, 17, 17, 0.15);
+  border-radius: 8px;
+  background: var(--cor-branco);
+  font: inherit;
+  font-weight: 600;
+  color: var(--cor-sumi);
+  cursor: pointer;
+}
+
+.aula-dias__opcao small {
+  font-weight: 400;
+  color: var(--cor-cinza);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.aula-dias__opcao--ativa {
+  border-color: var(--cor-hanko);
+  background: rgba(178, 58, 47, 0.08);
+}
+
+.chamada__subtitulo {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cor-cinza);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.chamada__aluno--experimental {
+  border-style: dashed;
+}
