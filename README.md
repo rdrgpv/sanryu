@@ -63,11 +63,18 @@ Após rodar `npm run seed`, use as credenciais definidas em `backend/.env`
 - `npm run dev` — sobe a API com reload automático (nodemon)
 - `npm start` — sobe a API em modo produção
 - `npm run seed` — popula o banco (idempotente, só cria o que faltar)
+- `npm test` — testes automatizados (banco SQLite em memória; não toca no
+  banco real nem manda e-mail/Pix de verdade)
 
 **frontend/**
 - `npm run dev` — sobe o site em modo desenvolvimento
 - `npm run build` — gera build de produção em `frontend/dist`
 - `npm run preview` — serve o build de produção localmente
+
+## Deploy
+
+Ver o roteiro completo em [`DEPLOY.md`](DEPLOY.md) — backup, configurações da
+primeira vez e teste de fumaça com Pix real.
 
 ## API
 
