@@ -524,3 +524,116 @@
     padding: 0;
   }
 }
+
+/* Gráficos do dashboard (GraficosDashboard.jsx). Paleta validada (dataviz): série 1 azul, série 2
+   laranja; saídas em vermelho (polo oposto do azul). O admin só tem tema claro. */
+.viz-raiz {
+  --viz-serie-1: #2a78d6;
+  --viz-serie-2: #eb6834;
+  --viz-negativo: #e34948;
+  --viz-grade: #ecebe7;
+  --viz-base: #c9c8c2;
+  --viz-texto: #52514e;
+  --viz-superficie: #ffffff;
+}
+
+.viz__area {
+  position: relative;
+}
+
+.viz svg {
+  display: block;
+  overflow: visible;
+}
+
+.viz-grade {
+  stroke: var(--viz-grade);
+  stroke-width: 1;
+}
+
+.viz-base {
+  stroke: var(--viz-base);
+  stroke-width: 1;
+}
+
+.viz-eixo {
+  fill: var(--viz-texto);
+  font-size: 11px;
+}
+
+.viz-rotulo {
+  fill: #0b0b0b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.viz-destaque {
+  fill: rgba(17, 17, 17, 0.04);
+}
+
+.viz-cruz {
+  stroke: var(--viz-base);
+  stroke-width: 1;
+}
+
+.viz-anel {
+  stroke: var(--viz-superficie);
+  stroke-width: 2;
+}
+
+.viz-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--viz-texto);
+  margin-bottom: 0.25rem;
+}
+
+.viz-legenda > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.viz-legenda__marca {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.viz-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: #fff;
+  border: 1px solid #dcdbd5;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.78rem;
+  color: #0b0b0b;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.viz-tooltip__linha {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.viz-tooltip__extra {
+  color: var(--viz-texto);
+  border-top: 1px solid #ecebe7;
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.viz-tabela summary {
+  font-size: 0.78rem;
+  color: var(--viz-texto);
+  cursor: pointer;
+  margin-top: 0.25rem;
+}

@@ -1,5 +1,28 @@
 const { Op } = require('sequelize');
-const { Aluno, Turma, Instrutor, Matricula, Faixa, Evento, TipoEvento, EventoAluno } = require('../models');
+const { sequelize, Aluno, Turma, Instrutor, Faixa, Evento, TipoEvento, EventoAluno, Contrato, Mensalidade, Presenca, Matricula, Responsavel } = require('../models');
+const { hoje } = require('../services/mensalidadeService');
+const financeiroService = require('../services/financeiroService');
+
+const MESES_HISTORICO = 12;
+const DIAS_SUMIDO = 14;
+
+function ultimoDiaDoMes(competencia) {
+  const [ano, mes] = competencia.split('-').map(Number);
+  return new Date(Date.UTC(ano, mes, 0)).toISOString().slice(0, 10);
+}
+
+// Os últimos N meses ("2025-11" ... "2026-10"), terminando no mês atual.
+function ultimosMeses(dataHoje, quantidade) {
+  const [ano, mes] = dataHoje.split('-').map(Number);
+  return Array.from({ length: quantidade }, (_, indice) =>
+    new Date(Date.UTC(ano, mes - quantidade + indice, 1)).toISOString().slice(0, 7)
+  );
+}
+
+function somarDias(data, dias) {
+  const [ano, mes, dia] = data.split('-').map(Number);
+  return new Date(Date.UTC(ano, mes - 1, dia + dias)).toISOString().slice(0, 10);
+}
 
 // Quantidade de alunos ativos por faixa, na ordem de graduação (Faixa.ordem) — usado pelo card
 // "Distribuição de Faixas" do dashboard. Não hardcoda nomes/cores: tudo vem do cadastro de Faixa.
@@ -48,21 +71,157 @@ async function buscarProximosEventos() {
   );
 }
 
+// Evolução de alunos pelos contratos (é o que tem data de entrada e de saída): ativos no fim de
+// cada mês, novos (início no mês) e saídas (encerrados/cancelados com fim no mês).
+async function buscarEvolucaoAlunos(meses) {
+  const contratos = await Contrato.findAll({ attributes: ['alunoId', 'dataInicio', 'dataFim', 'situacao'], raw: true });
+
+  return meses.map((competencia) => {
+    const fim = ultimoDiaDoMes(competencia);
+    const ativos = new Set(
+      contratos.filter((contrato) => contrato.dataInicio <= fim && (!contrato.dataFim || contrato.dataFim > fim)).map((contrato) => contrato.alunoId)
+    );
+    return {
+      mes: competencia,
+      ativos: ativos.size,
+      novos: contratos.filter((contrato) => contrato.dataInicio.slice(0, 7) === competencia).length,
+      saidas: contratos.filter((contrato) => contrato.dataFim && contrato.situacao !== 'ativo' && contrato.dataFim.slice(0, 7) === competencia).length,
+    };
+  });
+}
+
+async function buscarInadimplencia(dataHoje) {
+  const vencidas = await Mensalidade.findAll({
+    where: { status: 'pendente', vencimento: { [Op.lt]: dataHoje } },
+    include: {
+      model: Aluno,
+      as: 'aluno',
+      attributes: ['id', 'nome', 'telefone'],
+      include: { model: Responsavel, as: 'responsavel', attributes: ['nome', 'telefone'] },
+    },
+    order: [['vencimento', 'ASC']],
+  });
+
+  const alunosEmAtraso = new Set(vencidas.map((mensalidade) => mensalidade.alunoId));
+  const diasDeAtraso = (vencimento) => Math.round((Date.parse(`${dataHoje}T00:00:00Z`) - Date.parse(`${vencimento}T00:00:00Z`)) / 86400000);
+
+  return {
+    total: Math.round(vencidas.reduce((total, mensalidade) => total + Number(mensalidade.valor), 0) * 100) / 100,
+    alunos: alunosEmAtraso.size,
+    maisAtrasadas: vencidas.slice(0, 6).map((mensalidade) => ({
+      id: mensalidade.id,
+      aluno: mensalidade.aluno?.nome,
+      responsavel: mensalidade.aluno?.responsavel?.nome || null,
+      competencia: mensalidade.competencia,
+      valor: mensalidade.valor,
+      diasAtraso: diasDeAtraso(mensalidade.vencimento),
+    })),
+  };
+}
+
+// Engajamento: dos alunos ativos matriculados em turma, quantos treinaram nos últimos 30 dias, e
+// quem está sumido há DIAS_SUMIDO+ (ou nunca treinou) — os mais antigos primeiro.
+async function buscarEngajamento(dataHoje) {
+  const matriculados = await Matricula.findAll({
+    where: { status: 'ativa' },
+    attributes: ['alunoId'],
+    include: { model: Aluno, as: 'aluno', where: { situacao: 'ativo' }, attributes: ['id', 'nome', 'createdAt'] },
+  });
+  const alunos = new Map(matriculados.map((matricula) => [matricula.alunoId, matricula.aluno]));
+
+  if (alunos.size === 0) return { matriculados: 0, treinaram30Dias: 0, sumidos: [] };
+
+  const ultimas = await Presenca.findAll({
+    where: { alunoId: [...alunos.keys()] },
+    attributes: ['alunoId', [sequelize.fn('MAX', sequelize.col('data')), 'ultima']],
+    group: ['alunoId'],
+    raw: true,
+  });
+  const ultimaPorAluno = new Map(ultimas.map((linha) => [linha.alunoId, linha.ultima]));
+  const limite30 = somarDias(dataHoje, -30);
+  const limiteSumido = somarDias(dataHoje, -DIAS_SUMIDO);
+
+  const sumidos = [...alunos.values()]
+    .map((aluno) => ({ id: aluno.id, nome: aluno.nome, ultimaPresenca: ultimaPorAluno.get(aluno.id) || null }))
+    .filter((aluno) => !aluno.ultimaPresenca || aluno.ultimaPresenca < limiteSumido)
+    .sort((a, b) => (a.ultimaPresenca || '').localeCompare(b.ultimaPresenca || ''));
+
+  return {
+    matriculados: alunos.size,
+    treinaram30Dias: [...ultimaPorAluno.values()].filter((data) => data >= limite30).length,
+    totalSumidos: sumidos.length,
+    sumidos: sumidos.slice(0, 6),
+  };
+}
+
+// Aniversariantes do mês entre os ativos (dia/mês lidos da string, sem fuso).
+async function buscarAniversariantes(dataHoje) {
+  const mes = dataHoje.slice(5, 7);
+  const alunos = await Aluno.findAll({ where: { situacao: 'ativo', dataNascimento: { [Op.ne]: null } }, attributes: ['id', 'nome', 'dataNascimento'], raw: true });
+
+  return alunos
+    .filter((aluno) => String(aluno.dataNascimento).slice(5, 7) === mes)
+    .map((aluno) => ({
+      id: aluno.id,
+      nome: aluno.nome,
+      dia: Number(String(aluno.dataNascimento).slice(8, 10)),
+      idade: Number(dataHoje.slice(0, 4)) - Number(String(aluno.dataNascimento).slice(0, 4)),
+      hoje: String(aluno.dataNascimento).slice(5, 10) === dataHoje.slice(5, 10),
+    }))
+    .sort((a, b) => a.dia - b.dia);
+}
+
 async function resumo(req, res) {
-  const inicioMes = new Date();
-  inicioMes.setDate(1);
-  inicioMes.setHours(0, 0, 0, 0);
+  const dataHoje = hoje();
+  const meses = ultimosMeses(dataHoje, MESES_HISTORICO);
+  const mesAtual = meses[meses.length - 1];
 
-  const [alunosAtivos, totalTurmas, totalInstrutores, matriculasDoMes, distribuicaoFaixas, proximosEventos] = await Promise.all([
-    Aluno.count({ where: { ativo: true } }),
-    Turma.count(),
-    Instrutor.count(),
-    Matricula.count({ where: { dataMatricula: { [Op.gte]: inicioMes.toISOString().slice(0, 10) } } }),
-    buscarDistribuicaoFaixas(),
-    buscarProximosEventos(),
-  ]);
+  await financeiroService.sincronizarOrigens();
 
-  res.json({ alunosAtivos, totalTurmas, totalInstrutores, matriculasDoMes, distribuicaoFaixas, proximosEventos });
+  const [alunosAtivos, totalTurmas, totalInstrutores, distribuicaoFaixas, proximosEventos, evolucao, inadimplencia, engajamento, aniversariantes, fluxo] =
+    await Promise.all([
+      Aluno.count({ where: { situacao: 'ativo' } }),
+      Turma.count(),
+      Instrutor.count(),
+      buscarDistribuicaoFaixas(),
+      buscarProximosEventos(),
+      buscarEvolucaoAlunos(meses),
+      buscarInadimplencia(dataHoje),
+      buscarEngajamento(dataHoje),
+      buscarAniversariantes(dataHoje),
+      financeiroService.fluxoDeCaixa({ inicio: `${meses[0]}-01`, fim: ultimoDiaDoMes(mesAtual) }),
+    ]);
+
+  // Série financeira com todos os 12 meses (os sem movimento entram zerados, pro eixo não pular mês).
+  const porMes = new Map(fluxo.meses.map((linha) => [linha.mes, linha]));
+  const financeiro = meses.map((competencia) => {
+    const linha = porMes.get(competencia);
+    return { mes: competencia, entradas: linha?.entradas || 0, saidas: linha?.saidas || 0, resultado: linha?.resultado || 0 };
+  });
+
+  const evolucaoAtual = evolucao[evolucao.length - 1];
+  const financeiroAtual = financeiro[financeiro.length - 1];
+  const financeiroAnterior = financeiro[financeiro.length - 2];
+
+  res.json({
+    alunosAtivos,
+    totalTurmas,
+    totalInstrutores,
+    // Mantido por compatibilidade com o card antigo (agora = contratos iniciados no mês).
+    matriculasDoMes: evolucaoAtual.novos,
+    novosNoMes: evolucaoAtual.novos,
+    saidasNoMes: evolucaoAtual.saidas,
+    recebidoNoMes: financeiroAtual.entradas,
+    recebidoMesAnterior: financeiroAnterior?.entradas || 0,
+    resultadoNoMes: financeiroAtual.resultado,
+    inadimplencia,
+    engajamento,
+    aniversariantes,
+    evolucao,
+    financeiro,
+    distribuicaoFaixas,
+    proximosEventos,
+  });
 }
 
 module.exports = { resumo };
