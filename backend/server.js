@@ -9,6 +9,7 @@ const senseiRoutes = require('./src/routes/sensei');
 const seed = require('./seed');
 const { aplicarAjustesIniciais } = require('./src/config/ajustesIniciais');
 const { rotinaCobranca } = require('./src/services/mensalidadeService');
+const { sincronizarOrigens } = require('./src/services/financeiroService');
 const { logErro } = require('./src/utils/logger');
 
 const app = express();
@@ -93,12 +94,15 @@ app.listen(PORT, '0.0.0.0', async () => {
 function agendarRotinaCobranca() {
   if (process.env.ROTINA_COBRANCA === 'off') return;
 
+  // Depois da cobrança, sincroniza o financeiro (mensalidades pagas, vendas, compras, recorrências).
   const executar = () =>
-    rotinaCobranca().then((resultado) => {
-      if (resultado && (resultado.geradas || resultado.baixadas || resultado.avisos)) {
-        console.log('Rotina de cobrança:', resultado);
-      }
-    });
+    rotinaCobranca()
+      .then((resultado) => {
+        if (resultado && (resultado.geradas || resultado.baixadas || resultado.avisos)) {
+          console.log('Rotina de cobrança:', resultado);
+        }
+      })
+      .then(() => sincronizarOrigens());
 
   setTimeout(executar, 60 * 1000);
   setInterval(executar, 60 * 60 * 1000);

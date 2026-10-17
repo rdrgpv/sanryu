@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize, Unidade, Aluno, Turma, ConfiguracaoAcademia, Admin } = require('../models');
 const { TERMO_CONTRATO_PADRAO } = require('../utils/termoContrato');
+const { garantirCategoriasPadrao } = require('../services/financeiroService');
 const { logErro } = require('../utils/logger');
 
 // O sync do server.js não adiciona colunas novas no SQLite (roda sem alter lá, ver server.js) —
@@ -62,6 +63,8 @@ async function aplicarAjustesIniciais() {
       await ConfiguracaoAcademia.create({ descontoFamiliaPercentual: 0, termoContrato: TERMO_CONTRATO_PADRAO });
       console.log('Configuração da academia criada com o contrato padrão.');
     }
+
+    await garantirCategoriasPadrao();
 
     if ((await Unidade.count()) === 0) {
       await Unidade.create({ nome: 'Sanryu' });

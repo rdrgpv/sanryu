@@ -38,6 +38,10 @@ import {
   cilNotes,
   cilDollar,
   cilChartLine,
+  cilChartPie,
+  cilArrowCircleTop,
+  cilArrowCircleBottom,
+  cilLoopCircular,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -74,12 +78,20 @@ const linksLoja = [
   { to: '/admin/pedidos-compra', label: 'Pedidos de Compra', icon: cilBriefcase },
 ];
 
+const linksFinanceiro = [
+  { to: '/admin/financeiro', label: 'Financeiro', end: true, icon: cilChartPie },
+  { to: '/admin/financeiro/pagar', label: 'Contas a pagar', icon: cilArrowCircleTop },
+  { to: '/admin/financeiro/receber', label: 'Contas a receber', icon: cilArrowCircleBottom },
+  { to: '/admin/financeiro/recorrencias', label: 'Recorrentes', icon: cilLoopCircular },
+  { to: '/admin/financeiro/cadastros', label: 'Contas e categorias', icon: cilBank },
+];
+
 const linksSistema = [
   { to: '/admin/configuracao-academia', label: 'Config. da academia', icon: cilSettings },
   { to: '/admin/configuracoes', label: 'Configurações', icon: cilSettings },
 ];
 
-const TODOS_OS_LINKS = [...linksPrincipal, ...linksEventos, ...linksLoja, ...linksSistema];
+const TODOS_OS_LINKS = [...linksPrincipal, ...linksFinanceiro, ...linksEventos, ...linksLoja, ...linksSistema];
 
 // Sufixo da rota -> complemento do título mostrado no header (ex.: "Alunos — Novo").
 const SUFIXOS_DE_ROTA = {
@@ -90,6 +102,11 @@ const SUFIXOS_DE_ROTA = {
   'lista-inscritos': 'Lista de Inscritos',
   movimentacoes: 'Movimentações',
   'gerar-pedido-compra': 'Gerar Pedido de Compra',
+  chamada: 'Chamada',
+  pagar: 'Contas a pagar',
+  receber: 'Contas a receber',
+  recorrencias: 'Recorrentes',
+  cadastros: 'Contas e categorias',
 };
 
 // Deriva o título da aba e a trilha do breadcrumb a partir da própria URL — puramente visual (não
@@ -185,6 +202,15 @@ export default function AdminLayout({ children }) {
         <CSidebarNav>
           <CNavTitle>Gestão</CNavTitle>
           {linksPrincipal.map((link) => (
+            <CNavItem key={link.to}>
+              <CNavLink as={NavLink} to={link.to} end={link.end} title={link.label}>
+                <CIcon customClassName="nav-icon" icon={link.icon} />
+                {link.label}
+              </CNavLink>
+            </CNavItem>
+          ))}
+          <CNavTitle>Financeiro</CNavTitle>
+          {linksFinanceiro.map((link) => (
             <CNavItem key={link.to}>
               <CNavLink as={NavLink} to={link.to} end={link.end} title={link.label}>
                 <CIcon customClassName="nav-icon" icon={link.icon} />

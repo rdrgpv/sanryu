@@ -18,6 +18,11 @@ const ConfiguracaoAcademia = require('./ConfiguracaoAcademia');
 const Mensalidade = require('./Mensalidade');
 const Presenca = require('./Presenca');
 const Aula = require('./Aula');
+const ContaFinanceira = require('./ContaFinanceira');
+const CategoriaFinanceira = require('./CategoriaFinanceira');
+const Lancamento = require('./Lancamento');
+const Recorrencia = require('./Recorrencia');
+const Transferencia = require('./Transferencia');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -95,6 +100,18 @@ Presenca.belongsTo(Turma, { foreignKey: 'turmaId', as: 'turma' });
 Turma.hasMany(Aula, { foreignKey: 'turmaId', as: 'aulas' });
 Aula.belongsTo(Turma, { foreignKey: 'turmaId', as: 'turma' });
 
+Lancamento.belongsTo(CategoriaFinanceira, { foreignKey: 'categoriaId', as: 'categoria' });
+Lancamento.belongsTo(ContaFinanceira, { foreignKey: 'contaFinanceiraId', as: 'conta' });
+Lancamento.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
+Lancamento.belongsTo(Fornecedor, { foreignKey: 'fornecedorId', as: 'fornecedor' });
+Recorrencia.belongsTo(CategoriaFinanceira, { foreignKey: 'categoriaId', as: 'categoria' });
+Recorrencia.belongsTo(ContaFinanceira, { foreignKey: 'contaFinanceiraId', as: 'conta' });
+Recorrencia.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
+Recorrencia.belongsTo(Fornecedor, { foreignKey: 'fornecedorId', as: 'fornecedor' });
+ContaFinanceira.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
+Transferencia.belongsTo(ContaFinanceira, { foreignKey: 'contaOrigemId', as: 'contaOrigem' });
+Transferencia.belongsTo(ContaFinanceira, { foreignKey: 'contaDestinoId', as: 'contaDestino' });
+
 Faixa.hasMany(Aluno, { foreignKey: 'faixaId', as: 'alunos' });
 Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
 
@@ -167,6 +184,11 @@ module.exports = {
   Mensalidade,
   Presenca,
   Aula,
+  ContaFinanceira,
+  CategoriaFinanceira,
+  Lancamento,
+  Recorrencia,
+  Transferencia,
   Configuracao,
   Produto,
   Cor,

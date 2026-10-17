@@ -28,6 +28,7 @@ const contratoController = require('../controllers/contratoController');
 const configuracaoAcademiaController = require('../controllers/configuracaoAcademiaController');
 const mensalidadeController = require('../controllers/mensalidadeController');
 const chamadaController = require('../controllers/chamadaController');
+const financeiroController = require('../controllers/financeiroController');
 
 const router = express.Router();
 
@@ -83,6 +84,30 @@ router.post('/mensalidades/:id/enviar-email', mensalidadeController.enviarEmail)
 router.get('/frequencia', chamadaController.frequencia);
 router.post('/instrutores/:id/acesso', instrutorController.salvarAcesso);
 router.delete('/instrutores/:id/acesso', instrutorController.removerAcesso);
+
+router.get('/financeiro/resumo', financeiroController.resumo);
+router.get('/financeiro/contas', financeiroController.listarContas);
+router.post('/financeiro/contas', financeiroController.criarConta);
+router.put('/financeiro/contas/:id', financeiroController.atualizarConta);
+router.delete('/financeiro/contas/:id', financeiroController.removerConta);
+router.get('/financeiro/categorias', financeiroController.listarCategorias);
+router.post('/financeiro/categorias', financeiroController.criarCategoria);
+router.put('/financeiro/categorias/:id', financeiroController.atualizarCategoria);
+router.delete('/financeiro/categorias/:id', financeiroController.removerCategoria);
+router.get('/financeiro/lancamentos', financeiroController.listarLancamentos);
+router.post('/financeiro/lancamentos', financeiroController.criarLancamento);
+router.put('/financeiro/lancamentos/:id', financeiroController.atualizarLancamento);
+router.delete('/financeiro/lancamentos/:id', financeiroController.removerLancamento);
+router.post('/financeiro/lancamentos/:id/baixar', financeiroController.baixarLancamento);
+router.post('/financeiro/lancamentos/:id/estornar', financeiroController.estornarLancamento);
+router.post('/financeiro/lancamentos/:id/cancelar', financeiroController.cancelarLancamento);
+router.get('/financeiro/recorrencias', financeiroController.listarRecorrencias);
+router.post('/financeiro/recorrencias', financeiroController.salvarRecorrencia);
+router.put('/financeiro/recorrencias/:id', financeiroController.salvarRecorrencia);
+router.delete('/financeiro/recorrencias/:id', financeiroController.removerRecorrencia);
+router.get('/financeiro/transferencias', financeiroController.listarTransferencias);
+router.post('/financeiro/transferencias', financeiroController.criarTransferencia);
+router.delete('/financeiro/transferencias/:id', financeiroController.removerTransferencia);
 
 router.get('/configuracao-academia', configuracaoAcademiaController.buscar);
 router.put('/configuracao-academia', configuracaoAcademiaController.atualizar);

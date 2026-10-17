@@ -16,6 +16,10 @@ import ConfiguracaoAcademia from '../pages/admin/ConfiguracaoAcademia.jsx';
 import Mensalidades from '../pages/admin/Mensalidades.jsx';
 import TurmaChamada from '../pages/admin/TurmaChamada.jsx';
 import Frequencia from '../pages/admin/Frequencia.jsx';
+import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
+import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
+import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
+import CadastrosFinanceiros from '../pages/admin/financeiro/CadastrosFinanceiros.jsx';
 import Turmas from '../pages/admin/Turmas.jsx';
 import TurmaForm from '../pages/admin/TurmaForm.jsx';
 import Instrutores from '../pages/admin/Instrutores.jsx';
@@ -100,6 +104,12 @@ export default function AdminApp() {
       <Route path="mensalidades" element={<AdminRoute><Mensalidades /></AdminRoute>} />
       <Route path="turmas/:id/chamada" element={<AdminRoute><TurmaChamada /></AdminRoute>} />
       <Route path="frequencia" element={<AdminRoute><Frequencia /></AdminRoute>} />
+
+      <Route path="financeiro" element={<AdminRoute><ResumoFinanceiro /></AdminRoute>} />
+      <Route path="financeiro/pagar" element={<AdminRoute><Lancamentos key="despesa" tipo="despesa" /></AdminRoute>} />
+      <Route path="financeiro/receber" element={<AdminRoute><Lancamentos key="receita" tipo="receita" /></AdminRoute>} />
+      <Route path="financeiro/recorrencias" element={<AdminRoute><Recorrencias /></AdminRoute>} />
+      <Route path="financeiro/cadastros" element={<AdminRoute><CadastrosFinanceiros /></AdminRoute>} />
 
       <Route path="turmas" element={<AdminRoute><Turmas /></AdminRoute>} />
       <Route path="turmas/novo" element={<AdminRoute><TurmaForm /></AdminRoute>} />
