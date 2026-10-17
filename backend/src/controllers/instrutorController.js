@@ -1,8 +1,12 @@
-const { Instrutor, Faixa } = require('../models');
+const bcrypt = require('bcryptjs');
+const { Instrutor, Faixa, Admin } = require('../models');
+
+// Só o login (nunca o hash) — a tela mostra se o sensei já tem acesso à chamada.
+const INCLUDE_ACESSO = { model: Admin, as: 'acesso', attributes: ['id', 'username'] };
 
 async function listar(req, res) {
   const instrutores = await Instrutor.findAll({
-    include: [{ model: Faixa, as: 'faixa' }],
+    include: [{ model: Faixa, as: 'faixa' }, ...(req.baseUrl.endsWith('/admin') ? [INCLUDE_ACESSO] : [])],
     order: [['nome', 'ASC']],
   });
   res.json(instrutores);
@@ -55,4 +59,49 @@ async function remover(req, res) {
   res.status(204).send();
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover };
+// Cria ou troca o login do sensei (perfil "instrutor": só acessa a chamada das próprias turmas).
+async function salvarAcesso(req, res) {
+  const instrutor = await Instrutor.findByPk(req.params.id, { include: INCLUDE_ACESSO });
+
+  if (!instrutor) {
+    return res.status(404).json({ error: 'Instrutor não encontrado.' });
+  }
+
+  const username = (req.body.username || '').trim().toLowerCase();
+  const senha = req.body.senha || '';
+
+  if (!/^[a-z0-9._-]{3,40}$/.test(username)) {
+    return res.status(400).json({ error: 'Usuário deve ter de 3 a 40 letras, números, ponto, hífen ou sublinhado.' });
+  }
+
+  if (!instrutor.acesso && senha.length < 8) {
+    return res.status(400).json({ error: 'A senha deve ter pelo menos 8 caracteres.' });
+  }
+
+  if (senha && senha.length < 8) {
+    return res.status(400).json({ error: 'A senha deve ter pelo menos 8 caracteres.' });
+  }
+
+  const emUso = await Admin.findOne({ where: { username } });
+  if (emUso && emUso.id !== instrutor.acesso?.id) {
+    return res.status(400).json({ error: 'Este usuário já está em uso.' });
+  }
+
+  const dados = { username, nome: instrutor.nome, perfil: 'instrutor', instrutorId: instrutor.id };
+  if (senha) dados.passwordHash = await bcrypt.hash(senha, 10);
+
+  if (instrutor.acesso) {
+    await Admin.update(dados, { where: { id: instrutor.acesso.id } });
+  } else {
+    await Admin.create(dados);
+  }
+
+  res.json({ username });
+}
+
+async function removerAcesso(req, res) {
+  await Admin.destroy({ where: { instrutorId: req.params.id, perfil: 'instrutor' } });
+  res.status(204).send();
+}
+
+module.exports = { listar, buscarPorId, criar, atualizar, remover, salvarAcesso, removerAcesso };

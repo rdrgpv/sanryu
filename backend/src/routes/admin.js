@@ -1,5 +1,6 @@
 const express = require('express');
 const auth = require('../middleware/auth');
+const { exigirPerfil } = require('../middleware/auth');
 const alunoController = require('../controllers/alunoController');
 const turmaController = require('../controllers/turmaController');
 const instrutorController = require('../controllers/instrutorController');
@@ -26,10 +27,12 @@ const planoController = require('../controllers/planoController');
 const contratoController = require('../controllers/contratoController');
 const configuracaoAcademiaController = require('../controllers/configuracaoAcademiaController');
 const mensalidadeController = require('../controllers/mensalidadeController');
+const chamadaController = require('../controllers/chamadaController');
 
 const router = express.Router();
 
 router.use(auth);
+router.use(exigirPerfil('admin'));
 
 router.get('/dashboard', dashboardController.resumo);
 
@@ -76,6 +79,10 @@ router.post('/mensalidades/:id/reabrir', mensalidadeController.reabrir);
 router.post('/mensalidades/:id/cancelar', mensalidadeController.cancelar);
 router.post('/mensalidades/:id/verificar-pagamento', mensalidadeController.verificarPagamento);
 router.post('/mensalidades/:id/enviar-email', mensalidadeController.enviarEmail);
+
+router.get('/frequencia', chamadaController.frequencia);
+router.post('/instrutores/:id/acesso', instrutorController.salvarAcesso);
+router.delete('/instrutores/:id/acesso', instrutorController.removerAcesso);
 
 router.get('/configuracao-academia', configuracaoAcademiaController.buscar);
 router.put('/configuracao-academia', configuracaoAcademiaController.atualizar);

@@ -850,3 +850,285 @@ button, input, select, textarea {
   max-width: 260px;
   margin: 0 auto 1rem;
 }
+
+/* Área do sensei (/sensei) e tela de chamada — feitas pro celular, alvos de toque grandes. */
+.sensei {
+  min-height: 100vh;
+  background: var(--cor-off-white);
+}
+
+.sensei__cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 16px;
+  background: var(--cor-sumi);
+  color: var(--cor-branco);
+}
+
+.sensei__marca {
+  color: var(--cor-branco);
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sensei__marca span {
+  color: var(--cor-hanko);
+  font-family: var(--fonte-corpo);
+  font-weight: 400;
+  font-size: 0.85rem;
+  margin-left: 0.25rem;
+}
+
+.sensei__usuario {
+  font-size: 0.85rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.sensei__usuario button {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--cor-branco);
+  border-radius: var(--raio);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+.sensei__conteudo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1rem 16px 3rem;
+}
+
+.sensei__secao {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cor-cinza);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.sensei__turma {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cor-branco);
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-left: 3px solid var(--cor-hanko);
+  border-radius: var(--raio);
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--cor-sumi);
+  text-decoration: none;
+}
+
+.sensei__turma small {
+  display: block;
+  color: var(--cor-cinza);
+  margin-top: 0.15rem;
+}
+
+.sensei__selo {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--cor-hanko);
+  color: var(--cor-branco);
+}
+
+.sensei__selo--ok {
+  background: #345a3f;
+}
+
+.sensei__voltar {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--cor-cinza);
+  text-decoration: none;
+}
+
+.chamada__topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.chamada__titulo {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.chamada__meta {
+  margin: 0.15rem 0 0;
+  color: var(--cor-cinza);
+  font-size: 0.85rem;
+}
+
+.chamada__data {
+  font-size: 16px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(17, 17, 17, 0.2);
+  border-radius: var(--raio);
+  background: var(--cor-branco);
+}
+
+.chamada__resumo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0 0.5rem;
+}
+
+.chamada__atalhos button {
+  background: none;
+  border: none;
+  color: var(--cor-hanko);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.25rem 0.4rem;
+}
+
+.chamada__vazio {
+  color: var(--cor-cinza);
+}
+
+.chamada__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.chamada__aluno {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  background: var(--cor-branco);
+  border: 2px solid rgba(17, 17, 17, 0.1);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  font: inherit;
+  color: var(--cor-sumi);
+}
+
+.chamada__aluno--presente {
+  border-color: #345a3f;
+  background: rgba(80, 120, 90, 0.1);
+}
+
+.chamada__foto {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--cor-off-white-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--cor-cinza);
+}
+
+.chamada__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chamada__nome {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.chamada__detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--cor-cinza);
+  margin-top: 0.1rem;
+}
+
+.chamada__faixa {
+  width: 1.4rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  border: 1px solid rgba(17, 17, 17, 0.25);
+}
+
+.chamada__aviso {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(178, 58, 47, 0.12);
+  color: var(--cor-hanko-escuro);
+}
+
+.chamada__saude {
+  display: block;
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: #8a5a00;
+  margin-top: 0.15rem;
+}
+
+.chamada__marca {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid rgba(17, 17, 17, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--cor-branco);
+}
+
+.chamada__aluno--presente .chamada__marca {
+  background: #345a3f;
+  border-color: #345a3f;
+}
+
+.chamada__obs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.chamada__obs textarea {
+  font: inherit;
+  font-size: 16px;
+  padding: 0.6rem;
+  border: 1px solid rgba(17, 17, 17, 0.2);
+  border-radius: var(--raio);
+}
+
+/* Botão de salvar fica sempre à mão no celular, mesmo com a lista longa. */
+.chamada__rodape {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 0;
+  background: linear-gradient(to top, var(--cor-off-white) 70%, transparent);
+}

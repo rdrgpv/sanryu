@@ -36,7 +36,8 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ admin, loading, login, logout, isAuthenticated: !!admin }}>
+    // Sessões salvas antes de existir perfil eram todas de admin.
+    <AuthContext.Provider value={{ admin, loading, login, logout, isAuthenticated: !!admin, perfil: admin ? admin.perfil || 'admin' : null }}>
       {children}
     </AuthContext.Provider>
   );

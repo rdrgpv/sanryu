@@ -21,13 +21,10 @@ async function login(req, res) {
     return res.status(401).json({ error: 'Credenciais inválidas.' });
   }
 
-  const token = jwt.sign(
-    { id: admin.id, username: admin.username, nome: admin.nome },
-    process.env.JWT_SECRET,
-    { expiresIn: '8h' }
-  );
+  const dados = { id: admin.id, username: admin.username, nome: admin.nome, perfil: admin.perfil || 'admin', instrutorId: admin.instrutorId || null };
+  const token = jwt.sign(dados, process.env.JWT_SECRET, { expiresIn: '8h' });
 
-  res.json({ token, admin: { id: admin.id, nome: admin.nome, username: admin.username } });
+  res.json({ token, admin: dados });
 }
 
 module.exports = { login };

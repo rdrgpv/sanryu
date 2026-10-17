@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (error) => {
     const url = error.config?.url || '';
 
-    if (error.response?.status === 401 && url.startsWith('/admin')) {
+    if (error.response?.status === 401 && (url.startsWith('/admin') || url.startsWith('/sensei'))) {
       localStorage.removeItem('sanryu_token');
       localStorage.removeItem('sanryu_admin');
 

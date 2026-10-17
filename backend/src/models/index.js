@@ -16,6 +16,8 @@ const Plano = require('./Plano');
 const Contrato = require('./Contrato');
 const ConfiguracaoAcademia = require('./ConfiguracaoAcademia');
 const Mensalidade = require('./Mensalidade');
+const Presenca = require('./Presenca');
+const Aula = require('./Aula');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -51,6 +53,9 @@ EventoAluno.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
 Evento.hasMany(EventoAutorizacao, { foreignKey: 'eventoId', as: 'autorizacoes' });
 EventoAutorizacao.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
 
+Instrutor.hasOne(Admin, { foreignKey: 'instrutorId', as: 'acesso' });
+Admin.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
+
 Instrutor.hasMany(Evento, { foreignKey: 'instrutorId', as: 'eventos' });
 Evento.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
 
@@ -80,6 +85,15 @@ Mensalidade.belongsTo(Contrato, { foreignKey: 'contratoId', as: 'contrato' });
 
 Aluno.hasMany(Mensalidade, { foreignKey: 'alunoId', as: 'mensalidades' });
 Mensalidade.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
+
+Aluno.hasMany(Presenca, { foreignKey: 'alunoId', as: 'presencas' });
+Presenca.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
+
+Turma.hasMany(Presenca, { foreignKey: 'turmaId', as: 'presencas' });
+Presenca.belongsTo(Turma, { foreignKey: 'turmaId', as: 'turma' });
+
+Turma.hasMany(Aula, { foreignKey: 'turmaId', as: 'aulas' });
+Aula.belongsTo(Turma, { foreignKey: 'turmaId', as: 'turma' });
 
 Faixa.hasMany(Aluno, { foreignKey: 'faixaId', as: 'alunos' });
 Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
@@ -151,6 +165,8 @@ module.exports = {
   Contrato,
   ConfiguracaoAcademia,
   Mensalidade,
+  Presenca,
+  Aula,
   Configuracao,
   Produto,
   Cor,

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CButton } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilCheckCircle } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
@@ -42,6 +45,11 @@ export default function Turmas() {
         onEditar={() => navigate(`/admin/turmas/${selecionadoId}/editar`)}
         onExcluir={handleExcluir}
         onAtualizar={carregarTurmas}
+        extra={
+          <CButton color="secondary" variant="outline" disabled={!selecionadoId} onClick={() => navigate(`/admin/turmas/${selecionadoId}/chamada`)} title="Chamada">
+            <CIcon icon={cilCheckCircle} />
+          </CButton>
+        }
       />
 
       <AdminDataTable

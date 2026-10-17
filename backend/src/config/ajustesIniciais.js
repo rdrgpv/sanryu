@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize, Unidade, Aluno, Turma, ConfiguracaoAcademia } = require('../models');
+const { sequelize, Unidade, Aluno, Turma, ConfiguracaoAcademia, Admin } = require('../models');
 const { TERMO_CONTRATO_PADRAO } = require('../utils/termoContrato');
 const { logErro } = require('../utils/logger');
 
@@ -55,6 +55,7 @@ async function aplicarAjustesIniciais() {
     await adicionarColunasFaltantes(Aluno);
     await adicionarColunasFaltantes(Turma);
     await adicionarColunasFaltantes(ConfiguracaoAcademia);
+    await adicionarColunasFaltantes(Admin);
     await removerEmailUnicoDoAluno();
 
     if ((await ConfiguracaoAcademia.count()) === 0) {

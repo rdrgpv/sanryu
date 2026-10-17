@@ -37,6 +37,7 @@ import {
   cilWallet,
   cilNotes,
   cilDollar,
+  cilChartLine,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -50,6 +51,7 @@ const linksPrincipal = [
   { to: '/admin/mensalidades', label: 'Mensalidades', icon: cilDollar },
   { to: '/admin/planos', label: 'Planos', icon: cilWallet },
   { to: '/admin/turmas', label: 'Turmas', icon: cilSchool },
+  { to: '/admin/frequencia', label: 'Frequência', icon: cilChartLine },
   { to: '/admin/instrutores', label: 'Instrutores', icon: cilContact },
   { to: '/admin/faixas', label: 'Faixas', icon: cilLayers },
   { to: '/admin/unidades', label: 'Unidades', icon: cilBuilding },

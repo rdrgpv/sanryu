@@ -5,6 +5,7 @@ const { sequelize } = require('./src/models');
 const authRoutes = require('./src/routes/auth');
 const publicRoutes = require('./src/routes/public');
 const adminRoutes = require('./src/routes/admin');
+const senseiRoutes = require('./src/routes/sensei');
 const seed = require('./seed');
 const { aplicarAjustesIniciais } = require('./src/config/ajustesIniciais');
 const { rotinaCobranca } = require('./src/services/mensalidadeService');
@@ -19,6 +20,7 @@ app.use(express.json({ limit: '6mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api', publicRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/sensei', senseiRoutes);
 
 // TEMPORÁRIO: dispara o seed em produção, remover depois do primeiro uso.
 app.post('/api/_seed', async (req, res) => {

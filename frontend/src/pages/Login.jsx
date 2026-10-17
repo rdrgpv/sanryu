@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, perfil } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -11,7 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   if (isAuthenticated) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to={perfil === 'instrutor' ? '/sensei' : '/admin'} replace />;
   }
 
   async function handleSubmit(event) {
@@ -20,8 +20,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(username, password);
-      navigate('/admin');
+      const usuario = await login(username, password);
+      navigate(usuario.perfil === 'instrutor' ? '/sensei' : '/admin');
     } catch (err) {
       setErro('Usuário ou senha inválidos.');
     } finally {
