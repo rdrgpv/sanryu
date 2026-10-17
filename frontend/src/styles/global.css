@@ -1186,3 +1186,163 @@ button, input, select, textarea {
   height: 1.1rem;
   flex-shrink: 0;
 }
+
+/* Área do aluno/responsável (/portal) — reaproveita o layout do sensei (.sensei*). */
+.portal__entrada {
+  max-width: 420px;
+  margin: 2rem auto 0;
+}
+
+.portal__entrada h1 {
+  margin-bottom: 0.25rem;
+}
+
+.portal__codigo {
+  font-size: 1.6rem !important;
+  letter-spacing: 0.4em;
+  text-align: center;
+  font-family: monospace;
+}
+
+.portal__link-texto {
+  background: none;
+  border: none;
+  color: var(--cor-hanko);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.portal__titulo {
+  font-size: 1.4rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.portal__aluno {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--cor-branco);
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--cor-sumi);
+  text-decoration: none;
+}
+
+.portal__aluno-texto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.portal__aluno-texto small {
+  color: var(--cor-cinza);
+}
+
+.portal__faixa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--cor-cinza);
+}
+
+.portal__cabecalho-aluno {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.portal__foto-grande {
+  width: 64px;
+  height: 64px;
+  font-size: 1.4rem;
+}
+
+.portal__ok {
+  color: #345a3f;
+  font-weight: 600;
+}
+
+.portal__cobranca {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--cor-branco);
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-left: 3px solid #b8860b;
+  border-radius: var(--raio);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.portal__cobranca--vencida {
+  border-left-color: var(--cor-hanko);
+}
+
+.portal__cobranca small {
+  display: block;
+  color: var(--cor-cinza);
+}
+
+.portal__cobranca-acao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.portal__historico summary {
+  cursor: pointer;
+  color: var(--cor-cinza);
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.portal__historico-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.portal__frequencia {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.portal__frequencia-mes {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.portal__medidor {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(42, 120, 214, 0.15);
+  overflow: hidden;
+}
+
+.portal__medidor span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: #2a78d6;
+}
+
+.portal__frequencia-valor {
+  color: var(--cor-cinza);
+  white-space: nowrap;
+}

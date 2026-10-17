@@ -174,6 +174,7 @@ const Aluno = sequelize.define('Aluno', {
 
 Aluno.beforeValidate((aluno) => {
   if (aluno.email === '') aluno.email = null;
+  if (aluno.email) aluno.email = aluno.email.trim().toLowerCase();
 });
 
 // beforeSave (e não beforeValidate): só os campos alterados em hooks de save entram no UPDATE —

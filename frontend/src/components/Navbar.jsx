@@ -43,6 +43,9 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+          <NavLink to="/portal" className="navbar__link" onClick={() => setOpen(false)}>
+            Área do Aluno
+          </NavLink>
           <NavLink to="/login" className="navbar__link navbar__link--cta" onClick={() => setOpen(false)}>
             Área do Instrutor
           </NavLink>

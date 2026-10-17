@@ -15,6 +15,7 @@ import PublicLayout from './components/PublicLayout.jsx';
 
 const AdminApp = lazy(() => import('./admin/AdminApp.jsx'));
 const SenseiApp = lazy(() => import('./pages/sensei/SenseiApp.jsx'));
+const PortalApp = lazy(() => import('./pages/portal/PortalApp.jsx'));
 
 export default function App() {
   return (
@@ -30,6 +31,14 @@ export default function App() {
       <Route path="/contratos/:token" element={<PublicLayout><AssinaturaContrato /></PublicLayout>} />
       <Route path="/mensalidades/:token" element={<PublicLayout><PagamentoMensalidade /></PublicLayout>} />
       <Route path="/login" element={<Login />} />
+      <Route
+        path="/portal/*"
+        element={
+          <Suspense fallback={<div className="admin-loading">Carregando…</div>}>
+            <PortalApp />
+          </Suspense>
+        }
+      />
       <Route
         path="/sensei/*"
         element={

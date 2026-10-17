@@ -240,7 +240,8 @@ async function cadastrarComoAluno(req, res) {
     // Email + nome: o email do aluno pode se repetir (irmãos usando o dos pais), então só o email
     // reaproveitaria o irmão errado.
     const nomeAluno = inscricao.nome || inscricao.email;
-    let aluno = await Aluno.findOne({ where: { email: inscricao.email, nome: nomeAluno } });
+    // Aluno guarda o email em minúsculas (ver models/Aluno.js); a inscrição pode ter vindo com maiúsculas.
+    let aluno = await Aluno.findOne({ where: { email: (inscricao.email || '').toLowerCase(), nome: nomeAluno } });
 
     if (!aluno) {
       const faixaNome = inscricao.faixaAtual || inscricao.faixa || null;

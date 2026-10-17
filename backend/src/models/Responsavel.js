@@ -32,6 +32,7 @@ const Responsavel = sequelize.define('Responsavel', {
 
 Responsavel.beforeValidate((responsavel) => {
   if (responsavel.email === '') responsavel.email = null;
+  if (responsavel.email) responsavel.email = responsavel.email.trim().toLowerCase();
 });
 
 module.exports = Responsavel;

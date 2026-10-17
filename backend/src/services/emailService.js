@@ -224,4 +224,35 @@ async function enviarCobrancaMensalidade({ tipo, destinatario, nome, aluno, comp
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade };
+// Código de acesso à área do aluno/responsável. Devolve true/false; nunca lança.
+async function enviarCodigoAcesso({ destinatario, codigo, minutos }) {
+  try {
+    const transportador = await obterTransportador();
+
+    if (!transportador) {
+      logErro('SMTP não configurado em Configurações; código de acesso à área do aluno não enviado.');
+      return false;
+    }
+
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+
+    await transportador.sendMail({
+      from: remetente,
+      to: destinatario,
+      subject: `Seu código de acesso: ${codigo}`,
+      html: `
+        <p>Olá!</p>
+        <p>Use o código abaixo para entrar na área do aluno do San·Ryu Dojo:</p>
+        <p style="font-size:28px;font-weight:bold;letter-spacing:6px;font-family:monospace;">${codigo}</p>
+        <p>Ele vale por ${minutos} minutos. Se não foi você que pediu, pode ignorar este e-mail.</p>
+      `,
+    });
+
+    return true;
+  } catch (err) {
+    logErro('Erro ao enviar código de acesso:', err);
+    return false;
+  }
+}
+
+module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso };

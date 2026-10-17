@@ -6,6 +6,7 @@ const authRoutes = require('./src/routes/auth');
 const publicRoutes = require('./src/routes/public');
 const adminRoutes = require('./src/routes/admin');
 const senseiRoutes = require('./src/routes/sensei');
+const portalRoutes = require('./src/routes/portal');
 const seed = require('./seed');
 const { aplicarAjustesIniciais } = require('./src/config/ajustesIniciais');
 const { rotinaCobranca } = require('./src/services/mensalidadeService');
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', publicRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/sensei', senseiRoutes);
+app.use('/api/portal', portalRoutes);
 
 // TEMPORÁRIO: dispara o seed em produção, remover depois do primeiro uso.
 app.post('/api/_seed', async (req, res) => {

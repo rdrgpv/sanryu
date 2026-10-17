@@ -23,6 +23,7 @@ const CategoriaFinanceira = require('./CategoriaFinanceira');
 const Lancamento = require('./Lancamento');
 const Recorrencia = require('./Recorrencia');
 const Transferencia = require('./Transferencia');
+const CodigoAcesso = require('./CodigoAcesso');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -189,6 +190,7 @@ module.exports = {
   Lancamento,
   Recorrencia,
   Transferencia,
+  CodigoAcesso,
   Configuracao,
   Produto,
   Cor,
