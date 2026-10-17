@@ -35,6 +35,9 @@ function detalharErro(err) {
 // Sempre loga no console também (não muda o comportamento atual) e, além disso, grava em arquivo.
 // Nunca lança — uma falha ao gravar o log não pode derrubar quem chamou.
 function logErro(contexto, err) {
+  // Nos testes automatizados os erros são provocados de propósito: nem console nem arquivo de log.
+  if (process.env.NODE_ENV === 'test') return;
+
   console.error(contexto, err ?? '');
 
   try {

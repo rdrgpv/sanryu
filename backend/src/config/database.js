@@ -10,7 +10,8 @@ const sequelize = process.env.DB_HOST
     })
   : new Sequelize({
       dialect: 'sqlite',
-      storage: path.join(__dirname, '..', '..', 'database.sqlite'),
+      // DB_SQLITE_PATH troca o arquivo (":memory:" nos testes automatizados, ver test/).
+      storage: process.env.DB_SQLITE_PATH || path.join(__dirname, '..', '..', 'database.sqlite'),
       logging: false,
     });
 

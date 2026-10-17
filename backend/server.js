@@ -1,53 +1,13 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+const app = require('./src/app');
 const { sequelize } = require('./src/models');
-const authRoutes = require('./src/routes/auth');
-const publicRoutes = require('./src/routes/public');
-const adminRoutes = require('./src/routes/admin');
-const senseiRoutes = require('./src/routes/sensei');
-const portalRoutes = require('./src/routes/portal');
-const seed = require('./seed');
 const { aplicarAjustesIniciais } = require('./src/config/ajustesIniciais');
 const { rotinaCobranca } = require('./src/services/mensalidadeService');
 const { sincronizarOrigens } = require('./src/services/financeiroService');
+const { enviarLembretes: enviarLembretesAulaExperimental } = require('./src/services/leadService');
 const { logErro } = require('./src/utils/logger');
 
-const app = express();
 const PORT = process.env.PORT || 4000;
-
-app.use(cors());
-app.use(express.json({ limit: '6mb' }));
-
-app.use('/api/auth', authRoutes);
-app.use('/api', publicRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/sensei', senseiRoutes);
-app.use('/api/portal', portalRoutes);
-
-// TEMPORÁRIO: dispara o seed em produção, remover depois do primeiro uso.
-app.post('/api/_seed', async (req, res) => {
-  if (!process.env.SEED_KEY || req.headers['x-seed-key'] !== process.env.SEED_KEY) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
-  try {
-    await seed();
-    res.json({ message: 'Seed executado com sucesso.' });
-  } catch (error) {
-    logErro('Erro ao rodar seed via rota temporária:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.use((req, res) => {
-  res.status(404).json({ error: 'Rota não encontrada.' });
-});
-
-app.use((err, req, res, next) => {
-  logErro('Erro não tratado numa rota:', err);
-  res.status(500).json({ error: 'Erro interno do servidor.' });
-});
 
 // sequelize.sync() sincroniza as tabelas em ordem de dependência (FK), mas para no primeiro erro —
 // uma tabela com problema (ex.: índice único conflitante) travava a sincronização de TODAS as
@@ -104,7 +64,9 @@ function agendarRotinaCobranca() {
           console.log('Rotina de cobrança:', resultado);
         }
       })
-      .then(() => sincronizarOrigens());
+      .then(() => sincronizarOrigens())
+      .then(() => enviarLembretesAulaExperimental())
+      .catch((err) => logErro('Erro na rotina horária:', err));
 
   setTimeout(executar, 60 * 1000);
   setInterval(executar, 60 * 60 * 1000);
