@@ -12,6 +12,21 @@ const { logErro } = require('./utils/logger');
 // server.js sobe de verdade; os testes (test/) usam este mesmo app numa porta aleatória.
 const app = express();
 
+// Atrás do proxy reverso da hospedagem, sem isto o req.ip é o IP do PROXY (o mesmo pra todo mundo):
+// o limite antispam da aula experimental vira global e o IP gravado nas assinaturas é o do proxy.
+// TRUST_PROXY = quantos proxies existem na frente do Node (normalmente "1"), ou a lista de IPs/sub-
+// redes deles em notação IPv4 simples ("10.0.0.0/8"). Nunca "true": aí qualquer cliente forja o
+// X-Forwarded-For. Sem a variável, fica desligado (padrão do Express).
+function configuracaoTrustProxy(valor) {
+  const texto = String(valor || '').trim();
+  if (!texto || texto === 'false' || texto === '0') return false;
+  if (/^\d+$/.test(texto)) return Number(texto);
+  if (texto === 'true') throw new Error('TRUST_PROXY=true confia em qualquer cliente; use o número de proxies (ex.: 1).');
+  return texto;
+}
+
+app.set('trust proxy', configuracaoTrustProxy(process.env.TRUST_PROXY));
+
 app.use(cors());
 app.use(express.json({ limit: '6mb' }));
 

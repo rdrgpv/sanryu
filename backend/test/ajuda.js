@@ -52,6 +52,10 @@ async function encerrar() {
   await models.sequelize.close();
 }
 
+function porta() {
+  return servidor.address().port;
+}
+
 function token(dados) {
   return jwt.sign(dados, process.env.JWT_SECRET);
 }
@@ -81,4 +85,4 @@ async function criarUnidadeEPlano({ valor = 200, periodicidade = 'mensal' } = {}
   return { unidadeId: unidade.id, plano: plano.dados };
 }
 
-module.exports = { models, emails, mercadoPagoService, iniciar, encerrar, chamar, token, tokenAdmin, hoje, somarDias, criarUnidadeEPlano };
+module.exports = { models, emails, mercadoPagoService, iniciar, encerrar, chamar, porta, token, tokenAdmin, hoje, somarDias, criarUnidadeEPlano };

@@ -23,6 +23,15 @@ feitos no primeiro deploy da gestão da academia.
 - [ ] Conferir as variáveis de ambiente do backend: `JWT_SECRET` (forte e
       **igual** ao de antes, senão todos os logins caem), `DB_HOST`/`DB_PORT`/
       `DB_USER`/`DB_PASSWORD`/`DB_NAME`.
+- [ ] `TRUST_PROXY=1` se a API roda atrás do proxy reverso da hospedagem
+      (o comum). Sem isso o sistema vê o IP do proxy para todo mundo: o
+      antispam da aula experimental passa a barrar todos depois de 10
+      agendamentos por hora e o IP gravado nas assinaturas fica errado. Use o
+      número de proxies na frente do Node (ou os IPs deles em notação IPv4,
+      ex. `10.0.0.0/8`) — **nunca** `true`, que deixa qualquer cliente forjar o
+      IP.
+- [ ] Node.js **20 ou mais novo** no servidor (necessário para o nodemailer 10,
+      que corrige falhas de segurança do envio de e-mail).
 - [ ] **Nunca** em produção: `PORTAL_CODIGO_NO_LOG=sim` (escreve os códigos de
       acesso no log). `ROTINA_COBRANCA=off` só se for de propósito (desliga a
       geração de mensalidades, a baixa automática e os lembretes).
