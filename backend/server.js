@@ -5,6 +5,7 @@ const { aplicarAjustesIniciais } = require('./src/config/ajustesIniciais');
 const { rotinaCobranca } = require('./src/services/mensalidadeService');
 const { sincronizarOrigens } = require('./src/services/financeiroService');
 const { enviarLembretes: enviarLembretesAulaExperimental } = require('./src/services/leadService');
+const { cancelarNaoPagos: cancelarPedidosLojaNaoPagos } = require('./src/services/lojaService');
 const { logErro } = require('./src/utils/logger');
 
 const PORT = process.env.PORT || 4000;
@@ -66,6 +67,7 @@ function agendarRotinaCobranca() {
       })
       .then(() => sincronizarOrigens())
       .then(() => enviarLembretesAulaExperimental())
+      .then(() => cancelarPedidosLojaNaoPagos())
       .catch((err) => logErro('Erro na rotina horária:', err));
 
   setTimeout(executar, 60 * 1000);

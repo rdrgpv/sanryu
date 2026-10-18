@@ -9,6 +9,7 @@ const contratoController = require('../controllers/contratoController');
 const mensalidadeController = require('../controllers/mensalidadeController');
 const webhookController = require('../controllers/webhookController');
 const leadController = require('../controllers/leadController');
+const lojaController = require('../controllers/lojaController');
 
 const router = express.Router();
 
@@ -35,5 +36,8 @@ router.post('/webhooks/mercadopago', webhookController.mercadoPago);
 
 router.get('/aula-experimental/opcoes', leadController.opcoesPublicas);
 router.post('/aula-experimental', leadController.agendarPublico);
+
+router.get('/loja/pedidos/:token', lojaController.pagamentoPublico);
+router.get('/loja/pedidos/:token/status', lojaController.statusPublico);
 
 module.exports = router;

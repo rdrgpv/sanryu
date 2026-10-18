@@ -330,4 +330,30 @@ async function enviarAviso({ destinatario, nome, titulo, mensagem }) {
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental, enviarAviso };
+// Loja da área do aluno: pagamento confirmado, retirar na academia. Devolve true/false; nunca lança.
+async function enviarPedidoLojaPago({ destinatario, nome, pedidoId, itens, total }) {
+  try {
+    const transportador = await obterTransportador();
+    if (!transportador) return false;
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+
+    await transportador.sendMail({
+      from: remetente,
+      to: destinatario,
+      subject: `Pagamento confirmado — pedido #${pedidoId}`,
+      html: `
+        <p>Olá, ${escaparHtml(nome)}!</p>
+        <p>Recebemos o pagamento do seu pedido <strong>#${pedidoId}</strong>:</p>
+        <ul>${itens.map((item) => `<li>${escaparHtml(item)}</li>`).join('')}</ul>
+        <p><strong>Total:</strong> R$ ${Number(total).toFixed(2).replace('.', ',')}</p>
+        <p>É só retirar na recepção da academia.</p>
+      `,
+    });
+    return true;
+  } catch (err) {
+    logErro('Erro ao enviar e-mail de pedido da loja pago:', err);
+    return false;
+  }
+}
+
+module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental, enviarAviso, enviarPedidoLojaPago };

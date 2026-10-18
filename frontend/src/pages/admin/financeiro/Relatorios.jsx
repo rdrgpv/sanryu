@@ -11,6 +11,8 @@ const RELATORIOS = [
   { tipo: 'por-categoria', titulo: 'Resumo por categoria', descricao: 'Total pago no período em cada categoria de receita e despesa.' },
   { tipo: 'lancamentos', titulo: 'Todos os lançamentos', descricao: 'Tudo que venceu ou foi pago no período, inclusive em aberto e cancelado — para conferência.' },
   { tipo: 'mensalidades', titulo: 'Mensalidades', descricao: 'Mensalidades com vencimento no período: aluno, responsável, CPF, plano e situação.' },
+  { tipo: 'estoque', titulo: 'Estoque valorizado (hoje)', descricao: 'Quantidade e valor de cada item em estoque, pelo custo e pela venda — o inventário de fim de ano. Ignora o período.' },
+  { tipo: 'vendas-produtos', titulo: 'Vendas por produto', descricao: 'Quanto saiu de cada produto no período (balcão, encomendas e loja), com receita e margem.' },
   { tipo: 'inadimplencia', titulo: 'Inadimplência (hoje)', descricao: 'Todas as mensalidades vencidas em aberto, com multa e juros do dia. Ignora o período.' },
 ];
 

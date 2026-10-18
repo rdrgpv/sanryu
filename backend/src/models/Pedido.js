@@ -65,6 +65,35 @@ const Pedido = sequelize.define('Pedido', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  // Por onde a venda entrou: "admin" (encomenda no painel), "balcao" (venda rápida, já entregue e
+  // paga) ou "loja" (área do aluno, paga por Pix e retirada na academia).
+  canal: {
+    type: DataTypes.STRING(10),
+    allowNull: false,
+    defaultValue: 'admin',
+  },
+  // Loja: link secreto do pagamento (/loja/pedidos/:token) e o Pix atual (ver lojaService).
+  tokenPagamento: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+    unique: true,
+  },
+  mpPaymentId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  qrcodePix: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  pixCopiaCola: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  pixExpiraEm: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 });
 
 module.exports = Pedido;

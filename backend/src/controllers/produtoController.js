@@ -4,7 +4,8 @@ async function listar(req, res) {
   const where = {};
   if (req.query.ativo !== undefined) where.ativo = req.query.ativo === 'true';
 
-  const produtos = await Produto.findAll({ where, order: [['descricao', 'ASC']] });
+  // Sem a foto na listagem (pesa; vem no buscarPorId e na vitrine da loja).
+  const produtos = await Produto.findAll({ where, attributes: { exclude: ['foto'] }, order: [['descricao', 'ASC']] });
   res.json(produtos);
 }
 

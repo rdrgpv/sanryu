@@ -3,6 +3,7 @@ const { sequelize, Aluno, Turma, Instrutor, Faixa, Evento, TipoEvento, EventoAlu
 const { hoje } = require('../services/mensalidadeService');
 const { perfilDo } = require('../middleware/auth');
 const financeiroService = require('../services/financeiroService');
+const estoqueService = require('../services/estoqueService');
 
 const MESES_HISTORICO = 12;
 const DIAS_SUMIDO = 14;
@@ -172,6 +173,17 @@ async function buscarAniversariantes(dataHoje) {
     .sort((a, b) => a.dia - b.dia);
 }
 
+// Variações (de produto que controla estoque) com o disponível no mínimo ou abaixo.
+async function contarEstoqueBaixo() {
+  const { ProdutoVariacao, Produto } = require('../models');
+  const variacoes = await ProdutoVariacao.findAll({
+    where: { ativo: true, estoqueMinimo: { [Op.gt]: 0 } },
+    include: { model: Produto, as: 'produto', where: { ativo: true, controlaEstoque: true }, attributes: [] },
+  });
+  const comSaldo = await estoqueService.anexarSaldos(variacoes);
+  return comSaldo.filter((variacao) => variacao.saldoDisponivel <= variacao.estoqueMinimo).length;
+}
+
 async function resumo(req, res) {
   const dataHoje = hoje();
   const meses = ultimosMeses(dataHoje, MESES_HISTORICO);
@@ -207,6 +219,7 @@ async function resumo(req, res) {
   // Recepção vê o operacional (alunos, atrasos pra cobrar, frequência), não o caixa da academia.
   const somenteAdmin = perfilDo(req) === 'admin'
     ? {
+        estoqueBaixo: await contarEstoqueBaixo(),
         recebidoNoMes: financeiroAtual.entradas,
         recebidoMesAnterior: financeiroAnterior?.entradas || 0,
         resultadoNoMes: financeiroAtual.resultado,

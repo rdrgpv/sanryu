@@ -16,11 +16,18 @@ import {
   CModalFooter,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilTask, cilTruck, cilCheckCircle } from '@coreui/icons';
+import { cilTask, cilTruck, cilCheckCircle, cilReload } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
+
+const CANAIS = {
+  admin: { label: 'Encomenda', cor: 'secondary' },
+  balcao: { label: 'Balcão', cor: 'info' },
+  loja: { label: 'Loja online', cor: 'primary' },
+};
 
 const SITUACOES = {
   P: { label: 'Pendente', cor: 'secondary' },
@@ -35,6 +42,7 @@ function rotuloVariacao(v) {
 }
 
 export default function Pedidos() {
+  const { perfil } = useAuth();
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState([]);
   const [selecionadoId, setSelecionadoId] = useState(null);
@@ -70,7 +78,11 @@ export default function Pedidos() {
 
   async function handleEntregar() {
     if (!selecionado) return;
-    if (!window.confirm('Confirmar entrega deste pedido? Isso vai baixar o estoque.')) return;
+    const lojaNaoPaga = selecionado.canal === 'loja' && selecionado.recebimento?.status !== 'pago';
+    const aviso = lojaNaoPaga
+      ? 'ATENÇÃO: este pedido da loja ainda NÃO foi pago. Entregue só se o cliente pagou na hora (registre o recebimento em Contas a receber). Confirmar entrega?'
+      : 'Confirmar entrega deste pedido? Isso vai baixar o estoque.';
+    if (!window.confirm(aviso)) return;
     try {
       await api.post(`/admin/pedidos/${selecionado.id}/entregar`);
       carregarPedidos();
@@ -96,6 +108,21 @@ export default function Pedidos() {
     <div>
       <h1 className="h3 mb-3">Pedidos</h1>
 
+      {/* Recepção só faz a retirada (detalhe + entregar); cadastrar/editar encomenda e compra é do admin. */}
+      {perfil !== 'admin' ? (
+        <div className="d-flex gap-2 mb-3">
+          <CButton color="secondary" variant="outline" onClick={carregarPedidos} title="Atualizar">
+            <CIcon icon={cilReload} />
+          </CButton>
+          <CButton color="secondary" variant="outline" disabled={!selecionadoId} onClick={abrirDetalhe} title="Detalhe">
+            <CIcon icon={cilTask} />
+          </CButton>
+          <CButton color="primary" disabled={!selecionado || !['P', 'C'].includes(selecionado.situacao)} onClick={handleEntregar}>
+            <CIcon icon={cilCheckCircle} className="me-1" />
+            Entregar
+          </CButton>
+        </div>
+      ) : (
       <AdminToolbar
         podeEditar={!!selecionadoId}
         podeExcluir={selecionado?.situacao === 'P'}
@@ -129,6 +156,7 @@ export default function Pedidos() {
           </>
         }
       />
+      )}
 
       <AdminDataTable
         rows={pedidos}
@@ -137,6 +165,12 @@ export default function Pedidos() {
         emptyMessage="Nenhum pedido cadastrado."
         columns={[
           { key: 'nomeCliente', label: 'Cliente', sortable: true },
+          {
+            key: 'canal',
+            label: 'Canal',
+            sortable: true,
+            render: (p) => <CBadge color={CANAIS[p.canal]?.cor || 'secondary'}>{CANAIS[p.canal]?.label || p.canal}</CBadge>,
+          },
           { key: 'telefoneCliente', label: 'Telefone', render: (p) => p.telefoneCliente || '-' },
           { key: 'dataPedido', label: 'Data', sortable: true, render: (p) => formatarDataHora(p.dataPedido) },
           {

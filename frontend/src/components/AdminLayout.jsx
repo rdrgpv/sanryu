@@ -48,6 +48,9 @@ import {
   cilGroup,
   cilBullhorn,
   cilSpreadsheet,
+  cilBasket,
+  cilStorage,
+  cilClipboard,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -80,6 +83,11 @@ const linksEventos = [
 ];
 
 const linksLoja = [
+  { to: '/admin/balcao', label: 'Venda no balcão', icon: cilBasket },
+  { to: '/admin/estoque', label: 'Painel do estoque', end: true, icon: cilStorage },
+  { to: '/admin/estoque/reposicao', label: 'Reposição', icon: cilCart },
+  { to: '/admin/estoque/inventario', label: 'Inventário', icon: cilClipboard },
+  { to: '/admin/estoque/etiquetas', label: 'Etiquetas', icon: cilTags },
   { to: '/admin/produtos', label: 'Produtos', icon: cilCart },
   { to: '/admin/produto-variacoes', label: 'Variações (SKUs)', icon: cilBarcode },
   { to: '/admin/cores', label: 'Cores', icon: cilColorPalette },
@@ -130,6 +138,9 @@ const SUFIXOS_DE_ROTA = {
   recorrencias: 'Recorrentes',
   cadastros: 'Contas e categorias',
   relatorios: 'Relatórios',
+  reposicao: 'Reposição',
+  inventario: 'Inventário',
+  etiquetas: 'Etiquetas',
 };
 
 // Deriva o título da aba e a trilha do breadcrumb a partir da própria URL — puramente visual (não

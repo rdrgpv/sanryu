@@ -35,6 +35,8 @@ const usuarioController = require('../controllers/usuarioController');
 const academiaController = require('../controllers/academiaController');
 const avisoController = require('../controllers/avisoController');
 const relatorioController = require('../controllers/relatorioController');
+const balcaoController = require('../controllers/balcaoController');
+const estoqueController = require('../controllers/estoqueController');
 
 const router = express.Router();
 
@@ -56,6 +58,17 @@ router.post('/avisos/previa', avisoController.previa);
 router.delete('/avisos/:id', avisoController.remover);
 
 router.get('/relatorios/:tipo', relatorioController.baixar);
+
+router.get('/balcao/produtos', balcaoController.buscarProdutos);
+router.post('/balcao/vendas', balcaoController.vender);
+router.get('/balcao/vendas-do-dia', balcaoController.vendasDoDia);
+
+router.get('/estoque/painel', estoqueController.painel);
+router.get('/estoque/reposicao', estoqueController.reposicao);
+router.post('/estoque/reposicao/pedido-compra', estoqueController.gerarCompraReposicao);
+router.get('/estoque/inventario', estoqueController.listarParaContagem);
+router.post('/estoque/inventario', estoqueController.aplicarInventario);
+router.get('/estoque/inventarios', estoqueController.historicoInventarios);
 
 router.get('/usuarios', usuarioController.listar);
 router.post('/usuarios', usuarioController.criar);

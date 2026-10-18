@@ -44,7 +44,7 @@ async function verificarCombinacaoDuplicada({ produtoId, corId, tamanhoId }, idA
 }
 
 async function criar(req, res) {
-  const { produtoId, corId, tamanhoId, valorCusto, valorVenda, ativo } = req.body;
+  const { produtoId, corId, tamanhoId, valorCusto, valorVenda, ativo, estoqueMinimo, estoqueIdeal } = req.body;
 
   try {
     const produto = await Produto.findByPk(produtoId);
@@ -72,6 +72,8 @@ async function criar(req, res) {
           valorCusto: valorCusto || 0,
           valorVenda: valorVenda || 0,
           quantidadeEstoque: 0,
+          estoqueMinimo: Number(estoqueMinimo) || 0,
+          estoqueIdeal: estoqueIdeal ? Number(estoqueIdeal) : null,
           ativo: ativo !== undefined ? ativo : true,
           codigo: 'TEMP',
         },

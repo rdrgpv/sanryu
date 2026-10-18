@@ -9,6 +9,8 @@ const estadoInicial = {
   tamanhoId: '',
   valorCusto: '',
   valorVenda: '',
+  estoqueMinimo: '',
+  estoqueIdeal: '',
   ativo: true,
 };
 
@@ -41,6 +43,8 @@ export default function ProdutoVariacaoForm() {
           tamanhoId: variacao.tamanhoId ?? '',
           valorCusto: variacao.valorCusto ?? '',
           valorVenda: variacao.valorVenda ?? '',
+          estoqueMinimo: variacao.estoqueMinimo || '',
+          estoqueIdeal: variacao.estoqueIdeal ?? '',
           ativo: variacao.ativo,
         });
         setCodigo(variacao.codigo);
@@ -59,6 +63,8 @@ export default function ProdutoVariacaoForm() {
           tamanhoId: '',
           valorCusto: variacao.valorCusto ?? '',
           valorVenda: variacao.valorVenda ?? '',
+          estoqueMinimo: variacao.estoqueMinimo || '',
+          estoqueIdeal: variacao.estoqueIdeal ?? '',
           ativo: true,
         });
       });
@@ -80,6 +86,8 @@ export default function ProdutoVariacaoForm() {
       tamanhoId: form.tamanhoId !== '' ? Number(form.tamanhoId) : null,
       valorCusto: form.valorCusto !== '' ? Number(form.valorCusto) : 0,
       valorVenda: form.valorVenda !== '' ? Number(form.valorVenda) : 0,
+      estoqueMinimo: form.estoqueMinimo !== '' ? Number(form.estoqueMinimo) : 0,
+      estoqueIdeal: form.estoqueIdeal !== '' ? Number(form.estoqueIdeal) : null,
       ativo: form.ativo,
     };
 
@@ -157,6 +165,15 @@ export default function ProdutoVariacaoForm() {
               <CCol md={2}>
                 <CFormLabel>Valor de venda</CFormLabel>
                 <CFormInput type="number" step="0.01" min="0" name="valorVenda" value={form.valorVenda} onChange={handleChange} />
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Estoque mínimo</CFormLabel>
+                <CFormInput type="number" step="1" min="0" name="estoqueMinimo" value={form.estoqueMinimo} onChange={handleChange} placeholder="0 = não acompanha" />
+              </CCol>
+              <CCol md={2}>
+                <CFormLabel>Repor até</CFormLabel>
+                <CFormInput type="number" step="1" min="0" name="estoqueIdeal" value={form.estoqueIdeal} onChange={handleChange} placeholder={form.estoqueMinimo ? String(Number(form.estoqueMinimo) * 2) : ''} />
+                <small className="text-body-secondary">Vazio = dobro do mínimo.</small>
               </CCol>
             </CRow>
 

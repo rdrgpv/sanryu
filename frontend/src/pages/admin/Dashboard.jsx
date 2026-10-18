@@ -107,6 +107,12 @@ export default function Dashboard() {
         </CCol>
       </CRow>
 
+      {resumo?.estoqueBaixo > 0 && (
+        <Link to="/admin/estoque/reposicao" className="alert alert-warning d-block text-decoration-none mb-4">
+          {resumo.estoqueBaixo} item(s) da loja no estoque mínimo ou abaixo — ver reposição →
+        </Link>
+      )}
+
       {resumo && (
         <CRow className="g-3 mb-4">
           <CCol lg={6}>

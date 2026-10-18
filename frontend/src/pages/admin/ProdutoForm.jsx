@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
+import { reduzirImagem } from '../../utils/imagem.js';
 
 const estadoInicial = {
   descricao: '',
   tipoProduto: '',
   controlaEstoque: true,
+  vendaOnline: false,
+  foto: '',
   ativo: true,
 };
 
@@ -25,10 +28,25 @@ export default function ProdutoForm() {
         descricao: produto.descricao,
         tipoProduto: produto.tipoProduto || '',
         controlaEstoque: produto.controlaEstoque,
+        vendaOnline: produto.vendaOnline,
+        foto: produto.foto || '',
         ativo: produto.ativo,
       });
     });
   }, [id, editando]);
+
+  async function handleFoto(event) {
+    const arquivo = event.target.files?.[0];
+    event.target.value = '';
+    if (!arquivo) return;
+    try {
+      setForm((prev) => ({ ...prev, foto: '' }));
+      const foto = await reduzirImagem(arquivo, 800, 0.85);
+      setForm((prev) => ({ ...prev, foto }));
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -75,8 +93,21 @@ export default function ProdutoForm() {
               <CCol md={2} className="d-flex align-items-end gap-3">
                 <CFormCheck name="controlaEstoque" label="Controla estoque" checked={form.controlaEstoque} onChange={handleChange} />
               </CCol>
-              <CCol xs={12}>
+              <CCol xs={12} className="d-flex flex-wrap gap-4">
                 <CFormCheck name="ativo" label="Ativo" checked={form.ativo} onChange={handleChange} />
+                <CFormCheck name="vendaOnline" label="Vender na loja da área do aluno (Pix, retirada na academia)" checked={form.vendaOnline} onChange={handleChange} />
+              </CCol>
+              <CCol xs={12}>
+                <CFormLabel>Foto (aparece na loja)</CFormLabel>
+                <div className="d-flex align-items-center gap-3">
+                  {form.foto && <img src={form.foto} alt="" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 6, border: '1px solid #ddd' }} />}
+                  <CFormInput type="file" accept="image/*" onChange={handleFoto} style={{ maxWidth: 320 }} />
+                  {form.foto && (
+                    <CButton color="link" className="text-danger" onClick={() => setForm((prev) => ({ ...prev, foto: '' }))}>
+                      Remover
+                    </CButton>
+                  )}
+                </div>
               </CCol>
             </CRow>
 

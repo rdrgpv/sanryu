@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import apiPortal, { CHAVE_TOKEN_PORTAL } from '../../services/apiPortal';
+import LojaPortal from './LojaPortal.jsx';
 
 const PERIODICIDADES = { mensal: 'mensal', trimestral: 'trimestral', semestral: 'semestral', anual: 'anual' };
 const NOMES_MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -197,6 +198,14 @@ function Inicio({ dados }) {
         </Link>
       ))}
 
+      <Link to="/portal/loja" className="sensei__turma">
+        <span>
+          <strong>Loja</strong>
+          <small>Kimono, faixa e uniforme — pague por Pix e retire na academia</small>
+        </span>
+        <span aria-hidden="true">›</span>
+      </Link>
+
       {eventos.length > 0 && (
         <>
           <h2 className="sensei__secao">Próximos eventos</h2>
@@ -354,6 +363,7 @@ function AreaLogada() {
           <Routes>
             <Route index element={<Inicio dados={dados} />} />
             <Route path="alunos/:alunoId" element={<DetalheAluno />} />
+            <Route path="loja" element={<LojaPortal />} />
           </Routes>
         )}
       </main>

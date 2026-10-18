@@ -46,6 +46,12 @@ const RECEPCAO = [
   ['GET', /^\/eventos\/\d+\/(inscricoes|autorizacoes)$/],
   ['POST', /^\/inscricoes\/\d+\/verificar-pagamento$/],
   ['POST', /^\/inscricoes\/\d+\/cadastrar-aluno$/],
+
+  // Venda no balcão e retirada dos pedidos da loja (ver e entregar). Estoque/compras/inventário: admin.
+  ['GET', /^\/balcao\/(produtos|vendas-do-dia)$/],
+  ['POST', /^\/balcao\/vendas$/],
+  ['GET', /^\/pedidos(\/\d+)?$/],
+  ['POST', /^\/pedidos\/\d+\/entregar$/],
 ];
 
 const PERMISSOES = { recepcao: RECEPCAO };

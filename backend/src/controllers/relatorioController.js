@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Lancamento, CategoriaFinanceira, ContaFinanceira, Fornecedor, Unidade, Mensalidade, Aluno, Responsavel, Contrato, Plano } = require('../models');
+const { Lancamento, CategoriaFinanceira, ContaFinanceira, Fornecedor, Unidade, Mensalidade, Aluno, Responsavel, Contrato, Plano, ProdutoVariacao, Produto, Cor, Tamanho, EstoqueMovimentacao, PedidoItem } = require('../models');
 const financeiroService = require('../services/financeiroService');
 const { hoje, valorAtualizado } = require('../services/mensalidadeService');
 const { gerarCsv } = require('../utils/csv');
@@ -47,7 +47,71 @@ async function pagos(tipo, inicio, fim) {
   });
 }
 
+function descricaoVariacao(variacao) {
+  return [variacao.produto?.descricao, variacao.cor?.descricao, variacao.tamanho?.descricao].filter(Boolean).join(' · ');
+}
+
+const INCLUDES_VARIACAO = [
+  { model: Produto, as: 'produto', attributes: ['descricao', 'controlaEstoque'] },
+  { model: Cor, as: 'cor', attributes: ['descricao'] },
+  { model: Tamanho, as: 'tamanho', attributes: ['descricao'] },
+];
+
 const RELATORIOS = {
+  // Foto de hoje do estoque, valorizado pelo custo (inventário de fim de ano pro contador).
+  estoque: {
+    nome: 'estoque-valorizado',
+    async gerar() {
+      const variacoes = await ProdutoVariacao.findAll({ where: { ativo: true }, include: INCLUDES_VARIACAO, order: [[{ model: Produto, as: 'produto' }, 'descricao', 'ASC'], ['id', 'ASC']] });
+      const linhas = variacoes.filter((variacao) => variacao.produto?.controlaEstoque !== false);
+      return gerarCsv(
+        [
+          { titulo: 'Código', valor: (linha) => linha.codigo },
+          { titulo: 'Produto', valor: (linha) => descricaoVariacao(linha) },
+          { titulo: 'Quantidade', valor: (linha) => linha.quantidadeEstoque },
+          { titulo: 'Custo unitário', valor: (linha) => linha.valorCusto, tipo: 'numero' },
+          { titulo: 'Valor em estoque (custo)', valor: (linha) => Math.max(0, linha.quantidadeEstoque) * Number(linha.valorCusto), tipo: 'numero' },
+          { titulo: 'Preço de venda', valor: (linha) => linha.valorVenda, tipo: 'numero' },
+          { titulo: 'Valor em estoque (venda)', valor: (linha) => Math.max(0, linha.quantidadeEstoque) * Number(linha.valorVenda), tipo: 'numero' },
+        ],
+        linhas
+      );
+    },
+  },
+
+  // Vendido no período por produto (saídas de venda), com receita, custo e margem.
+  'vendas-produtos': {
+    nome: 'vendas-por-produto',
+    async gerar({ inicio, fim }) {
+      const saidas = await EstoqueMovimentacao.findAll({
+        where: { tipoMovimentacao: 'S', pedidoItemId: { [Op.ne]: null }, dataMovimentacao: { [Op.between]: [new Date(`${inicio}T00:00:00-03:00`), new Date(`${fim}T23:59:59.999-03:00`)] } },
+        include: [
+          { model: ProdutoVariacao, as: 'produtoVariacao', include: INCLUDES_VARIACAO },
+          { model: PedidoItem, as: 'pedidoItem', attributes: ['valorTotal', 'quantidade'] },
+        ],
+      });
+      const porVariacao = new Map();
+      for (const saida of saidas) {
+        const linha = porVariacao.get(saida.produtoVariacaoId) || { variacao: saida.produtoVariacao, quantidade: 0, receita: 0 };
+        linha.quantidade += saida.quantidade;
+        linha.receita += Number(saida.pedidoItem?.valorTotal || 0);
+        porVariacao.set(saida.produtoVariacaoId, linha);
+      }
+      const linhas = [...porVariacao.values()].sort((a, b) => b.receita - a.receita);
+      return gerarCsv(
+        [
+          { titulo: 'Código', valor: (linha) => linha.variacao?.codigo },
+          { titulo: 'Produto', valor: (linha) => descricaoVariacao(linha.variacao || {}) },
+          { titulo: 'Quantidade vendida', valor: (linha) => linha.quantidade },
+          { titulo: 'Receita', valor: (linha) => linha.receita, tipo: 'numero' },
+          { titulo: 'Custo (atual)', valor: (linha) => linha.quantidade * Number(linha.variacao?.valorCusto || 0), tipo: 'numero' },
+          { titulo: 'Margem', valor: (linha) => linha.receita - linha.quantidade * Number(linha.variacao?.valorCusto || 0), tipo: 'numero' },
+        ],
+        linhas
+      );
+    },
+  },
+
   recebimentos: {
     nome: 'recebimentos',
     async gerar({ inicio, fim }) {
@@ -162,7 +226,7 @@ async function baixar(req, res) {
 
   await financeiroService.sincronizarOrigens();
   const csv = await relatorio.gerar({ inicio, fim });
-  const sufixo = req.params.tipo === 'inadimplencia' ? hoje() : `${inicio}_a_${fim}`;
+  const sufixo = ['inadimplencia', 'estoque'].includes(req.params.tipo) ? hoje() : `${inicio}_a_${fim}`;
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="sanryu-${relatorio.nome}-${sufixo}.csv"`);

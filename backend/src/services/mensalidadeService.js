@@ -210,6 +210,14 @@ async function processarPagamentoMercadoPago(paymentId) {
   const pagamento = await mercadoPagoService.consultarPagamento(paymentId);
   const referencia = pagamento.referenciaExterna || '';
 
+  // Pedido da loja da área do aluno (require tardio: lojaService usa este módulo).
+  if (referencia.startsWith('PED')) {
+    if (pagamento.statusPagamento !== 'pago') return { tipo: 'pedido', baixada: false };
+    const { confirmarPagamento } = require('./lojaService');
+    const baixada = await confirmarPagamento(Number(referencia.slice(3)), { valor: pagamento.valor, aprovadoEm: pagamento.aprovadoEm });
+    return { tipo: 'pedido', id: Number(referencia.slice(3)), baixada };
+  }
+
   if (referencia.startsWith(PREFIXO_REFERENCIA)) {
     const mensalidade = await Mensalidade.findByPk(Number(referencia.slice(PREFIXO_REFERENCIA.length)));
 

@@ -22,6 +22,11 @@ import Academias from '../pages/admin/Academias.jsx';
 import AlunosExternos from '../pages/admin/AlunosExternos.jsx';
 import Avisos from '../pages/admin/Avisos.jsx';
 import Relatorios from '../pages/admin/financeiro/Relatorios.jsx';
+import Balcao from '../pages/admin/Balcao.jsx';
+import PainelEstoque from '../pages/admin/PainelEstoque.jsx';
+import Reposicao from '../pages/admin/Reposicao.jsx';
+import Inventario from '../pages/admin/Inventario.jsx';
+import Etiquetas from '../pages/admin/Etiquetas.jsx';
 import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
 import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
 import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
@@ -116,6 +121,11 @@ export default function AdminApp() {
       <Route path="alunos-externos" element={<AdminRoute><AlunosExternos /></AdminRoute>} />
       <Route path="avisos" element={<AdminRoute><Avisos /></AdminRoute>} />
       <Route path="financeiro/relatorios" element={<AdminRoute><Relatorios /></AdminRoute>} />
+      <Route path="balcao" element={<AdminRoute><Balcao /></AdminRoute>} />
+      <Route path="estoque" element={<AdminRoute><PainelEstoque /></AdminRoute>} />
+      <Route path="estoque/reposicao" element={<AdminRoute><Reposicao /></AdminRoute>} />
+      <Route path="estoque/inventario" element={<AdminRoute><Inventario /></AdminRoute>} />
+      <Route path="estoque/etiquetas" element={<AdminRoute><Etiquetas /></AdminRoute>} />
 
       <Route path="financeiro" element={<AdminRoute><ResumoFinanceiro /></AdminRoute>} />
       <Route path="financeiro/pagar" element={<AdminRoute><Lancamentos key="despesa" tipo="despesa" /></AdminRoute>} />

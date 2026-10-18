@@ -37,6 +37,17 @@ const ProdutoVariacao = sequelize.define('ProdutoVariacao', {
     allowNull: false,
     defaultValue: 0,
   },
+  // Reposição: abaixo (ou igual) do mínimo entra na lista de compra, sugerindo completar até o
+  // ideal (se vazio, o dobro do mínimo). 0 = não acompanha. Ver estoqueController.reposicao.
+  estoqueMinimo: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
+  estoqueIdeal: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   ativo: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
