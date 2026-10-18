@@ -17,9 +17,10 @@ import {
   CCol,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilReload, cilCash, cilLink, cilEnvelopeClosed, cilChatBubble, cilSync, cilBan, cilActionUndo, cilCalculator } from '@coreui/icons';
+import { cilReload, cilCash, cilLink, cilEnvelopeClosed, cilChatBubble, cilSync, cilBan, cilActionUndo, cilCalculator, cilDescription } from '@coreui/icons';
 import api from '../../services/api';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 
 const FORMAS = [
@@ -59,6 +60,9 @@ function badgeStatus(mensalidade) {
 }
 
 export default function Mensalidades() {
+  // Desfazer baixa e cancelar cobrança são só do admin (a recepção recebe e cobra).
+  const { perfil } = useAuth();
+  const ehAdmin = perfil === 'admin';
   const [mensalidades, setMensalidades] = useState([]);
   const [unidades, setUnidades] = useState([]);
   const [statusFiltro, setStatusFiltro] = useState('pendente');
@@ -217,6 +221,15 @@ export default function Mensalidades() {
           </CButton>
         </CButtonGroup>
         <CButtonGroup role="group">
+          <CButton
+            color="secondary"
+            variant="outline"
+            disabled={selecionada?.status !== 'pago' || !(Number(selecionada?.valorPago) > 0)}
+            onClick={() => window.open(`${linkCompleto(selecionada.link)}/recibo`, '_blank', 'noopener')}
+            title="Recibo (mensalidade paga)"
+          >
+            <CIcon icon={cilDescription} />
+          </CButton>
           <CButton color="secondary" variant="outline" disabled={!pendente} onClick={copiarLink} title="Copiar link de pagamento">
             <CIcon icon={cilLink} />
           </CButton>
@@ -233,6 +246,7 @@ export default function Mensalidades() {
             <CIcon icon={cilEnvelopeClosed} />
           </CButton>
         </CButtonGroup>
+        {ehAdmin && (
         <CButtonGroup role="group">
           <CButton
             color="secondary"
@@ -256,6 +270,7 @@ export default function Mensalidades() {
             <CIcon icon={cilBan} />
           </CButton>
         </CButtonGroup>
+        )}
       </div>
 
       <div className="d-flex flex-wrap gap-2 mb-3">

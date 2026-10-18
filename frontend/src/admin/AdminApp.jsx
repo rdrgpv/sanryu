@@ -17,6 +17,7 @@ import Mensalidades from '../pages/admin/Mensalidades.jsx';
 import TurmaChamada from '../pages/admin/TurmaChamada.jsx';
 import Frequencia from '../pages/admin/Frequencia.jsx';
 import Leads from '../pages/admin/Leads.jsx';
+import Usuarios from '../pages/admin/Usuarios.jsx';
 import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
 import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
 import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
@@ -106,6 +107,7 @@ export default function AdminApp() {
       <Route path="turmas/:id/chamada" element={<AdminRoute><TurmaChamada /></AdminRoute>} />
       <Route path="frequencia" element={<AdminRoute><Frequencia /></AdminRoute>} />
       <Route path="interessados" element={<AdminRoute><Leads /></AdminRoute>} />
+      <Route path="usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
 
       <Route path="financeiro" element={<AdminRoute><ResumoFinanceiro /></AdminRoute>} />
       <Route path="financeiro/pagar" element={<AdminRoute><Lancamentos key="despesa" tipo="despesa" /></AdminRoute>} />

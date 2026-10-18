@@ -24,9 +24,13 @@ function diaDaSemana(data) {
   return DIAS[new Date(`${data}T12:00:00Z`).getUTCDay()];
 }
 
-// Sensei só mexe nas próprias turmas; admin em todas.
+// Sensei só mexe nas próprias turmas; admin e recepção em todas.
+function veTodasAsTurmas(req) {
+  return ['admin', 'recepcao'].includes(perfilDo(req));
+}
+
 function podeAcessar(req, turma) {
-  return perfilDo(req) === 'admin' || (turma.instrutorId && turma.instrutorId === req.admin.instrutorId);
+  return veTodasAsTurmas(req) || (turma.instrutorId && turma.instrutorId === req.admin.instrutorId);
 }
 
 async function carregarTurma(req, res) {
@@ -55,7 +59,7 @@ function dataValida(data) {
 }
 
 async function listarTurmas(req, res) {
-  const where = perfilDo(req) === 'admin' ? {} : { instrutorId: req.admin.instrutorId || -1 };
+  const where = veTodasAsTurmas(req) ? {} : { instrutorId: req.admin.instrutorId || -1 };
   const turmas = await Turma.findAll({
     where,
     include: [

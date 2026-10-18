@@ -36,7 +36,9 @@ function formatarData(valor) {
 }
 
 export default function Dashboard() {
-  const { admin } = useAuth();
+  const { admin, perfil } = useAuth();
+  // Recepção não vê o caixa (o backend nem manda esses números pra ela).
+  const veFinanceiro = perfil === 'admin';
   const [resumo, setResumo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
@@ -70,6 +72,7 @@ export default function Dashboard() {
             loading={loading}
           />
         </CCol>
+        {veFinanceiro && (
         <CCol sm={6} lg={3}>
           <DashboardStatCard
             title="Recebido no mês"
@@ -79,6 +82,7 @@ export default function Dashboard() {
             loading={loading}
           />
         </CCol>
+        )}
         <CCol sm={6} lg={3}>
           <Link to="/admin/mensalidades" className="text-decoration-none">
             <DashboardStatCard
@@ -132,6 +136,7 @@ export default function Dashboard() {
               />
             </DashboardSection>
           </CCol>
+          {resumo.financeiro && (
           <CCol lg={12}>
             <DashboardSection title="Entradas e saídas de dinheiro (pago de fato)">
               <GraficoColunas
@@ -153,6 +158,7 @@ export default function Dashboard() {
               />
             </DashboardSection>
           </CCol>
+          )}
         </CRow>
       )}
 

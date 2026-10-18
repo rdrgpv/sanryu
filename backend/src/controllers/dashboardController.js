@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { sequelize, Aluno, Turma, Instrutor, Faixa, Evento, TipoEvento, EventoAluno, Contrato, Mensalidade, Presenca, Matricula, Responsavel } = require('../models');
 const { hoje } = require('../services/mensalidadeService');
+const { perfilDo } = require('../middleware/auth');
 const financeiroService = require('../services/financeiroService');
 
 const MESES_HISTORICO = 12;
@@ -203,7 +204,18 @@ async function resumo(req, res) {
   const financeiroAtual = financeiro[financeiro.length - 1];
   const financeiroAnterior = financeiro[financeiro.length - 2];
 
+  // Recepção vê o operacional (alunos, atrasos pra cobrar, frequência), não o caixa da academia.
+  const somenteAdmin = perfilDo(req) === 'admin'
+    ? {
+        recebidoNoMes: financeiroAtual.entradas,
+        recebidoMesAnterior: financeiroAnterior?.entradas || 0,
+        resultadoNoMes: financeiroAtual.resultado,
+        financeiro,
+      }
+    : {};
+
   res.json({
+    ...somenteAdmin,
     alunosAtivos,
     totalTurmas,
     totalInstrutores,
@@ -211,14 +223,10 @@ async function resumo(req, res) {
     matriculasDoMes: evolucaoAtual.novos,
     novosNoMes: evolucaoAtual.novos,
     saidasNoMes: evolucaoAtual.saidas,
-    recebidoNoMes: financeiroAtual.entradas,
-    recebidoMesAnterior: financeiroAnterior?.entradas || 0,
-    resultadoNoMes: financeiroAtual.resultado,
     inadimplencia,
     engajamento,
     aniversariantes,
     evolucao,
-    financeiro,
     distribuicaoFaixas,
     proximosEventos,
   });

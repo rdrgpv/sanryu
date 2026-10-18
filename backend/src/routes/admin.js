@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const { exigirPerfil } = require('../middleware/auth');
+const { exigirPermissao } = require('../middleware/permissoes');
 const alunoController = require('../controllers/alunoController');
 const turmaController = require('../controllers/turmaController');
 const instrutorController = require('../controllers/instrutorController');
@@ -30,13 +31,21 @@ const mensalidadeController = require('../controllers/mensalidadeController');
 const chamadaController = require('../controllers/chamadaController');
 const financeiroController = require('../controllers/financeiroController');
 const leadController = require('../controllers/leadController');
+const usuarioController = require('../controllers/usuarioController');
 
 const router = express.Router();
 
 router.use(auth);
-router.use(exigirPerfil('admin'));
+router.use(exigirPerfil('admin', 'recepcao'));
+// Admin passa direto; recepção só no que está liberado em middleware/permissoes.js.
+router.use(exigirPermissao);
 
 router.get('/dashboard', dashboardController.resumo);
+
+router.get('/usuarios', usuarioController.listar);
+router.post('/usuarios', usuarioController.criar);
+router.put('/usuarios/:id', usuarioController.atualizar);
+router.delete('/usuarios/:id', usuarioController.remover);
 
 router.get('/alunos', alunoController.listar);
 router.post('/alunos', alunoController.criar);

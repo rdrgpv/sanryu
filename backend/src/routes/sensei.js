@@ -4,11 +4,11 @@ const { exigirPerfil } = require('../middleware/auth');
 const chamadaController = require('../controllers/chamadaController');
 
 // Rotas da chamada no celular. Instrutor só enxerga as próprias turmas (checado no controller);
-// admin também pode usar, pra fazer chamada de qualquer turma.
+// admin e recepção também podem usar, pra fazer chamada de qualquer turma.
 const router = express.Router();
 
 router.use(auth);
-router.use(exigirPerfil('instrutor', 'admin'));
+router.use(exigirPerfil('instrutor', 'admin', 'recepcao'));
 
 router.get('/turmas', chamadaController.listarTurmas);
 router.get('/turmas/:turmaId/chamada', chamadaController.buscarChamada);

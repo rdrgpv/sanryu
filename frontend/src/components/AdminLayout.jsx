@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   CSidebar,
@@ -43,10 +43,13 @@ import {
   cilArrowCircleBottom,
   cilLoopCircular,
   cilUserFollow,
+  cilLockLocked,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
 import AdminFooter from '../admin/components/AdminFooter.jsx';
+import TrocarSenhaModal from '../admin/components/TrocarSenhaModal.jsx';
+import { podeVer } from '../utils/permissoes.js';
 
 const linksPrincipal = [
   { to: '/admin', label: 'Dashboard', end: true, icon: cilSpeedometer },
@@ -89,11 +92,20 @@ const linksFinanceiro = [
 ];
 
 const linksSistema = [
+  { to: '/admin/usuarios', label: 'Usuários', icon: cilLockLocked },
   { to: '/admin/configuracao-academia', label: 'Config. da academia', icon: cilSettings },
   { to: '/admin/configuracoes', label: 'Configurações', icon: cilSettings },
 ];
 
-const TODOS_OS_LINKS = [...linksPrincipal, ...linksFinanceiro, ...linksEventos, ...linksLoja, ...linksSistema];
+const SECOES = [
+  { titulo: 'Gestão', links: linksPrincipal },
+  { titulo: 'Financeiro', links: linksFinanceiro },
+  { titulo: 'Eventos', links: linksEventos },
+  { titulo: 'Loja', links: linksLoja },
+  { titulo: 'Sistema', links: linksSistema },
+];
+
+const TODOS_OS_LINKS = SECOES.flatMap((secao) => secao.links);
 
 // Sufixo da rota -> complemento do título mostrado no header (ex.: "Alunos — Novo").
 const SUFIXOS_DE_ROTA = {
@@ -135,8 +147,9 @@ function useTituloDaPagina(pathname) {
 }
 
 export default function AdminLayout({ children }) {
-  const { admin, logout } = useAuth();
+  const { admin, logout, perfil } = useAuth();
   const navigate = useNavigate();
+  const [trocandoSenha, setTrocandoSenha] = useState(false);
   const location = useLocation();
   // Abaixo do breakpoint lg (992px) o CSidebar do CoreUI já entra em modo off-canvas sozinho —
   // só falta a gente controlar quando ele fica visível (não tem toggle nenhum por padrão).
@@ -202,60 +215,39 @@ export default function AdminLayout({ children }) {
           </CSidebarBrand>
         </CSidebarHeader>
         <CSidebarNav>
-          <CNavTitle>Gestão</CNavTitle>
-          {linksPrincipal.map((link) => (
-            <CNavItem key={link.to}>
-              <CNavLink as={NavLink} to={link.to} end={link.end} title={link.label}>
-                <CIcon customClassName="nav-icon" icon={link.icon} />
-                {link.label}
-              </CNavLink>
-            </CNavItem>
-          ))}
-          <CNavTitle>Financeiro</CNavTitle>
-          {linksFinanceiro.map((link) => (
-            <CNavItem key={link.to}>
-              <CNavLink as={NavLink} to={link.to} end={link.end} title={link.label}>
-                <CIcon customClassName="nav-icon" icon={link.icon} />
-                {link.label}
-              </CNavLink>
-            </CNavItem>
-          ))}
-          <CNavTitle>Eventos</CNavTitle>
-          {linksEventos.map((link) => (
-            <CNavItem key={link.to}>
-              <CNavLink as={NavLink} to={link.to} title={link.label}>
-                <CIcon customClassName="nav-icon" icon={link.icon} />
-                {link.label}
-              </CNavLink>
-            </CNavItem>
-          ))}
-          <CNavTitle>Loja</CNavTitle>
-          {linksLoja.map((link) => (
-            <CNavItem key={link.to}>
-              <CNavLink as={NavLink} to={link.to} title={link.label}>
-                <CIcon customClassName="nav-icon" icon={link.icon} />
-                {link.label}
-              </CNavLink>
-            </CNavItem>
-          ))}
-          <CNavTitle>Sistema</CNavTitle>
-          {linksSistema.map((link) => (
-            <CNavItem key={link.to}>
-              <CNavLink as={NavLink} to={link.to} title={link.label}>
-                <CIcon customClassName="nav-icon" icon={link.icon} />
-                {link.label}
-              </CNavLink>
-            </CNavItem>
-          ))}
+          {SECOES.map((secao) => {
+            const visiveis = secao.links.filter((link) => podeVer(perfil, link.to));
+            if (visiveis.length === 0) return null;
+            return (
+              <Fragment key={secao.titulo}>
+                <CNavTitle>{secao.titulo}</CNavTitle>
+                {visiveis.map((link) => (
+                  <CNavItem key={link.to}>
+                    <CNavLink as={NavLink} to={link.to} end={link.end} title={link.label}>
+                      <CIcon customClassName="nav-icon" icon={link.icon} />
+                      {link.label}
+                    </CNavLink>
+                  </CNavItem>
+                ))}
+              </Fragment>
+            );
+          })}
         </CSidebarNav>
         <CSidebarFooter className="border-top d-flex flex-column gap-2 align-items-stretch">
-          <div className="small text-white-50 text-truncate">{admin?.nome}</div>
+          <div className="small text-white-50 text-truncate">
+            {admin?.nome}
+            {perfil === 'recepcao' && ' · recepção'}
+          </div>
+          <CButton color="secondary" variant="ghost" size="sm" className="text-white-50" onClick={() => setTrocandoSenha(true)}>
+            Trocar minha senha
+          </CButton>
           <CButton color="secondary" variant="outline" size="sm" onClick={handleLogout}>
             Sair
           </CButton>
           <CSidebarToggler className="d-none d-lg-flex" onClick={() => setUnfoldable((valor) => !valor)} />
         </CSidebarFooter>
       </CSidebar>
+      <TrocarSenhaModal visivel={trocandoSenha} aoFechar={() => setTrocandoSenha(false)} />
 
       <div className="wrapper d-flex flex-column min-vh-100">
         <AdminHeader

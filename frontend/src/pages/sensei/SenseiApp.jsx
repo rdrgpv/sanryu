@@ -90,7 +90,7 @@ function ChamadaDaTurma() {
 // Área do sensei: fora do layout do admin (sem menu de cadastros/financeiro), pensada pro celular.
 export default function SenseiApp() {
   return (
-    <ProtectedRoute perfis={['instrutor', 'admin']}>
+    <ProtectedRoute perfis={['instrutor', 'admin', 'recepcao']}>
       <div className="sensei">
         <Cabecalho />
         <main className="sensei__conteudo">

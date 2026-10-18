@@ -6,6 +6,7 @@ import { cilSchool, cilSearch, cilUserPlus, cilNotes } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const SITUACOES = {
   ativo: { label: 'Ativo', classe: 'text-bg-success' },
@@ -15,6 +16,7 @@ const SITUACOES = {
 
 export default function Alunos() {
   const navigate = useNavigate();
+  const { perfil } = useAuth();
   const [alunos, setAlunos] = useState([]);
   const [turmas, setTurmas] = useState([]);
   const [busca, setBusca] = useState('');
@@ -139,6 +141,7 @@ export default function Alunos() {
         onNovo={() => navigate('/admin/alunos/novo')}
         onEditar={() => navigate(`/admin/alunos/${selecionadoId}/editar`)}
         onExcluir={handleExcluir}
+        podeExcluir={!!selecionadoId && perfil === 'admin'}
         onAtualizar={carregarAlunos}
         extra={
           <>
