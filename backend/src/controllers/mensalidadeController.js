@@ -2,6 +2,8 @@ const { Op } = require('sequelize');
 const { Mensalidade, Aluno, Responsavel, Contrato, Plano, Unidade } = require('../models');
 const mensalidadeService = require('../services/mensalidadeService');
 const mercadoPagoService = require('../services/mercadoPagoService');
+const { obterConfiguracao, contratante } = require('../services/contratoService');
+const { valorPorExtenso } = require('../utils/extenso');
 const { logErro } = require('../utils/logger');
 
 const FORMAS_MANUAIS = ['dinheiro', 'cartao', 'transferencia', 'pix', 'outro'];
@@ -229,7 +231,56 @@ async function statusPublico(req, res) {
   res.json({ status: mensalidade.status, pagoEm: mensalidade.pagoEm });
 }
 
+const FORMAS_RECIBO = { pix: 'Pix', dinheiro: 'dinheiro', cartao: 'cartão', transferencia: 'transferência', outro: 'outro meio' };
+
+// Recibo da mensalidade paga — acessado pelo mesmo código secreto do link de pagamento (quem pagou
+// tem o link; o portal e o admin também mostram). Recibo simples, sem valor fiscal.
+async function reciboPublico(req, res) {
+  const mensalidade = await Mensalidade.findOne({
+    where: { token: req.params.token },
+    include: [
+      {
+        model: Aluno,
+        as: 'aluno',
+        attributes: ['id', 'nome', 'cpf', 'dataNascimento'],
+        include: [{ model: Responsavel, as: 'responsavel', attributes: ['nome', 'cpf'] }],
+      },
+      { model: Contrato, as: 'contrato', attributes: ['id'], include: { model: Plano, as: 'plano', attributes: ['nome'] } },
+    ],
+  });
+
+  if (!mensalidade || mensalidade.status !== 'pago') {
+    return res.status(404).json({ error: 'Recibo disponível só para mensalidade paga.' });
+  }
+  if (!(Number(mensalidade.valorPago) > 0)) {
+    return res.status(404).json({ error: 'Mensalidade isenta — não há recibo de pagamento.' });
+  }
+
+  const configuracao = await obterConfiguracao();
+  const pagador = contratante(mensalidade.aluno);
+  const pagoEm = new Date(mensalidade.pagoEm);
+
+  res.json({
+    numero: `${pagoEm.getFullYear()}-${String(mensalidade.id).padStart(6, '0')}`,
+    emissor: {
+      nome: configuracao?.reciboNome || 'San·Ryu Dojo',
+      documento: configuracao?.reciboDocumento || null,
+      endereco: configuracao?.reciboEndereco || null,
+    },
+    pagador: { nome: pagador.nome, cpf: pagador.cpf || null },
+    aluno: mensalidade.aluno.nome,
+    plano: mensalidade.contrato?.plano?.nome || null,
+    competencia: mensalidade.competencia,
+    vencimento: mensalidade.vencimento,
+    valor: Number(mensalidade.valorPago),
+    valorPorExtenso: valorPorExtenso(mensalidade.valorPago),
+    formaPagamento: FORMAS_RECIBO[mensalidade.formaPagamento] || mensalidade.formaPagamento,
+    pagoEm: mensalidade.pagoEm,
+  });
+}
+
 module.exports = {
+  reciboPublico,
   listar,
   gerar,
   registrarPagamento,

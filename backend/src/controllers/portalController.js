@@ -198,6 +198,7 @@ async function resumoAluno(req, res) {
         valor: mensalidade.status === 'pago' ? mensalidade.valorPago : atualizado?.total ?? mensalidade.valor,
         pagoEm: mensalidade.pagoEm,
         linkPagamento: mensalidade.status === 'pendente' ? link(`/mensalidades/${mensalidade.token}`) : null,
+        linkRecibo: mensalidade.status === 'pago' && Number(mensalidade.valorPago) > 0 ? link(`/mensalidades/${mensalidade.token}/recibo`) : null,
       };
     })
   );

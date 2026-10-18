@@ -1400,3 +1400,122 @@ button, input, select, textarea {
 .chamada__aluno--experimental {
   border-style: dashed;
 }
+
+/* Recibo de mensalidade (/mensalidades/:token/recibo) — página própria, pensada pra imprimir/PDF. */
+.recibo-pagina {
+  min-height: 100vh;
+  background: var(--cor-off-white);
+  padding: 1rem 16px 3rem;
+}
+
+.recibo-acoes {
+  max-width: 720px;
+  margin: 0 auto 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--cor-cinza);
+}
+
+.recibo {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--cor-branco);
+  border: 1px solid rgba(17, 17, 17, 0.15);
+  border-radius: var(--raio);
+  padding: 2rem;
+  color: var(--cor-sumi);
+}
+
+.recibo__cabecalho {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 2px solid var(--cor-sumi);
+  padding-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.recibo__emissor {
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.recibo__numero {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.recibo__numero span {
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+.recibo__valor {
+  text-align: right;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 1.25rem 0;
+}
+
+.recibo__texto {
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.recibo__rodape {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.recibo__assinatura {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 260px;
+  margin-bottom: 1.5rem;
+}
+
+.recibo__assinatura span {
+  width: 100%;
+  border-top: 1px solid var(--cor-sumi);
+  margin-bottom: 0.35rem;
+}
+
+.recibo__rodape small {
+  display: block;
+  color: var(--cor-cinza);
+}
+
+@media (max-width: 560px) {
+  .recibo {
+    padding: 1.25rem;
+  }
+
+  .recibo__cabecalho {
+    flex-direction: column;
+  }
+
+  .recibo__numero {
+    text-align: left;
+  }
+}
+
+@media print {
+  .recibo-pagina {
+    background: #fff;
+    padding: 0;
+  }
+
+  .recibo-acoes {
+    display: none;
+  }
+
+  .recibo {
+    border: none;
+    padding: 0;
+  }
+}

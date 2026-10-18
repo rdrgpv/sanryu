@@ -29,6 +29,7 @@ router.post('/contratos/:token/assinatura', contratoController.assinarPublico);
 
 router.get('/mensalidades/:token', mensalidadeController.buscarPublico);
 router.get('/mensalidades/:token/status', mensalidadeController.statusPublico);
+router.get('/mensalidades/:token/recibo', mensalidadeController.reciboPublico);
 
 router.post('/webhooks/mercadopago', webhookController.mercadoPago);
 

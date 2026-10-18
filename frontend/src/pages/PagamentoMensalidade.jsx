@@ -93,6 +93,9 @@ export default function PagamentoMensalidade() {
                 <p className="alert alert--success" style={{ marginTop: 0 }}>
                   Pagamento confirmado{cobranca.pagoEm ? ` em ${new Date(cobranca.pagoEm).toLocaleDateString('pt-BR')}` : ''}. Obrigado!
                 </p>
+                <a href={`/mensalidades/${token}/recibo`} className="btn btn--ghost btn--bloco">
+                  Ver recibo
+                </a>
               </div>
             ) : (
               <div className="tile pagamento-mensalidade">

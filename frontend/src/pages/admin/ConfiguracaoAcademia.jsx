@@ -24,6 +24,9 @@ export default function ConfiguracaoAcademia() {
     jurosMensalPercentual: '',
     diasAntecedenciaCobranca: '',
     termoContrato: '',
+    reciboNome: '',
+    reciboDocumento: '',
+    reciboEndereco: '',
   });
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState(null);
@@ -37,6 +40,9 @@ export default function ConfiguracaoAcademia() {
         jurosMensalPercentual: res.data.jurosMensalPercentual,
         diasAntecedenciaCobranca: res.data.diasAntecedenciaCobranca,
         termoContrato: res.data.termoContrato,
+        reciboNome: res.data.reciboNome || '',
+        reciboDocumento: res.data.reciboDocumento || '',
+        reciboEndereco: res.data.reciboEndereco || '',
       })
     );
   }, []);
@@ -132,6 +138,23 @@ export default function ConfiguracaoAcademia() {
                   />
                   <CInputGroupText>dias antes</CInputGroupText>
                 </CInputGroup>
+              </CCol>
+
+              <CCol xs={12}>
+                <h2 className="h6 mb-0 mt-2">Recibo de pagamento</h2>
+                <small className="text-body-secondary">Quem aparece como emissor no recibo das mensalidades (recibo simples, sem valor fiscal).</small>
+              </CCol>
+              <CCol md={5}>
+                <CFormLabel>Nome ou razão social</CFormLabel>
+                <CFormInput value={form.reciboNome} placeholder="San·Ryu Dojo" onChange={(event) => setForm((prev) => ({ ...prev, reciboNome: event.target.value }))} />
+              </CCol>
+              <CCol md={3}>
+                <CFormLabel>CPF ou CNPJ</CFormLabel>
+                <CFormInput value={form.reciboDocumento} onChange={(event) => setForm((prev) => ({ ...prev, reciboDocumento: event.target.value }))} />
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel>Endereço</CFormLabel>
+                <CFormInput value={form.reciboEndereco} onChange={(event) => setForm((prev) => ({ ...prev, reciboEndereco: event.target.value }))} />
               </CCol>
 
               <CCol md={12}>

@@ -269,6 +269,12 @@ function DetalheAluno() {
               <span>{nomeMes(mensalidade.competencia)}</span>
               <span>
                 {formatarMoeda(mensalidade.valor)} · pago em {new Date(mensalidade.pagoEm).toLocaleDateString('pt-BR')}
+                {mensalidade.linkRecibo && (
+                  <>
+                    {' · '}
+                    <a href={mensalidade.linkRecibo}>recibo</a>
+                  </>
+                )}
               </span>
             </div>
           ))}

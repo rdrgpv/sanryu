@@ -37,6 +37,9 @@ async function atualizar(req, res) {
     jurosMensalPercentual: juros,
     diasAntecedenciaCobranca: antecedencia,
     termoContrato: req.body.termoContrato,
+    ...(req.body.reciboNome !== undefined ? { reciboNome: (req.body.reciboNome || '').trim() || null } : {}),
+    ...(req.body.reciboDocumento !== undefined ? { reciboDocumento: (req.body.reciboDocumento || '').trim() || null } : {}),
+    ...(req.body.reciboEndereco !== undefined ? { reciboEndereco: (req.body.reciboEndereco || '').trim() || null } : {}),
   });
   res.json(configuracao);
 }

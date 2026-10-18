@@ -27,6 +27,19 @@ const ConfiguracaoAcademia = sequelize.define('ConfiguracaoAcademia', {
     allowNull: false,
     defaultValue: 10,
   },
+  // Emissor que aparece no recibo de pagamento (recibo simples, sem valor fiscal).
+  reciboNome: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  reciboDocumento: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+  },
+  reciboEndereco: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   // Modelo do contrato com marcadores {{...}} (ver utils/termoContrato.js).
   termoContrato: {
     type: DataTypes.TEXT('long'),
