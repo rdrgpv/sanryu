@@ -4,11 +4,14 @@ import CIcon from '@coreui/icons-react';
 import { cilPlus, cilPencil, cilTrash, cilReload } from '@coreui/icons';
 import api from '../../services/api';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { formatarTelefone } from '../../utils/formato.js';
 
 // Academias de outros professores do Método Morganti (não administradas aqui) — agrupam os alunos
 // externos dos eventos e exames. O professor responsável vai como "professor" no cadastro do Gatame.
 export default function Academias() {
+  // Recepção cadastra e edita, mas não exclui (o servidor também bloqueia).
+  const { perfil } = useAuth();
   const [academias, setAcademias] = useState([]);
   const [instrutores, setInstrutores] = useState([]);
   const [selecionadoId, setSelecionadoId] = useState(null);
@@ -74,7 +77,7 @@ export default function Academias() {
           <CButton color="secondary" variant="outline" disabled={!selecionada} onClick={() => abrir(selecionada)} title="Editar">
             <CIcon icon={cilPencil} />
           </CButton>
-          <CButton color="danger" variant="outline" disabled={!selecionada} onClick={excluir} title="Excluir">
+          <CButton color="danger" variant="outline" disabled={!selecionada || perfil !== 'admin'} onClick={excluir} title="Excluir">
             <CIcon icon={cilTrash} />
           </CButton>
           <CButton color="secondary" variant="outline" onClick={carregar} title="Atualizar">

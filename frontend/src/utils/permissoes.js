@@ -12,6 +12,8 @@ const TELAS_RECEPCAO = [
   /^\/admin\/frequencia(\/|$)/,
   /^\/admin\/eventos\/?$/,
   /^\/admin\/eventos\/\d+\/(inscricoes|lista-inscritos|autorizacoes)$/,
+  /^\/admin\/academias\/?$/,
+  /^\/admin\/alunos-externos\/?$/,
 ];
 
 export function podeVer(perfil, caminho) {

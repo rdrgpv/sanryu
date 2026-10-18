@@ -5,6 +5,7 @@ import CIcon from '@coreui/icons-react';
 import { cilPlus, cilPencil, cilTrash, cilReload, cilSearch, cilUserPlus, cilArrowCircleRight } from '@coreui/icons';
 import api from '../../services/api';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { OPCOES_TAMANHO_FAIXA } from '../../utils/opcoesTamanhoFaixa.js';
 import { formatarTelefone, calcularIdade } from '../../utils/formato.js';
 
@@ -13,6 +14,8 @@ const VAZIO = { nome: '', email: '', telefone: '', dataNascimento: '', faixaId: 
 // Alunos do Método Morganti de outros professores — o cadastro simples de antes. Não têm contrato,
 // mensalidade nem chamada aqui: aparecem nos eventos/exames de faixa e no Gatame.
 export default function AlunosExternos() {
+  // Recepção cadastra e edita, mas não exclui (o servidor também bloqueia).
+  const { perfil } = useAuth();
   const navigate = useNavigate();
   const [alunos, setAlunos] = useState([]);
   const [academias, setAcademias] = useState([]);
@@ -135,7 +138,7 @@ export default function AlunosExternos() {
           <CButton color="secondary" variant="outline" disabled={!selecionado} onClick={() => abrir(selecionado)} title="Editar">
             <CIcon icon={cilPencil} />
           </CButton>
-          <CButton color="danger" variant="outline" disabled={!selecionado} onClick={excluir} title="Excluir">
+          <CButton color="danger" variant="outline" disabled={!selecionado || perfil !== 'admin'} onClick={excluir} title="Excluir">
             <CIcon icon={cilTrash} />
           </CButton>
           <CButton color="secondary" variant="outline" onClick={carregar} title="Atualizar">

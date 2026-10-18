@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   CTable,
   CTableHead,
@@ -151,6 +151,26 @@ export default function Pedidos() {
             ),
           },
           { key: 'valorTotal', label: 'Total', align: 'end', sortable: true, render: (p) => formatarMoeda(p.valorTotal) },
+          {
+            key: 'recebimento',
+            label: 'Recebido',
+            sortable: true,
+            sortValue: (p) => p.recebimento?.status || '',
+            render: (p) => {
+              if (p.recebimento?.status === 'pago') {
+                const [ano, mes, dia] = (p.recebimento.dataPagamento || '').split('-');
+                return <span className="text-success small">Sim{dia ? ` · ${dia}/${mes}/${ano}` : ''}</span>;
+              }
+              if (p.recebimento?.status === 'pendente') {
+                return (
+                  <Link to="/admin/financeiro/receber" className="text-warning-emphasis small" title="Registrar o recebimento em Contas a receber">
+                    Não — receber
+                  </Link>
+                );
+              }
+              return <span className="text-body-secondary small">-</span>;
+            },
+          },
           {
             key: 'dataPrevistaEntrega',
             label: 'Previsão de entrega',

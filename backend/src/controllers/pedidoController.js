@@ -1,5 +1,6 @@
-const { sequelize, Pedido, PedidoItem, PedidoItemPersonalizacao, ProdutoVariacao, Produto, Cor, Tamanho, TipoPersonalizacao } = require('../models');
+const { sequelize, Lancamento, Pedido, PedidoItem, PedidoItemPersonalizacao, ProdutoVariacao, Produto, Cor, Tamanho, TipoPersonalizacao } = require('../models');
 const pedidoService = require('../services/pedidoService');
+const financeiroService = require('../services/financeiroService');
 const pedidoCompraService = require('../services/pedidoCompraService');
 
 const INCLUDE_ITENS = {
@@ -28,7 +29,25 @@ async function listar(req, res) {
   if (req.query.situacao) where.situacao = req.query.situacao;
 
   const pedidos = await Pedido.findAll({ where, order: [['dataPedido', 'DESC']] });
-  res.json(pedidos);
+
+  // O recebimento da venda é dado no financeiro (conta a receber de origem "pedido"); aqui só mostra.
+  // Sincroniza antes pra pedido recém-criado já ter a conta a receber.
+  await financeiroService.sincronizarOrigens();
+  const lancamentos = await Lancamento.findAll({
+    where: { origem: 'pedido', origemId: pedidos.map((pedido) => pedido.id) },
+    attributes: ['origemId', 'status', 'dataPagamento', 'valorPago'],
+  });
+  const porPedido = new Map(lancamentos.map((lancamento) => [lancamento.origemId, lancamento]));
+
+  res.json(
+    pedidos.map((pedido) => {
+      const lancamento = porPedido.get(pedido.id);
+      return {
+        ...pedido.toJSON(),
+        recebimento: lancamento ? { status: lancamento.status, dataPagamento: lancamento.dataPagamento, valorPago: lancamento.valorPago } : null,
+      };
+    })
+  );
 }
 
 async function buscarPorId(req, res) {

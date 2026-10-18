@@ -12,6 +12,12 @@ const RECEPCAO = [
   ['PUT', /^\/alunos\/\d+$/],
   ['POST', /^\/alunos\/\d+\/matricular$/],
   ['GET', /^\/alunos\/\d+\/verificar-gatame$/],
+  ['POST', /^\/alunos\/\d+\/cadastrar-gatame$/],
+
+  // Academias e alunos Morganti externos (eventos/exames) — sem excluir.
+  ['GET', /^\/academias$/],
+  ['POST', /^\/academias$/],
+  ['PUT', /^\/academias\/\d+$/],
 
   ['GET', /^\/responsaveis(\/\d+)?$/],
   ['POST', /^\/responsaveis$/],
@@ -39,6 +45,7 @@ const RECEPCAO = [
   ['GET', /^\/eventos(\/\d+)?$/],
   ['GET', /^\/eventos\/\d+\/(inscricoes|autorizacoes)$/],
   ['POST', /^\/inscricoes\/\d+\/verificar-pagamento$/],
+  ['POST', /^\/inscricoes\/\d+\/cadastrar-aluno$/],
 ];
 
 const PERMISSOES = { recepcao: RECEPCAO };
