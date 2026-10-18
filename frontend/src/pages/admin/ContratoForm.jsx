@@ -45,7 +45,7 @@ export default function ContratoForm() {
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    api.get('/admin/alunos', { params: { situacao: 'ativo' } }).then((res) => setAlunos(res.data));
+    api.get('/admin/alunos', { params: { situacao: 'ativo', vinculo: 'academia' } }).then((res) => setAlunos(res.data));
     api.get('/admin/planos').then((res) => setPlanos(res.data));
   }, []);
 

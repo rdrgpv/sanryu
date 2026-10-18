@@ -32,6 +32,7 @@ const chamadaController = require('../controllers/chamadaController');
 const financeiroController = require('../controllers/financeiroController');
 const leadController = require('../controllers/leadController');
 const usuarioController = require('../controllers/usuarioController');
+const academiaController = require('../controllers/academiaController');
 
 const router = express.Router();
 
@@ -41,6 +42,11 @@ router.use(exigirPerfil('admin', 'recepcao'));
 router.use(exigirPermissao);
 
 router.get('/dashboard', dashboardController.resumo);
+
+router.get('/academias', academiaController.listar);
+router.post('/academias', academiaController.criar);
+router.put('/academias/:id', academiaController.atualizar);
+router.delete('/academias/:id', academiaController.remover);
 
 router.get('/usuarios', usuarioController.listar);
 router.post('/usuarios', usuarioController.criar);

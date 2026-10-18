@@ -76,10 +76,10 @@ export default function EventoInscricoes() {
   const [inscricoes, setInscricoes] = useState([]);
   const [notificando, setNotificando] = useState(false);
   const [cadastrandoGatameId, setCadastrandoGatameId] = useState(null);
-  const [turmas, setTurmas] = useState([]);
+  const [academias, setAcademias] = useState([]);
   const [cadastrandoAlunoId, setCadastrandoAlunoId] = useState(null);
   const [cancelandoPagamentoId, setCancelandoPagamentoId] = useState(null);
-  const [modalTurma, setModalTurma] = useState(null); // { inscricao, turmasDoInstrutor, turmaId }
+  const [modalAcademia, setModalAcademia] = useState(null); // { inscricao, academiaId }
   const [modalEdicao, setModalEdicao] = useState(null); // { id, nome, email, ... } — campos editáveis
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [modalPix, setModalPix] = useState(null); // inscrição cujo QR Pix está sendo visualizado
@@ -99,7 +99,7 @@ export default function EventoInscricoes() {
   useEffect(() => {
     api.get(`/admin/eventos/${id}`).then((res) => setEvento(res.data));
     api.get(`/admin/eventos/${id}/inscricoes`).then((res) => setInscricoes(res.data));
-    api.get('/admin/turmas').then((res) => setTurmas(res.data));
+    api.get('/admin/academias').then((res) => setAcademias(res.data.filter((academia) => academia.ativo)));
   }, [id]);
 
   async function copiarPix(texto) {
@@ -190,10 +190,10 @@ export default function EventoInscricoes() {
     }
   }
 
-  async function enviarCadastroAluno(inscricao, turmaId) {
+  async function enviarCadastroAluno(inscricao, academiaId) {
     setCadastrandoAlunoId(inscricao.id);
     try {
-      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cadastrar-aluno`, { turmaId: turmaId || undefined });
+      const res = await api.post(`/admin/inscricoes/${inscricao.id}/cadastrar-aluno`, { academiaId: academiaId || undefined });
       setInscricoes((prev) => prev.map((item) => (item.id === inscricao.id ? res.data.inscricao : item)));
     } catch (err) {
       window.alert(err.response?.data?.error || 'Não foi possível cadastrar o aluno no Sanryu agora.');
@@ -202,29 +202,16 @@ export default function EventoInscricoes() {
     }
   }
 
-  // Se o instrutor responsável do evento tiver mais de uma turma, pergunta em qual matricular; com
-  // 0 ou 1 turma não há escolha real a fazer, então só confirma e já manda direto.
+  // Inscrito vira aluno Morganti externo ligado a uma academia — já sugere a do professor do evento.
   function cadastrarComoAluno(inscricao) {
-    const turmasDoInstrutor = evento?.instrutorId ? turmas.filter((turma) => turma.instrutorId === evento.instrutorId) : [];
-
-    if (turmasDoInstrutor.length > 1) {
-      setModalTurma({ inscricao, turmasDoInstrutor, turmaId: turmasDoInstrutor[0].id });
-      return;
-    }
-
-    const turma = turmasDoInstrutor[0];
-    const mensagem = turma
-      ? `Cadastrar ${inscricao.nome || inscricao.email} como aluno e matricular na turma "${turma.nome}"?`
-      : `Cadastrar ${inscricao.nome || inscricao.email} como aluno no Sanryu?`;
-
-    if (!window.confirm(mensagem)) return;
-    enviarCadastroAluno(inscricao, turma?.id);
+    const doProfessor = evento?.instrutorId ? academias.find((academia) => academia.instrutorId === evento.instrutorId) : null;
+    setModalAcademia({ inscricao, academiaId: doProfessor ? String(doProfessor.id) : '' });
   }
 
-  function confirmarCadastroComTurma() {
-    const { inscricao, turmaId } = modalTurma;
-    setModalTurma(null);
-    enviarCadastroAluno(inscricao, turmaId || undefined);
+  function confirmarCadastroComAcademia() {
+    const { inscricao, academiaId } = modalAcademia;
+    setModalAcademia(null);
+    enviarCadastroAluno(inscricao, academiaId || undefined);
   }
 
   async function handleNotificarPendentes() {
@@ -473,35 +460,37 @@ export default function EventoInscricoes() {
         ]}
       />
 
-      <CModal visible={!!modalTurma} onClose={() => setModalTurma(null)}>
+      <CModal visible={!!modalAcademia} onClose={() => setModalAcademia(null)}>
         <CModalHeader>
-          <CModalTitle>Cadastrar como Aluno</CModalTitle>
+          <CModalTitle>Cadastrar como aluno Morganti</CModalTitle>
         </CModalHeader>
-        {modalTurma && (
+        {modalAcademia && (
           <CModalBody>
             <p>
-              O instrutor responsável tem mais de uma turma. Escolha em qual matricular{' '}
-              <strong>{modalTurma.inscricao.nome || modalTurma.inscricao.email}</strong>, ou deixe sem turma.
+              <strong>{modalAcademia.inscricao.nome || modalAcademia.inscricao.email}</strong> vai para os Alunos Morganti (externos). De qual
+              academia ele é?
             </p>
-            <CFormLabel>Turma</CFormLabel>
+            <CFormLabel>Academia</CFormLabel>
             <CFormSelect
-              value={modalTurma.turmaId}
-              onChange={(event) => setModalTurma((prev) => ({ ...prev, turmaId: event.target.value }))}
+              value={modalAcademia.academiaId}
+              onChange={(event) => setModalAcademia((prev) => ({ ...prev, academiaId: event.target.value }))}
             >
-              <option value="">Sem turma (só cadastrar o aluno)</option>
-              {modalTurma.turmasDoInstrutor.map((turma) => (
-                <option key={turma.id} value={turma.id}>
-                  {turma.nome}
+              <option value="">Não sei / sem academia</option>
+              {academias.map((academia) => (
+                <option key={academia.id} value={academia.id}>
+                  {academia.nome}
+                  {academia.instrutor ? ` — ${academia.instrutor.nome}` : ''}
                 </option>
               ))}
             </CFormSelect>
+            <small className="text-body-secondary">Aluno do próprio dojo tem o cadastro completo em Alunos.</small>
           </CModalBody>
         )}
         <CModalFooter>
-          <CButton color="secondary" variant="outline" onClick={() => setModalTurma(null)}>
+          <CButton color="secondary" variant="outline" onClick={() => setModalAcademia(null)}>
             Cancelar
           </CButton>
-          <CButton color="primary" onClick={confirmarCadastroComTurma}>
+          <CButton color="primary" onClick={confirmarCadastroComAcademia}>
             Cadastrar
           </CButton>
         </CModalFooter>

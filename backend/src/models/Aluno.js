@@ -43,6 +43,17 @@ const Aluno = sequelize.define('Aluno', {
     allowNull: true,
   },
 
+  // "academia" = aluno do próprio dojo (unidade, turma, contrato, mensalidade); "externo" = aluno do
+  // Método Morganti de outro professor, que só aparece nos eventos/exames (ligado a uma Academia).
+  vinculo: {
+    type: DataTypes.ENUM('academia', 'externo'),
+    allowNull: false,
+    defaultValue: 'academia',
+  },
+  academiaId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   unidadeId: {
     type: DataTypes.INTEGER,
     allowNull: true,

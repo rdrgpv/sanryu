@@ -36,7 +36,8 @@ export default function Alunos() {
     : alunos;
 
   async function carregarAlunos() {
-    const params = {};
+    // Só os alunos do dojo — os externos (Morganti de outras academias) têm tela própria.
+    const params = { vinculo: 'academia' };
     if (busca) params.busca = busca;
     if (unidadeFiltro) params.unidadeId = unidadeFiltro;
     if (situacaoFiltro) params.situacao = situacaoFiltro;

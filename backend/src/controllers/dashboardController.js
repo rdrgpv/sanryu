@@ -32,7 +32,7 @@ async function buscarDistribuicaoFaixas() {
 
   const contagens = await Aluno.findAll({
     attributes: ['faixaId', [Aluno.sequelize.fn('COUNT', Aluno.sequelize.col('id')), 'total']],
-    where: { ativo: true, faixaId: { [Op.ne]: null } },
+    where: { ativo: true, vinculo: 'academia', faixaId: { [Op.ne]: null } },
     group: ['faixaId'],
     raw: true,
   });
@@ -158,7 +158,7 @@ async function buscarEngajamento(dataHoje) {
 // Aniversariantes do mês entre os ativos (dia/mês lidos da string, sem fuso).
 async function buscarAniversariantes(dataHoje) {
   const mes = dataHoje.slice(5, 7);
-  const alunos = await Aluno.findAll({ where: { situacao: 'ativo', dataNascimento: { [Op.ne]: null } }, attributes: ['id', 'nome', 'dataNascimento'], raw: true });
+  const alunos = await Aluno.findAll({ where: { situacao: 'ativo', vinculo: 'academia', dataNascimento: { [Op.ne]: null } }, attributes: ['id', 'nome', 'dataNascimento'], raw: true });
 
   return alunos
     .filter((aluno) => String(aluno.dataNascimento).slice(5, 7) === mes)
@@ -181,7 +181,7 @@ async function resumo(req, res) {
 
   const [alunosAtivos, totalTurmas, totalInstrutores, distribuicaoFaixas, proximosEventos, evolucao, inadimplencia, engajamento, aniversariantes, fluxo] =
     await Promise.all([
-      Aluno.count({ where: { situacao: 'ativo' } }),
+      Aluno.count({ where: { situacao: 'ativo', vinculo: 'academia' } }),
       Turma.count(),
       Instrutor.count(),
       buscarDistribuicaoFaixas(),

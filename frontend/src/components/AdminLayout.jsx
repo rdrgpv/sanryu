@@ -44,6 +44,8 @@ import {
   cilLoopCircular,
   cilUserFollow,
   cilLockLocked,
+  cilInstitution,
+  cilGroup,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -69,6 +71,8 @@ const linksPrincipal = [
 const linksEventos = [
   { to: '/admin/tipos-evento', label: 'Tipos de Evento', icon: cilTags },
   { to: '/admin/eventos', label: 'Eventos', icon: cilCalendar },
+  { to: '/admin/academias', label: 'Academias Morganti', icon: cilInstitution },
+  { to: '/admin/alunos-externos', label: 'Alunos Morganti', icon: cilGroup },
   { to: '/admin/bancos', label: 'Configuração Pix', icon: cilBank },
 ];
 

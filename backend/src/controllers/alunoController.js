@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { sequelize, Aluno, Turma, Matricula, Faixa, Instrutor, Unidade, Responsavel } = require('../models');
+const { sequelize, Aluno, Turma, Matricula, Faixa, Instrutor, Unidade, Responsavel, Academia } = require('../models');
 const gatameService = require('../services/gatameService');
 const { logErro } = require('../utils/logger');
 
@@ -13,6 +13,7 @@ const CAMPOS_EDITAVEIS = [
   'contatoEmergenciaNome', 'contatoEmergenciaTelefone', 'contatoEmergenciaParentesco',
   'tipoSanguineo', 'alergias', 'medicamentos', 'restricoesMedicas', 'observacoes',
   'consentimentoBiometria',
+  'vinculo', 'academiaId',
 ];
 
 function dadosAluno(body) {
@@ -56,7 +57,7 @@ async function salvarAluno(aluno, body) {
 }
 
 async function listar(req, res) {
-  const { busca, unidadeId, situacao } = req.query;
+  const { busca, unidadeId, situacao, vinculo, academiaId } = req.query;
   const where = {};
 
   if (busca) {
@@ -68,6 +69,8 @@ async function listar(req, res) {
   }
 
   if (unidadeId) where.unidadeId = unidadeId;
+  if (vinculo) where.vinculo = vinculo;
+  if (academiaId) where.academiaId = academiaId;
   if (situacao) where.situacao = situacao;
 
   const alunos = await Aluno.findAll({
@@ -79,6 +82,7 @@ async function listar(req, res) {
       { model: Faixa, as: 'faixa' },
       { model: Unidade, as: 'unidade', attributes: ['id', 'nome'] },
       { model: Responsavel, as: 'responsavel', attributes: ['id', 'nome', 'telefone'] },
+      { model: Academia, as: 'academia', attributes: ['id', 'nome'], include: { model: Instrutor, as: 'instrutor', attributes: ['id', 'nome'] } },
     ],
     order: [['nome', 'ASC']],
   });
@@ -93,6 +97,7 @@ async function buscarPorId(req, res) {
       { model: Faixa, as: 'faixa' },
       { model: Unidade, as: 'unidade', attributes: ['id', 'nome'] },
       { model: Responsavel, as: 'responsavel' },
+      { model: Academia, as: 'academia', attributes: ['id', 'nome'] },
     ],
   });
 
@@ -218,6 +223,7 @@ async function cadastrarNoGatame(req, res) {
         include: [{ model: Instrutor, as: 'instrutor' }],
       },
       { model: Faixa, as: 'faixa' },
+      { model: Academia, as: 'academia', include: { model: Instrutor, as: 'instrutor' } },
     ],
   });
 
@@ -233,13 +239,18 @@ async function cadastrarNoGatame(req, res) {
     return res.status(400).json({ error: 'Aluno sem email cadastrado — o Gatame exige um email.' });
   }
 
-  const instrutoresComEmail = [
-    ...new Map(aluno.turmas.filter((turma) => turma.instrutor?.email).map((turma) => [turma.instrutor.email, turma.instrutor])).values(),
-  ];
+  // Externo: o professor é o responsável pela academia dele. Do dojo: o instrutor das turmas.
+  const instrutoresComEmail =
+    aluno.vinculo === 'externo'
+      ? [aluno.academia?.instrutor].filter((instrutor) => instrutor?.email)
+      : [...new Map(aluno.turmas.filter((turma) => turma.instrutor?.email).map((turma) => [turma.instrutor.email, turma.instrutor])).values()];
 
   if (instrutoresComEmail.length === 0) {
     return res.status(400).json({
-      error: 'Este aluno não está matriculado em nenhuma turma ativa com instrutor (com email) definido — não é possível determinar o professor responsável.',
+      error:
+        aluno.vinculo === 'externo'
+          ? 'A academia deste aluno não tem professor responsável (com email) — defina em Academias Morganti.'
+          : 'Este aluno não está matriculado em nenhuma turma ativa com instrutor (com email) definido — não é possível determinar o professor responsável.',
     });
   }
 

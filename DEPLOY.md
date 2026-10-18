@@ -35,7 +35,12 @@ feitos no primeiro deploy da gestão da academia.
   - remove a restrição de e-mail único dos alunos (irmãos podem usar o
     e-mail dos pais) — **(1ª vez)**;
   - cria a unidade "Sanryu", a configuração da academia (contrato padrão)
-    e as categorias financeiras padrão, se ainda não existirem.
+    e as categorias financeiras padrão, se ainda não existirem;
+  - **(1ª vez, uma única vez)** converte as turmas antigas em **Academias
+    Morganti** (externas, com o mesmo professor) e marca como **alunos
+    externos** os alunos sem contrato. Turma que já teve chamada é mantida
+    como turma do dojo. Depois disso, confira em *Academias Morganti* se cada
+    uma tem professor com e-mail (necessário para o Gatame).
 
   Tudo isso é idempotente (rodar de novo não muda nada). Se algo falhar, fica
   no log e o servidor continua no ar.

@@ -18,6 +18,8 @@ import TurmaChamada from '../pages/admin/TurmaChamada.jsx';
 import Frequencia from '../pages/admin/Frequencia.jsx';
 import Leads from '../pages/admin/Leads.jsx';
 import Usuarios from '../pages/admin/Usuarios.jsx';
+import Academias from '../pages/admin/Academias.jsx';
+import AlunosExternos from '../pages/admin/AlunosExternos.jsx';
 import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
 import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
 import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
@@ -108,6 +110,8 @@ export default function AdminApp() {
       <Route path="frequencia" element={<AdminRoute><Frequencia /></AdminRoute>} />
       <Route path="interessados" element={<AdminRoute><Leads /></AdminRoute>} />
       <Route path="usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
+      <Route path="academias" element={<AdminRoute><Academias /></AdminRoute>} />
+      <Route path="alunos-externos" element={<AdminRoute><AlunosExternos /></AdminRoute>} />
 
       <Route path="financeiro" element={<AdminRoute><ResumoFinanceiro /></AdminRoute>} />
       <Route path="financeiro/pagar" element={<AdminRoute><Lancamentos key="despesa" tipo="despesa" /></AdminRoute>} />

@@ -14,6 +14,7 @@ function hoje() {
 async function montarDados(body, contratoExistente = null) {
   const aluno = await Aluno.findByPk(body.alunoId ?? contratoExistente?.alunoId);
   if (!aluno) return { erro: 'Aluno não encontrado.' };
+  if (aluno.vinculo === 'externo') return { erro: 'Aluno Morganti externo: torne-o aluno da academia antes de fazer contrato.' };
 
   const plano = await Plano.findByPk(body.planoId ?? contratoExistente?.planoId);
   if (!plano) return { erro: 'Plano não encontrado.' };

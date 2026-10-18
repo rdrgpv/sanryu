@@ -1,4 +1,4 @@
-const { Evento, TipoEvento, EventoAluno, Instrutor, Aluno, Turma, Matricula, Faixa } = require('../models');
+const { Evento, TipoEvento, EventoAluno, Instrutor, Aluno, Faixa, Academia } = require('../models');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
@@ -213,11 +213,11 @@ async function atualizarInscricao(req, res) {
   }
 }
 
-// Cadastra o inscrito como Aluno no próprio Sanryu (tabela Aluno) — reaproveita um Aluno já
-// existente com o mesmo email em vez de duplicar. Se o instrutor responsável do evento tiver uma
-// Turma (e o admin escolher uma via turmaId), já matricula o aluno nela também.
+// Cadastra o inscrito como aluno Morganti EXTERNO (de outra academia) — reaproveita um aluno já
+// existente com o mesmo email + nome em vez de duplicar, e liga à academia escolhida (por padrão a do
+// professor responsável do evento). Aluno do próprio dojo tem o cadastro completo em Alunos.
 async function cadastrarComoAluno(req, res) {
-  const { turmaId } = req.body;
+  const { academiaId } = req.body;
   const inscricao = await EventoAluno.findByPk(req.params.id);
 
   if (!inscricao) {
@@ -229,12 +229,9 @@ async function cadastrarComoAluno(req, res) {
   }
 
   try {
-    let turma = null;
-    if (turmaId) {
-      turma = await Turma.findByPk(turmaId);
-      if (!turma) {
-        return res.status(400).json({ error: 'Turma não encontrada.' });
-      }
+    const academia = academiaId ? await Academia.findByPk(academiaId) : null;
+    if (academiaId && !academia) {
+      return res.status(400).json({ error: 'Academia não encontrada.' });
     }
 
     // Email + nome: o email do aluno pode se repetir (irmãos usando o dos pais), então só o email
@@ -253,21 +250,16 @@ async function cadastrarComoAluno(req, res) {
         telefone: inscricao.telefone || null,
         dataNascimento: inscricao.dataNascimento || null,
         faixaId: faixa ? faixa.id : null,
-        unidadeId: turma ? turma.unidadeId : null,
+        tamanhoFaixa: inscricao.tamanhoFaixa || null,
+        vinculo: 'externo',
+        academiaId: academia?.id || null,
       });
-    }
-
-    let matriculado = false;
-    if (turma) {
-      const jaMatriculado = await Matricula.findOne({ where: { alunoId: aluno.id, turmaId: turma.id } });
-      if (!jaMatriculado) {
-        await Matricula.create({ alunoId: aluno.id, turmaId: turma.id });
-      }
-      matriculado = true;
+    } else if (academia && !aluno.academiaId && aluno.vinculo === 'externo') {
+      await aluno.update({ academiaId: academia.id });
     }
 
     await inscricao.update({ alunoId: aluno.id });
-    res.json({ inscricao, aluno, matriculado });
+    res.json({ inscricao, aluno, academia: academia ? { id: academia.id, nome: academia.nome } : null });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

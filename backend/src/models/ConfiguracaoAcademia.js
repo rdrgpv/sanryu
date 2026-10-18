@@ -40,6 +40,12 @@ const ConfiguracaoAcademia = sequelize.define('ConfiguracaoAcademia', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // Marca que a migração "turmas antigas -> academias externas" já rodou (roda uma vez só, pra nunca
+  // converter as turmas de verdade criadas depois). Ver config/ajustesIniciais.js.
+  turmasMigradasEm: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   // Modelo do contrato com marcadores {{...}} (ver utils/termoContrato.js).
   termoContrato: {
     type: DataTypes.TEXT('long'),

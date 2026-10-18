@@ -53,6 +53,8 @@ async function alunosDoEmail(email) {
   const alunos = await Aluno.findAll({
     where: {
       situacao: { [Op.ne]: 'cancelado' },
+      // A área do aluno é dos alunos do dojo (mensalidade, frequência); externos não usam.
+      vinculo: 'academia',
       [Op.or]: [emailIgual(email), ...(responsaveis.length ? [{ responsavelId: responsaveis.map((responsavel) => responsavel.id) }] : [])],
     },
     attributes: ['id', 'nome', 'email', 'foto', 'situacao', 'dataNascimento'],

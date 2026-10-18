@@ -25,6 +25,7 @@ const Recorrencia = require('./Recorrencia');
 const Transferencia = require('./Transferencia');
 const CodigoAcesso = require('./CodigoAcesso');
 const Lead = require('./Lead');
+const Academia = require('./Academia');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -119,6 +120,11 @@ Lead.belongsTo(Unidade, { foreignKey: 'unidadeId', as: 'unidade' });
 Lead.belongsTo(Aluno, { foreignKey: 'alunoId', as: 'aluno' });
 Turma.hasMany(Lead, { foreignKey: 'turmaId', as: 'leads' });
 
+Academia.hasMany(Aluno, { foreignKey: 'academiaId', as: 'alunos' });
+Aluno.belongsTo(Academia, { foreignKey: 'academiaId', as: 'academia' });
+Instrutor.hasMany(Academia, { foreignKey: 'instrutorId', as: 'academias' });
+Academia.belongsTo(Instrutor, { foreignKey: 'instrutorId', as: 'instrutor' });
+
 Faixa.hasMany(Aluno, { foreignKey: 'faixaId', as: 'alunos' });
 Aluno.belongsTo(Faixa, { foreignKey: 'faixaId', as: 'faixa' });
 
@@ -198,6 +204,7 @@ module.exports = {
   Transferencia,
   CodigoAcesso,
   Lead,
+  Academia,
   Configuracao,
   Produto,
   Cor,
