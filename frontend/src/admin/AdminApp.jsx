@@ -20,6 +20,8 @@ import Leads from '../pages/admin/Leads.jsx';
 import Usuarios from '../pages/admin/Usuarios.jsx';
 import Academias from '../pages/admin/Academias.jsx';
 import AlunosExternos from '../pages/admin/AlunosExternos.jsx';
+import Avisos from '../pages/admin/Avisos.jsx';
+import Relatorios from '../pages/admin/financeiro/Relatorios.jsx';
 import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
 import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
 import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
@@ -112,6 +114,8 @@ export default function AdminApp() {
       <Route path="usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
       <Route path="academias" element={<AdminRoute><Academias /></AdminRoute>} />
       <Route path="alunos-externos" element={<AdminRoute><AlunosExternos /></AdminRoute>} />
+      <Route path="avisos" element={<AdminRoute><Avisos /></AdminRoute>} />
+      <Route path="financeiro/relatorios" element={<AdminRoute><Relatorios /></AdminRoute>} />
 
       <Route path="financeiro" element={<AdminRoute><ResumoFinanceiro /></AdminRoute>} />
       <Route path="financeiro/pagar" element={<AdminRoute><Lancamentos key="despesa" tipo="despesa" /></AdminRoute>} />

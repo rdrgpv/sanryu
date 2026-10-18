@@ -46,6 +46,8 @@ import {
   cilLockLocked,
   cilInstitution,
   cilGroup,
+  cilBullhorn,
+  cilSpreadsheet,
 } from '@coreui/icons';
 import { useAuth } from '../context/AuthContext.jsx';
 import AdminHeader from '../admin/components/AdminHeader.jsx';
@@ -63,6 +65,7 @@ const linksPrincipal = [
   { to: '/admin/planos', label: 'Planos', icon: cilWallet },
   { to: '/admin/turmas', label: 'Turmas', icon: cilSchool },
   { to: '/admin/frequencia', label: 'Frequência', icon: cilChartLine },
+  { to: '/admin/avisos', label: 'Avisos', icon: cilBullhorn },
   { to: '/admin/instrutores', label: 'Instrutores', icon: cilContact },
   { to: '/admin/faixas', label: 'Faixas', icon: cilLayers },
   { to: '/admin/unidades', label: 'Unidades', icon: cilBuilding },
@@ -93,6 +96,7 @@ const linksFinanceiro = [
   { to: '/admin/financeiro/receber', label: 'Contas a receber', icon: cilArrowCircleBottom },
   { to: '/admin/financeiro/recorrencias', label: 'Recorrentes', icon: cilLoopCircular },
   { to: '/admin/financeiro/cadastros', label: 'Contas e categorias', icon: cilBank },
+  { to: '/admin/financeiro/relatorios', label: 'Relatórios (contador)', icon: cilSpreadsheet },
 ];
 
 const linksSistema = [
@@ -125,6 +129,7 @@ const SUFIXOS_DE_ROTA = {
   receber: 'Contas a receber',
   recorrencias: 'Recorrentes',
   cadastros: 'Contas e categorias',
+  relatorios: 'Relatórios',
 };
 
 // Deriva o título da aba e a trilha do breadcrumb a partir da própria URL — puramente visual (não

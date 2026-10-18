@@ -294,4 +294,40 @@ async function enviarAulaExperimental({ tipo, destinatario, nome, aluno, turma, 
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental };
+function escaparHtml(texto) {
+  return String(texto).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Comunicado em massa (tela Avisos). O texto vem digitado no admin: é escapado (nada de HTML/script
+// vindo dele) e as quebras de linha viram <br>. Devolve true/false; nunca lança.
+async function enviarAviso({ destinatario, nome, titulo, mensagem }) {
+  try {
+    const transportador = await obterTransportador();
+
+    if (!transportador) {
+      logErro('SMTP não configurado em Configurações; aviso não enviado.');
+      return false;
+    }
+
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+
+    await transportador.sendMail({
+      from: remetente,
+      to: destinatario,
+      subject: titulo,
+      text: `Olá, ${nome}!\n\n${mensagem}\n\nSan·Ryu Dojo`,
+      html: `
+        <p>Olá, ${escaparHtml(nome)}!</p>
+        <p>${escaparHtml(mensagem).replace(/\r?\n/g, '<br>')}</p>
+        <p>San·Ryu Dojo</p>
+      `,
+    });
+
+    return true;
+  } catch (err) {
+    logErro('Erro ao enviar aviso por e-mail:', err);
+    return false;
+  }
+}
+
+module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental, enviarAviso };

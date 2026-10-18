@@ -166,14 +166,23 @@ function FaixaChip({ faixa }) {
 
 function Inicio({ dados }) {
   const [eventos, setEventos] = useState([]);
+  const [avisos, setAvisos] = useState([]);
 
   useEffect(() => {
     apiPortal.get('/eventos').then((res) => setEventos(res.data)).catch(() => setEventos([]));
+    apiPortal.get('/avisos').then((res) => setAvisos(res.data)).catch(() => setAvisos([]));
   }, []);
 
   return (
     <>
       <h1 className="portal__titulo">Olá{dados.nome ? `, ${dados.nome.split(' ')[0]}` : ''}!</h1>
+      {avisos.map((aviso) => (
+        <div key={aviso.id} className="portal__aviso">
+          <strong>{aviso.titulo}</strong>
+          <small>{new Date(aviso.createdAt).toLocaleDateString('pt-BR')}</small>
+          <p>{aviso.mensagem}</p>
+        </div>
+      ))}
       {dados.alunos.length === 0 && <p>Nenhum aluno ativo ligado a este e-mail. Fale com a academia.</p>}
       {dados.alunos.map((aluno) => (
         <Link key={aluno.id} to={`/portal/alunos/${aluno.id}`} className="portal__aluno">

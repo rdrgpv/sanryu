@@ -33,6 +33,8 @@ const financeiroController = require('../controllers/financeiroController');
 const leadController = require('../controllers/leadController');
 const usuarioController = require('../controllers/usuarioController');
 const academiaController = require('../controllers/academiaController');
+const avisoController = require('../controllers/avisoController');
+const relatorioController = require('../controllers/relatorioController');
 
 const router = express.Router();
 
@@ -47,6 +49,13 @@ router.get('/academias', academiaController.listar);
 router.post('/academias', academiaController.criar);
 router.put('/academias/:id', academiaController.atualizar);
 router.delete('/academias/:id', academiaController.remover);
+
+router.get('/avisos', avisoController.listar);
+router.post('/avisos', avisoController.criar);
+router.post('/avisos/previa', avisoController.previa);
+router.delete('/avisos/:id', avisoController.remover);
+
+router.get('/relatorios/:tipo', relatorioController.baixar);
 
 router.get('/usuarios', usuarioController.listar);
 router.post('/usuarios', usuarioController.criar);

@@ -26,6 +26,7 @@ const Transferencia = require('./Transferencia');
 const CodigoAcesso = require('./CodigoAcesso');
 const Lead = require('./Lead');
 const Academia = require('./Academia');
+const Aviso = require('./Aviso');
 const Configuracao = require('./Configuracao');
 const Produto = require('./Produto');
 const Cor = require('./Cor');
@@ -205,6 +206,7 @@ module.exports = {
   CodigoAcesso,
   Lead,
   Academia,
+  Aviso,
   Configuracao,
   Produto,
   Cor,

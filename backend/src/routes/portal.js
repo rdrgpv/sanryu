@@ -16,5 +16,6 @@ router.use(exigirPerfil('portal'));
 router.get('/eu', portalController.eu);
 router.get('/alunos/:alunoId', portalController.resumoAluno);
 router.get('/eventos', portalController.eventos);
+router.get('/avisos', portalController.avisos);
 
 module.exports = router;

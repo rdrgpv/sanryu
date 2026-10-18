@@ -20,6 +20,7 @@ const {
 const emailService = require('../services/emailService');
 const configService = require('../services/configService');
 const { hoje, valorAtualizado } = require('../services/mensalidadeService');
+const { avisosDoPortal } = require('../services/avisoService');
 const { logErro } = require('../utils/logger');
 
 const VALIDADE_CODIGO_MIN = 15;
@@ -242,4 +243,9 @@ async function eventos(req, res) {
   );
 }
 
-module.exports = { pedirCodigo, entrar, eu, resumoAluno, eventos, alunosDoEmail };
+async function avisos(req, res) {
+  const { alunos } = await alunosDoEmail(req.admin.email);
+  res.json(await avisosDoPortal(alunos.map((aluno) => aluno.id)));
+}
+
+module.exports = { pedirCodigo, entrar, eu, resumoAluno, eventos, avisos, alunosDoEmail };
