@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin
+Disallow: /portal
+Disallow: /sensei
+Disallow: /login
+Disallow: /contratos/
+Disallow: /mensalidades/
+Disallow: /loja/
+
+Sitemap: https://sanryu.com.br/sitemap.xml

@@ -1,9 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Sobre from './pages/Sobre.jsx';
 import Aulas from './pages/Aulas.jsx';
-import Horarios from './pages/Horarios.jsx';
+import Planos from './pages/Planos.jsx';
+import Duvidas from './pages/Duvidas.jsx';
 import Contato from './pages/Contato.jsx';
 import Eventos from './pages/Eventos.jsx';
 import InscricaoEvento from './pages/InscricaoEvento.jsx';
@@ -26,7 +27,10 @@ export default function App() {
       <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
       <Route path="/sobre" element={<PublicLayout><Sobre /></PublicLayout>} />
       <Route path="/aulas" element={<PublicLayout><Aulas /></PublicLayout>} />
-      <Route path="/horarios" element={<PublicLayout><Horarios /></PublicLayout>} />
+      {/* Horários passou a fazer parte da página de aulas; o endereço antigo continua funcionando. */}
+      <Route path="/horarios" element={<Navigate to="/aulas" replace />} />
+      <Route path="/planos" element={<PublicLayout><Planos /></PublicLayout>} />
+      <Route path="/duvidas" element={<PublicLayout><Duvidas /></PublicLayout>} />
       <Route path="/contato" element={<PublicLayout><Contato /></PublicLayout>} />
       <Route path="/eventos" element={<PublicLayout><Eventos /></PublicLayout>} />
       <Route path="/eventos/:id" element={<PublicLayout><InscricaoEvento /></PublicLayout>} />

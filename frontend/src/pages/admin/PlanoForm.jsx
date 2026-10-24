@@ -19,7 +19,7 @@ import api from '../../services/api';
 import { formatarMoeda } from '../../utils/formato.js';
 import { PERIODICIDADES, mesesPeriodicidade } from '../../utils/planos.js';
 
-const estadoInicial = { nome: '', descricao: '', periodicidade: 'mensal', valor: '', unidadeId: '', ativo: true };
+const estadoInicial = { nome: '', descricao: '', periodicidade: 'mensal', valor: '', unidadeId: '', ativo: true, exibirNoSite: true };
 
 export default function PlanoForm() {
   const { id } = useParams();
@@ -44,6 +44,7 @@ export default function PlanoForm() {
         valor: plano.valor,
         unidadeId: plano.unidadeId || '',
         ativo: plano.ativo,
+        exibirNoSite: plano.exibirNoSite !== false,
       });
     });
   }, [id, editando]);
@@ -121,6 +122,9 @@ export default function PlanoForm() {
               </CCol>
               <CCol md={4} className="d-flex align-items-end">
                 <CFormCheck name="ativo" label="Ativo (disponível para novas matrículas)" checked={form.ativo} onChange={handleChange} />
+              </CCol>
+              <CCol md={4} className="d-flex align-items-end">
+                <CFormCheck name="exibirNoSite" label="Mostrar na página Planos do site" checked={form.exibirNoSite} onChange={handleChange} />
               </CCol>
               <CCol md={12}>
                 <CFormLabel>Descrição</CFormLabel>

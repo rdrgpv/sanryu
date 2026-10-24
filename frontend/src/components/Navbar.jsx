@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const links = [
-  { to: '/', label: 'Início' },
   { to: '/sobre', label: 'Sobre' },
-  { to: '/aulas', label: 'Aulas' },
-  { to: '/horarios', label: 'Horários' },
+  { to: '/aulas', label: 'Aulas e horários' },
+  { to: '/planos', label: 'Planos' },
   { to: '/eventos', label: 'Eventos' },
+  { to: '/duvidas', label: 'Dúvidas' },
   { to: '/aula-experimental', label: 'Aula experimental' },
   { to: '/contato', label: 'Contato' },
 ];

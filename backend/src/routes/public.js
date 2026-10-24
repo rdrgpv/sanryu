@@ -10,11 +10,13 @@ const mensalidadeController = require('../controllers/mensalidadeController');
 const webhookController = require('../controllers/webhookController');
 const leadController = require('../controllers/leadController');
 const lojaController = require('../controllers/lojaController');
+const siteController = require('../controllers/siteController');
 
 const router = express.Router();
 
 router.get('/turmas', turmaController.listar);
-router.get('/instrutores', instrutorController.listar);
+router.get('/instrutores', instrutorController.listarPublico);
+router.get('/site', siteController.dados);
 router.post('/contato', contatoController.enviar);
 router.get('/faixas', faixaController.listarPublico);
 

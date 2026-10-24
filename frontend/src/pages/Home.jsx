@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { usePagina } from '../utils/site.js';
 
 const pilares = [
   {
@@ -23,6 +24,7 @@ const diferenciais = [
 ];
 
 export default function Home() {
+  usePagina(null);
   return (
     <>
       <section className="hero">

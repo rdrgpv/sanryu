@@ -40,6 +40,32 @@ const ConfiguracaoAcademia = sequelize.define('ConfiguracaoAcademia', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // Contato mostrado no site (rodapé, página de contato, botão do WhatsApp, dados pro Google).
+  siteTelefone: {
+    type: DataTypes.STRING(30),
+    allowNull: true,
+  },
+  siteWhatsapp: {
+    type: DataTypes.STRING(30),
+    allowNull: true,
+  },
+  siteEmail: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  siteInstagram: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  siteEndereco: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  // Texto livre, uma linha por período (ex.: "Segunda a sexta: 07h — 22h").
+  siteHorarioFuncionamento: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
   // Marca que a migração "turmas antigas -> academias externas" já rodou (roda uma vez só, pra nunca
   // converter as turmas de verdade criadas depois). Ver config/ajustesIniciais.js.
   turmasMigradasEm: {

@@ -4,6 +4,15 @@ async function buscar(req, res) {
   res.json(await obterConfiguracao());
 }
 
+const CAMPOS_SITE = ['siteTelefone', 'siteWhatsapp', 'siteEmail', 'siteInstagram', 'siteEndereco', 'siteHorarioFuncionamento'];
+
+// Só os campos do site que vieram no corpo; vazio vira null.
+function camposDoSite(corpo) {
+  return Object.fromEntries(
+    CAMPOS_SITE.filter((campo) => corpo[campo] !== undefined).map((campo) => [campo, String(corpo[campo] || '').trim() || null])
+  );
+}
+
 // Mudar o texto ou o desconto família não altera contratos já assinados (eles guardam o texto e os
 // valores da época) — só vale para os próximos.
 async function atualizar(req, res) {
@@ -37,6 +46,7 @@ async function atualizar(req, res) {
     jurosMensalPercentual: juros,
     diasAntecedenciaCobranca: antecedencia,
     termoContrato: req.body.termoContrato,
+    ...camposDoSite(req.body),
     ...(req.body.reciboNome !== undefined ? { reciboNome: (req.body.reciboNome || '').trim() || null } : {}),
     ...(req.body.reciboDocumento !== undefined ? { reciboDocumento: (req.body.reciboDocumento || '').trim() || null } : {}),
     ...(req.body.reciboEndereco !== undefined ? { reciboEndereco: (req.body.reciboEndereco || '').trim() || null } : {}),

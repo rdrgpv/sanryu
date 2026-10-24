@@ -12,8 +12,30 @@ async function listar(req, res) {
   res.json(instrutores);
 }
 
+// Site: só quem está marcado pra aparecer, sem e-mail nem dados internos.
+async function listarPublico(req, res) {
+  const instrutores = await Instrutor.unscoped().findAll({
+    where: { exibirNoSite: true },
+    attributes: ['id', 'nome', 'especialidade', 'bio', 'foto', 'fotoUrl', 'titulos'],
+    include: [{ model: Faixa, as: 'faixa', attributes: ['nome', 'grau', 'cor'] }],
+    order: [['nome', 'ASC']],
+  });
+
+  res.json(
+    instrutores.map((instrutor) => ({
+      id: instrutor.id,
+      nome: instrutor.nome,
+      especialidade: instrutor.especialidade,
+      bio: instrutor.bio,
+      foto: instrutor.foto || instrutor.fotoUrl || null,
+      titulos: instrutor.titulos,
+      faixa: instrutor.faixa,
+    }))
+  );
+}
+
 async function buscarPorId(req, res) {
-  const instrutor = await Instrutor.findByPk(req.params.id, {
+  const instrutor = await Instrutor.unscoped().findByPk(req.params.id, {
     include: [{ model: Faixa, as: 'faixa' }],
   });
 
@@ -104,4 +126,4 @@ async function removerAcesso(req, res) {
   res.status(204).send();
 }
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, salvarAcesso, removerAcesso };
+module.exports = { listar, listarPublico, buscarPorId, criar, atualizar, remover, salvarAcesso, removerAcesso };

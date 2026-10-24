@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
+import { usePagina } from '../utils/site.js';
 import { formatarTelefone, calcularIdade } from '../utils/formato.js';
 
 const ORIGENS = [
@@ -36,8 +38,11 @@ const INICIAL = {
 
 // Agendamento público de aula experimental — escolhe a turma e um dos próximos dias dela.
 export default function AulaExperimental() {
+  const [parametros] = useSearchParams();
   const [turmas, setTurmas] = useState(null);
-  const [dados, setDados] = useState(INICIAL);
+  // Vindo de "Quero experimentar esta turma" (página de aulas), a turma já chega escolhida.
+  const [dados, setDados] = useState(() => ({ ...INICIAL, turmaId: parametros.get('turma') || '' }));
+  usePagina('Aula experimental gratuita', 'Agende sua aula experimental gratuita de Morganti Ju-Jitsu no San·Ryu Dojo, no Tatuapé.');
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(null);
   const [concluido, setConcluido] = useState(null);
@@ -45,7 +50,11 @@ export default function AulaExperimental() {
   useEffect(() => {
     api
       .get('/aula-experimental/opcoes')
-      .then((res) => setTurmas(res.data))
+      .then((res) => {
+        setTurmas(res.data);
+        // Turma do link que não aceita experimental (ou não existe mais): volta pra "ainda não sei".
+        setDados((prev) => (prev.turmaId && !res.data.some((turma) => String(turma.id) === String(prev.turmaId)) ? { ...prev, turmaId: '' } : prev));
+      })
       .catch(() => setTurmas([]));
   }, []);
 

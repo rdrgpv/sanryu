@@ -1,4 +1,23 @@
+import { useEffect, useState } from 'react';
+import api from '../services/api';
+import { usePagina } from '../utils/site.js';
+
+function nomeDaFaixa(faixa) {
+  if (!faixa) return null;
+  return `${faixa.nome}${faixa.grau ? ` ${faixa.grau}º Dan` : ''}`;
+}
+
 export default function Sobre() {
+  const [instrutores, setInstrutores] = useState([]);
+  usePagina('Sobre', 'A história do San·Ryu Dojo, o significado do nome, a filosofia Morganti Ju-Jitsu e os nossos instrutores.');
+
+  useEffect(() => {
+    api
+      .get('/instrutores')
+      .then((res) => setInstrutores(res.data))
+      .catch(() => setInstrutores([]));
+  }, []);
+
   return (
     <>
       <section className="page-header">
@@ -74,6 +93,38 @@ export default function Sobre() {
         </div>
       </section>
 
+      {instrutores.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <h2 className="section__title">Nossos instrutores</h2>
+            <div className="grid grid--3">
+              {instrutores.map((instrutor) => (
+                <div key={instrutor.id} className="tile instrutor">
+                  {instrutor.foto ? (
+                    <img className="instrutor__foto" src={instrutor.foto} alt={instrutor.nome} loading="lazy" />
+                  ) : (
+                    <div className="instrutor__foto instrutor__foto--vazia" aria-hidden="true">
+                      {instrutor.nome.charAt(0)}
+                    </div>
+                  )}
+                  <h3>{instrutor.nome}</h3>
+                  {instrutor.faixa && <p className="tile__tag">{nomeDaFaixa(instrutor.faixa)}</p>}
+                  {instrutor.especialidade && <p className="tile__meta">{instrutor.especialidade}</p>}
+                  {instrutor.bio && <p>{instrutor.bio}</p>}
+                  {instrutor.titulos?.length > 0 && (
+                    <ul className="instrutor__titulos">
+                      {instrutor.titulos.map((titulo) => (
+                        <li key={titulo}>{titulo}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="belt-stripe" />
 
       <section className="section section--dark">
@@ -96,8 +147,8 @@ export default function Sobre() {
           />
           <h2 className="section__title">Método Morganti Ju-Jitsu</h2>
           <p className="section__lead" style={{ margin: '0 auto' }}>
-            O San·Ryu Dojo é filiado à Morganti Ju-Jitsu®. Conheça nossa equipe de instrutores na
-            página de <a href="/aulas">Aulas</a>, onde cada turma traz o responsável pela graduação.
+            O San·Ryu Dojo é filiado à Morganti Ju-Jitsu®. Veja as turmas e os horários na página{' '}
+            <a href="/aulas">Aulas e horários</a>.
           </p>
         </div>
       </section>

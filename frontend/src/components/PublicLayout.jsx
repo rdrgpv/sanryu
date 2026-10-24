@@ -1,5 +1,6 @@
 import Navbar from './Navbar.jsx';
 import Footer from './Footer.jsx';
+import BotaoWhatsapp from './BotaoWhatsapp.jsx';
 
 export default function PublicLayout({ children }) {
   return (
@@ -7,6 +8,7 @@ export default function PublicLayout({ children }) {
       <Navbar />
       <main>{children}</main>
       <Footer />
+      <BotaoWhatsapp />
     </div>
   );
 }

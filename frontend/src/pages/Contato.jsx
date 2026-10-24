@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import api from '../services/api';
+import { useSite, usePagina, linkWhatsapp, linkInstagram, arrobaInstagram } from '../utils/site.js';
 
 const estadoInicial = { nome: '', email: '', mensagem: '' };
 
 export default function Contato() {
   const [form, setForm] = useState(estadoInicial);
   const [status, setStatus] = useState('idle');
+  const contato = useSite()?.contato || {};
+  const whatsapp = linkWhatsapp(contato.whatsapp, 'Olá! Vim pelo site do San·Ryu Dojo.');
+  const instagram = linkInstagram(contato.instagram);
+  usePagina('Contato', 'Endereço, telefone, WhatsApp e mapa do San·Ryu Dojo, no Tatuapé, São Paulo. Fale com a gente.');
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -65,14 +70,34 @@ export default function Contato() {
           </form>
 
           <div className="contact-info">
-            <h2>Endereço</h2>
-            <p>Rua Monte Serrat, 380 — Tatuapé, São Paulo - SP, 03312-000</p>
-            <p>(11) 4000-0000</p>
-            <p>contato@sanryu.com.br</p>
+            <h2>Onde estamos</h2>
+            {contato.endereco && <p>{contato.endereco}</p>}
+            {contato.telefone && <p>{contato.telefone}</p>}
+            {contato.email && (
+              <p>
+                <a href={`mailto:${contato.email}`}>{contato.email}</a>
+              </p>
+            )}
+            {instagram && (
+              <p>
+                <a href={instagram} target="_blank" rel="noopener noreferrer">Instagram {arrobaInstagram(contato.instagram)}</a>
+              </p>
+            )}
+            {whatsapp && (
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="btn btn--primary">
+                Chamar no WhatsApp
+              </a>
+            )}
 
-            <div className="map-placeholder" role="img" aria-label="Mapa de localização do San·Ryu Dojo">
-              Mapa — Rua Monte Serrat, 380 — Tatuapé, São Paulo - SP
-            </div>
+            {contato.endereco && (
+              <iframe
+                className="contato-mapa"
+                title="Mapa de localização do San·Ryu Dojo"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(contato.endereco)}&z=16&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            )}
           </div>
         </div>
       </section>

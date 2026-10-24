@@ -166,7 +166,7 @@ button, input, select, textarea {
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: 1.75rem;
+  gap: 1.25rem;
 }
 
 .navbar__link {
@@ -176,6 +176,7 @@ button, input, select, textarea {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  white-space: nowrap;
   padding: 0.4rem 0;
   border-bottom: 2px solid transparent;
 }
@@ -705,7 +706,8 @@ button, input, select, textarea {
   }
 }
 
-@media (max-width: 720px) {
+/* O menu tem muitos itens: vira "hambúrguer" antes de quebrar linha. */
+@media (max-width: 1240px) {
   .navbar__toggle {
     display: flex;
   }
@@ -727,7 +729,7 @@ button, input, select, textarea {
   }
 
   .navbar__links.is-open {
-    max-height: 400px;
+    max-height: 640px;
     padding: 0.5rem 1.5rem 1rem;
   }
 
@@ -735,7 +737,9 @@ button, input, select, textarea {
     width: 100%;
     padding: 0.75rem 0;
   }
+}
 
+@media (max-width: 720px) {
   .grid--2,
   .grid--3,
   .grid--4 {
@@ -1592,4 +1596,213 @@ button, input, select, textarea {
   border-radius: 8px;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
+}
+
+/* Botão flutuante do WhatsApp (todas as páginas públicas) */
+.whatsapp-flutuante {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 60;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.whatsapp-flutuante:hover {
+  transform: scale(1.06);
+}
+
+.contato-mapa {
+  display: block;
+  width: 100%;
+  height: 240px;
+  margin-top: 1.5rem;
+  border: 0;
+  border-radius: var(--raio);
+}
+
+.contact-info a:not(.btn) {
+  color: var(--cor-branco);
+}
+
+/* Aulas e horários: grade em tabela no computador, lista por dia no celular */
+.grade--lista {
+  display: none;
+}
+
+.grade-dia {
+  background: var(--cor-branco);
+  border-left: 3px solid var(--cor-hanko);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.9rem;
+}
+
+.grade-dia__titulo {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.grade-dia__item {
+  display: flex;
+  gap: 0.9rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid rgba(17, 17, 17, 0.06);
+  font-size: 0.95rem;
+}
+
+.grade-dia__hora {
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 7.5rem;
+}
+
+.chamada-final {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.chamada-final p {
+  margin: 0;
+  flex-basis: 100%;
+  font-weight: 500;
+}
+
+/* Planos */
+.plano__valor {
+  font-family: var(--fonte-titulo);
+  font-size: 1.6rem;
+  margin: 0.25rem 0;
+}
+
+.plano__valor span {
+  font-family: var(--fonte-corpo);
+  font-size: 0.9rem;
+  color: var(--cor-cinza);
+}
+
+.plano__aviso {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--cor-off-white-alt);
+  border-left: 3px solid var(--cor-hanko);
+  border-radius: var(--raio);
+}
+
+/* Dúvidas */
+.faq__item {
+  background: var(--cor-branco);
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-radius: var(--raio);
+  margin-bottom: 0.75rem;
+  padding: 0 1.25rem;
+}
+
+.faq__item summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 1rem 0;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__item summary::after {
+  content: '+';
+  color: var(--cor-hanko);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.faq__item[open] summary::after {
+  content: '−';
+}
+
+.faq__item p {
+  margin: 0 0 1rem;
+}
+
+/* Nossos instrutores */
+.instrutor {
+  text-align: center;
+}
+
+.instrutor__foto {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 1rem;
+  display: block;
+  border: 3px solid var(--cor-hanko);
+}
+
+.instrutor__foto--vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-sumi);
+  color: var(--cor-branco);
+  font-family: var(--fonte-titulo);
+  font-size: 2.5rem;
+}
+
+.instrutor__titulos {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.instrutor__titulos li {
+  padding: 0.35rem 0 0.35rem 1.4rem;
+  border-top: 1px solid rgba(17, 17, 17, 0.06);
+  position: relative;
+}
+
+.instrutor__titulos li::before {
+  content: '';
+  position: absolute;
+  left: 0.2rem;
+  top: 0.85em;
+  width: 0.55em;
+  height: 0.55em;
+  background: var(--cor-hanko);
+  transform: rotate(45deg);
+}
+
+@media (max-width: 720px) {
+  .grade--tabela {
+    display: none;
+  }
+
+  .grade--lista {
+    display: block;
+  }
+}
+
+@media print {
+  .whatsapp-flutuante {
+    display: none;
+  }
 }

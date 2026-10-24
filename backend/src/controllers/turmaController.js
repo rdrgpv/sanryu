@@ -15,7 +15,8 @@ async function listar(req, res) {
   const turmas = await Turma.findAll({
     where,
     include: [
-      { model: Instrutor, as: 'instrutor' },
+      // Rota pública também: só o nome do instrutor, nunca o e-mail.
+      { model: Instrutor, as: 'instrutor', attributes: ['id', 'nome'] },
       { model: Unidade, as: 'unidade', attributes: ['id', 'nome'] },
     ],
     order: [['diaSemana', 'ASC'], ['horaInicio', 'ASC']],

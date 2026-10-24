@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { usePagina } from '../utils/site.js';
 
 export default function Eventos() {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
+  usePagina('Eventos', 'Exames de faixa, seminários e eventos de Morganti Ju-Jitsu com inscrição online.');
 
   useEffect(() => {
     api

@@ -146,6 +146,12 @@ export default function Instrutores() {
           { key: 'email', label: 'Email', sortable: true, render: (instrutor) => instrutor.email || '-' },
           { key: 'especialidade', label: 'Especialidade', render: (instrutor) => instrutor.especialidade || '-' },
           {
+            key: 'exibirNoSite',
+            label: 'No site',
+            render: (instrutor) =>
+              instrutor.exibirNoSite ? <span className="badge text-bg-success">Aparece</span> : <span className="text-body-secondary small">não</span>,
+          },
+          {
             key: 'acesso',
             label: 'Acesso à chamada',
             render: (instrutor) => (instrutor.acesso ? <code>{instrutor.acesso.username}</code> : <span className="text-body-secondary small">sem acesso</span>),

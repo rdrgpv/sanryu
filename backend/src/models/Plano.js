@@ -34,6 +34,12 @@ const Plano = sequelize.define('Plano', {
     allowNull: false,
     defaultValue: true,
   },
+  // Aparece na página "Planos" do site (planos internos, como bolsista, ficam desmarcados).
+  exibirNoSite: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
 });
 
 Plano.MESES_POR_PERIODICIDADE = MESES_POR_PERIODICIDADE;

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://sanryu.com.br/</loc><priority>1.0</priority></url>
+  <url><loc>https://sanryu.com.br/aula-experimental</loc><priority>0.9</priority></url>
+  <url><loc>https://sanryu.com.br/aulas</loc><priority>0.8</priority></url>
+  <url><loc>https://sanryu.com.br/planos</loc><priority>0.8</priority></url>
+  <url><loc>https://sanryu.com.br/sobre</loc><priority>0.7</priority></url>
+  <url><loc>https://sanryu.com.br/duvidas</loc><priority>0.6</priority></url>
+  <url><loc>https://sanryu.com.br/eventos</loc><priority>0.6</priority></url>
+  <url><loc>https://sanryu.com.br/contato</loc><priority>0.6</priority></url>
+</urlset>

@@ -17,6 +17,14 @@ const MARCADORES = [
   ['{{data}}', 'data da assinatura'],
 ];
 
+const CAMPOS_SITE = [
+  ['siteTelefone', 'Telefone', '(11) 0000-0000', 3],
+  ['siteWhatsapp', 'WhatsApp', '(11) 90000-0000', 3],
+  ['siteEmail', 'E-mail', 'contato@sanryu.com.br', 3],
+  ['siteInstagram', 'Instagram', '@sanryudojo', 3],
+];
+const SITE_VAZIO = { siteTelefone: '', siteWhatsapp: '', siteEmail: '', siteInstagram: '', siteEndereco: '', siteHorarioFuncionamento: '' };
+
 export default function ConfiguracaoAcademia() {
   const [form, setForm] = useState({
     descontoFamiliaPercentual: '',
@@ -27,6 +35,7 @@ export default function ConfiguracaoAcademia() {
     reciboNome: '',
     reciboDocumento: '',
     reciboEndereco: '',
+    ...SITE_VAZIO,
   });
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState(null);
@@ -43,6 +52,7 @@ export default function ConfiguracaoAcademia() {
         reciboNome: res.data.reciboNome || '',
         reciboDocumento: res.data.reciboDocumento || '',
         reciboEndereco: res.data.reciboEndereco || '',
+        ...Object.fromEntries(Object.keys(SITE_VAZIO).map((campo) => [campo, res.data[campo] || ''])),
       })
     );
   }, []);
@@ -155,6 +165,36 @@ export default function ConfiguracaoAcademia() {
               <CCol md={4}>
                 <CFormLabel>Endereço</CFormLabel>
                 <CFormInput value={form.reciboEndereco} onChange={(event) => setForm((prev) => ({ ...prev, reciboEndereco: event.target.value }))} />
+              </CCol>
+
+              <CCol xs={12}>
+                <h2 className="h6 mb-0 mt-2">Contato no site</h2>
+                <small className="text-body-secondary">Aparece no rodapé, na página de contato, no botão do WhatsApp e nos dados para o Google. Campo vazio não aparece.</small>
+              </CCol>
+              {CAMPOS_SITE.map(([campo, rotulo, exemplo, largura]) => (
+                <CCol md={largura} key={campo}>
+                  <CFormLabel>{rotulo}</CFormLabel>
+                  <CFormInput value={form[campo]} placeholder={exemplo} onChange={(event) => setForm((prev) => ({ ...prev, [campo]: event.target.value }))} />
+                </CCol>
+              ))}
+              <CCol md={6}>
+                <CFormLabel>Endereço</CFormLabel>
+                <CFormInput
+                  value={form.siteEndereco}
+                  placeholder="Rua Monte Serrat, 380 — Tatuapé, São Paulo - SP, 03312-000"
+                  onChange={(event) => setForm((prev) => ({ ...prev, siteEndereco: event.target.value }))}
+                />
+                <small className="text-body-secondary">Usado também no mapa da página de contato.</small>
+              </CCol>
+              <CCol md={6}>
+                <CFormLabel>Horário de funcionamento</CFormLabel>
+                <CFormTextarea
+                  rows={2}
+                  value={form.siteHorarioFuncionamento}
+                  placeholder={'Segunda a sexta: 07h — 22h\nSábado: 08h — 13h'}
+                  onChange={(event) => setForm((prev) => ({ ...prev, siteHorarioFuncionamento: event.target.value }))}
+                />
+                <small className="text-body-secondary">Uma linha por período.</small>
               </CCol>
 
               <CCol md={12}>

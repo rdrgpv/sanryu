@@ -31,6 +31,7 @@ function dadosPlano(body) {
     valor: body.valor,
     unidadeId: body.unidadeId || null,
     ativo: body.ativo,
+    ...(body.exibirNoSite !== undefined ? { exibirNoSite: !!body.exibirNoSite } : {}),
   };
 }
 
