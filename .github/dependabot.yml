@@ -1,0 +1,57 @@
+# Atualizações automáticas de dependências (Dependabot, do próprio GitHub).
+# Toda segunda o GitHub confere backend e frontend e abre pull requests:
+# - correções de segurança (vulnerabilidades) saem assim que aparecem, agrupadas por pasta;
+# - atualizações comuns (patch e minor) vêm juntas num PR por semana, por pasta.
+# Atualização "major" (que pode quebrar algo) não entra automática: fica pra decidir com calma.
+# Cada PR roda os testes e o build (.github/workflows/testes.yml) antes de você aprovar.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "Backend: atualizar dependências"
+    groups:
+      seguranca-backend:
+        applies-to: security-updates
+        patterns: ["*"]
+      semanal-backend:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: [patch, minor]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "Frontend: atualizar dependências"
+    groups:
+      seguranca-frontend:
+        applies-to: security-updates
+        patterns: ["*"]
+      semanal-frontend:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: [patch, minor]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # As próprias ações usadas no workflow de testes (checkout, setup-node).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
