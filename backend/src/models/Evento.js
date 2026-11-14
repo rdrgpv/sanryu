@@ -63,6 +63,12 @@ const Evento = sequelize.define('Evento', {
     type: DataTypes.TEXT('long'),
     allowNull: true,
   },
+  // Cópia reduzida do banner (JPEG até 1200px, gerada no admin ao salvar) usada na prévia do link
+  // no WhatsApp/Instagram — o banner original pode ter até 4MB, grande demais pra prévia.
+  bannerCompartilhamento: {
+    type: DataTypes.TEXT('long'),
+    allowNull: true,
+  },
 });
 
 // Slug em branco/editado -> gera (ou re-slugifica) a partir do nome, garantindo unicidade

@@ -14,9 +14,22 @@ import {
   CButton,
 } from '@coreui/react';
 import api from '../../services/api';
+import { reduzirImagem } from '../../utils/imagem.js';
 
 const STATUS = ['agendado', 'realizado', 'cancelado'];
 const BANNER_TAMANHO_MAXIMO = 4 * 1024 * 1024;
+
+// Cópia leve do banner (até 1200px) pra prévia do link no WhatsApp; gerada a cada salvamento, então
+// evento antigo ganha a prévia certa só de abrir e salvar.
+async function bannerParaCompartilhar(banner) {
+  if (!banner) return null;
+  try {
+    const arquivo = await (await fetch(banner)).blob();
+    return await reduzirImagem(arquivo, 1200, 0.8);
+  } catch {
+    return null;
+  }
+}
 
 const estadoInicial = {
   nome: '',
@@ -138,6 +151,7 @@ export default function EventoForm() {
       tipoEventoId: Number(form.tipoEventoId),
       instrutorId: form.instrutorId !== '' ? Number(form.instrutorId) : null,
       valor: mostrarValor && form.valor !== '' ? Number(form.valor) : null,
+      bannerCompartilhamento: await bannerParaCompartilhar(form.banner),
     };
 
     try {

@@ -104,6 +104,25 @@ async function buscarPublico(req, res) {
   res.json(evento);
 }
 
+// Imagem da prévia do link do evento (og:image). Serve a cópia reduzida; evento antigo, salvo antes
+// dela existir, cai no banner original.
+async function imagemCompartilhamento(req, res) {
+  const evento = await Evento.findOne({
+    where: { ...whereIdOuSlug(req.params.id), publicado: true },
+    attributes: ['banner', 'bannerCompartilhamento'],
+  });
+  const dataUrl = evento?.bannerCompartilhamento || evento?.banner;
+  const partes = /^data:(image\/(?:jpeg|png|webp|gif));base64,(.+)$/s.exec(dataUrl || '');
+
+  if (!partes) {
+    return res.status(404).json({ error: 'Evento sem banner.' });
+  }
+
+  res.set('Content-Type', partes[1]);
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.send(Buffer.from(partes[2], 'base64'));
+}
+
 async function consultarCarteirinha(req, res) {
   const evento = await Evento.findOne({ where: { ...whereIdOuSlug(req.params.id), publicado: true } });
 
@@ -327,4 +346,4 @@ async function inscrever(req, res) {
   }
 }
 
-module.exports = { listarPublicados, buscarPublico, consultarCarteirinha, inscrever };
+module.exports = { listarPublicados, buscarPublico, imagemCompartilhamento, consultarCarteirinha, inscrever };

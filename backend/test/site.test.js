@@ -71,3 +71,22 @@ test('turmas públicas não expõem o e-mail do instrutor', async () => {
   assert.equal(turmas.dados[0].instrutor.nome, 'Professor');
   assert.equal(turmas.dados[0].instrutor.email, undefined);
 });
+
+test('imagem de compartilhamento do evento: usa a cópia reduzida, cai no banner, 404 sem banner', async () => {
+  const tipo = await models.TipoEvento.create({ nome: 'Exame' });
+  const png = Buffer.from('imagem-original').toString('base64');
+  const jpg = Buffer.from('imagem-reduzida').toString('base64');
+  const comCopia = await models.Evento.create({ nome: 'Exame A', data: new Date(), tipoEventoId: tipo.id, publicado: true, banner: `data:image/png;base64,${png}`, bannerCompartilhamento: `data:image/jpeg;base64,${jpg}` });
+  const soBanner = await models.Evento.create({ nome: 'Exame B', data: new Date(), tipoEventoId: tipo.id, publicado: true, banner: `data:image/png;base64,${png}` });
+  const semBanner = await models.Evento.create({ nome: 'Exame C', data: new Date(), tipoEventoId: tipo.id, publicado: true });
+
+  const base = `http://127.0.0.1:${ajuda.porta()}/api/eventos`;
+  const reduzida = await fetch(`${base}/${comCopia.slug}/imagem-compartilhamento`);
+  assert.equal(reduzida.headers.get('content-type'), 'image/jpeg');
+  assert.equal(Buffer.from(await reduzida.arrayBuffer()).toString(), 'imagem-reduzida');
+
+  const original = await fetch(`${base}/${soBanner.id}/imagem-compartilhamento`);
+  assert.equal(original.headers.get('content-type'), 'image/png');
+
+  assert.equal((await fetch(`${base}/${semBanner.id}/imagem-compartilhamento`)).status, 404);
+});

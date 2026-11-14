@@ -8,5 +8,9 @@
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
+  # Página de um evento: passa pelo evento.php, que põe título, descrição e banner do evento na
+  # prévia do link (WhatsApp/Instagram não rodam o React). Pra quem abre, é a mesma página.
+  RewriteRule ^eventos/([A-Za-z0-9-]+)/?$ evento.php?slug=$1 [L,QSA]
+
   RewriteRule ^ index.html [L]
 </IfModule>

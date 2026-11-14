@@ -10,7 +10,11 @@ export function reduzirImagem(arquivo, ladoMaximo = 480, qualidade = 0.85) {
       const canvas = document.createElement('canvas');
       canvas.width = Math.round(imagem.width * escala);
       canvas.height = Math.round(imagem.height * escala);
-      canvas.getContext('2d').drawImage(imagem, 0, 0, canvas.width, canvas.height);
+      const contexto = canvas.getContext('2d');
+      // JPEG não tem transparência: sem o fundo branco, PNG transparente sairia com fundo preto.
+      contexto.fillStyle = '#fff';
+      contexto.fillRect(0, 0, canvas.width, canvas.height);
+      contexto.drawImage(imagem, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
       resolve(canvas.toDataURL('image/jpeg', qualidade));
     };
