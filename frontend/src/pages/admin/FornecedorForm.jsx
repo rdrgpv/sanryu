@@ -4,7 +4,7 @@ import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormCheck, CRow, CCol
 import api from '../../services/api';
 import { formatarTelefone } from '../../utils/formato.js';
 
-const estadoInicial = { nome: '', cnpjCpf: '', telefone: '', email: '', ativo: true };
+const estadoInicial = { nome: '', cnpjCpf: '', telefone: '', email: '', prazoEntregaDias: '', ativo: true };
 
 export default function FornecedorForm() {
   const { id } = useParams();
@@ -22,6 +22,7 @@ export default function FornecedorForm() {
         cnpjCpf: fornecedor.cnpjCpf || '',
         telefone: formatarTelefone(fornecedor.telefone),
         email: fornecedor.email || '',
+        prazoEntregaDias: fornecedor.prazoEntregaDias ?? '',
         ativo: fornecedor.ativo,
       });
     });
@@ -81,6 +82,14 @@ export default function FornecedorForm() {
               <CCol md={6}>
                 <CFormLabel>Email</CFormLabel>
                 <CFormInput type="email" name="email" value={form.email} onChange={handleChange} />
+              </CCol>
+              <CCol md={3}>
+                <CFormLabel>Prazo de entrega padrão</CFormLabel>
+                <div className="input-group">
+                  <CFormInput type="number" min="0" max="365" step="1" name="prazoEntregaDias" value={form.prazoEntregaDias} onChange={handleChange} />
+                  <span className="input-group-text">dias</span>
+                </div>
+                <div className="form-text">Preenche a previsão de entrega ao gerar o pedido de compra.</div>
               </CCol>
             </CRow>
 

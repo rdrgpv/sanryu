@@ -40,6 +40,11 @@ const PedidoCompra = sequelize.define('PedidoCompra', {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  // Pagamento agrupado do qual este pedido faz parte (ver PagamentoCompra).
+  pagamentoCompraId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   observacao: {
     type: DataTypes.TEXT,
     allowNull: true,

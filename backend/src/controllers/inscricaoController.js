@@ -82,7 +82,7 @@ function tratarErroConsulta(err, res) {
 async function listarPublicados(req, res) {
   const eventos = await Evento.findAll({
     where: { publicado: true },
-    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'data', 'banner'],
+    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'linkMapa', 'data', 'banner'],
     include: { model: TipoEvento, as: 'tipoEvento', attributes: ['nome'] },
     order: [['data', 'ASC']],
   });
@@ -93,7 +93,7 @@ async function listarPublicados(req, res) {
 async function buscarPublico(req, res) {
   const evento = await Evento.findOne({
     where: { ...whereIdOuSlug(req.params.id), publicado: true },
-    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'data', 'banner'],
+    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'linkMapa', 'data', 'banner'],
     include: { model: TipoEvento, as: 'tipoEvento', attributes: ['id', 'nome'] },
   });
 

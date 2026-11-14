@@ -30,7 +30,7 @@ const INCLUDE_INSTRUTOR = { model: Instrutor, as: 'instrutor', attributes: ['nom
 async function buscarPublico(req, res) {
   const evento = await Evento.findOne({
     where: { ...whereIdOuSlug(req.params.id), publicado: true },
-    attributes: ['id', 'slug', 'nome', 'local', 'data'],
+    attributes: ['id', 'slug', 'nome', 'local', 'linkMapa', 'data'],
   });
 
   if (!evento) {

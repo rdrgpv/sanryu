@@ -39,6 +39,7 @@ const Pedido = require('./Pedido');
 const PedidoItem = require('./PedidoItem');
 const PedidoItemPersonalizacao = require('./PedidoItemPersonalizacao');
 const Fornecedor = require('./Fornecedor');
+const PagamentoCompra = require('./PagamentoCompra');
 const PedidoCompra = require('./PedidoCompra');
 const PedidoCompraItem = require('./PedidoCompraItem');
 const PedidoItemCompra = require('./PedidoItemCompra');
@@ -162,6 +163,9 @@ EstoqueMovimentacao.belongsTo(PedidoItem, { foreignKey: 'pedidoItemId', as: 'ped
 
 Fornecedor.hasMany(PedidoCompra, { foreignKey: 'fornecedorId', as: 'pedidosCompra' });
 PedidoCompra.belongsTo(Fornecedor, { foreignKey: 'fornecedorId', as: 'fornecedor' });
+PagamentoCompra.hasMany(PedidoCompra, { foreignKey: 'pagamentoCompraId', as: 'pedidos' });
+PedidoCompra.belongsTo(PagamentoCompra, { foreignKey: 'pagamentoCompraId', as: 'pagamentoCompra' });
+PagamentoCompra.belongsTo(Fornecedor, { foreignKey: 'fornecedorId', as: 'fornecedor' });
 
 PedidoCompra.hasMany(PedidoCompraItem, { foreignKey: 'pedidoCompraId', as: 'itens', onDelete: 'CASCADE' });
 PedidoCompraItem.belongsTo(PedidoCompra, { foreignKey: 'pedidoCompraId', as: 'pedidoCompra' });
@@ -220,6 +224,7 @@ module.exports = {
   PedidoItem,
   PedidoItemPersonalizacao,
   Fornecedor,
+  PagamentoCompra,
   PedidoCompra,
   PedidoCompraItem,
   PedidoItemCompra,

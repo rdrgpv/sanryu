@@ -8,7 +8,6 @@ const {
   Transferencia,
   Unidade,
   Fornecedor,
-  PedidoCompra,
 } = require('../models');
 const financeiroService = require('../services/financeiroService');
 const { hoje } = require('../services/mensalidadeService');
@@ -308,9 +307,8 @@ async function estornarLancamento(req, res) {
 
   await lancamento.update({ status: 'pendente', dataPagamento: null, valorPago: null, formaPagamento: null });
 
-  if (lancamento.origem === 'pedidoCompra') {
-    const compra = await PedidoCompra.findByPk(lancamento.origemId);
-    if (compra?.dataPagamento) await compra.update({ dataPagamento: null, ...(compra.situacao === 'PG' ? { situacao: 'X' } : {}) });
+  for (const compra of await financeiroService.comprasDoLancamento(lancamento)) {
+    if (compra.dataPagamento) await compra.update({ dataPagamento: null, ...(compra.situacao === 'PG' ? { situacao: 'X' } : {}) });
   }
 
   res.json(lancamento);
@@ -320,7 +318,7 @@ async function cancelarLancamento(req, res) {
   const lancamento = await carregarLancamento(req, res);
   if (!lancamento) return;
 
-  if (['mensalidade', 'pedido', 'pedidoCompra'].includes(lancamento.origem)) {
+  if (['mensalidade', 'pedido', 'pedidoCompra', 'pagamentoCompra'].includes(lancamento.origem)) {
     return res.status(400).json({ error: 'Este lançamento vem de outro cadastro (venda, compra ou mensalidade) — cancele por lá.' });
   }
   if (lancamento.status !== 'pendente') return res.status(400).json({ error: 'Só dá para cancelar lançamento em aberto.' });

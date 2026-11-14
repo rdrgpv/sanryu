@@ -59,6 +59,12 @@ const Evento = sequelize.define('Evento', {
     allowNull: false,
     defaultValue: false,
   },
+  // Link do Google Maps colado pelo admin (o "Compartilhar" do Maps). Opcional: sem ele, o site
+  // busca o "local" no Maps, o que pode cair no lugar errado se o texto for só um nome.
+  linkMapa: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+  },
   banner: {
     type: DataTypes.TEXT('long'),
     allowNull: true,

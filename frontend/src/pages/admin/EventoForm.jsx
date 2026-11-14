@@ -39,6 +39,7 @@ const estadoInicial = {
   instrutorId: '',
   data: '',
   local: '',
+  linkMapa: '',
   status: STATUS[0],
   valor: '',
   publicado: false,
@@ -79,6 +80,7 @@ export default function EventoForm() {
         instrutorId: evento.instrutorId || '',
         data: paraInputDatetime(evento.data),
         local: evento.local || '',
+        linkMapa: evento.linkMapa || '',
         status: evento.status,
         valor: evento.valor ?? '',
         publicado: evento.publicado,
@@ -221,7 +223,19 @@ export default function EventoForm() {
               </CCol>
               <CCol md={4}>
                 <CFormLabel>Local</CFormLabel>
-                <CFormInput name="local" value={form.local} onChange={handleChange} />
+                <CFormInput name="local" value={form.local} onChange={handleChange} placeholder="Nome do lugar e endereço" />
+              </CCol>
+              <CCol md={8}>
+                <CFormLabel>Link do Google Maps (opcional)</CFormLabel>
+                <CFormInput
+                  name="linkMapa"
+                  value={form.linkMapa}
+                  onChange={handleChange}
+                  placeholder="https://maps.app.goo.gl/..."
+                />
+                <div className="form-text">
+                  No Google Maps, abra o lugar, toque em "Compartilhar" e cole o link aqui. Sem link, o site procura o texto do campo Local.
+                </div>
               </CCol>
               <CCol md={4}>
                 <CFormLabel>Instrutor responsável</CFormLabel>

@@ -18,6 +18,12 @@ const Fornecedor = sequelize.define('Fornecedor', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // Dias que o fornecedor costuma levar pra entregar; preenche a previsão de entrega do pedido de
+  // compra quando ele é gerado.
+  prazoEntregaDias: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   ativo: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,

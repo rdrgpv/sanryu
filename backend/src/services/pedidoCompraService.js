@@ -8,8 +8,23 @@ const {
   PedidoCompraItem,
   ProdutoVariacao,
   EstoqueMovimentacao,
+  Fornecedor,
 } = require('../models');
 const estoqueService = require('../services/estoqueService');
+const { hoje } = require('./mensalidadeService');
+
+function somarDias(data, dias) {
+  const [ano, mes, dia] = data.split('-').map(Number);
+  return new Date(Date.UTC(ano, mes - 1, dia + dias)).toISOString().slice(0, 10);
+}
+
+// Previsão de entrega (AAAA-MM-DD) pelo prazo padrão do fornecedor, contado a partir de hoje.
+// Sem prazo cadastrado, fica em branco.
+async function previsaoDeEntrega(fornecedorId, transaction) {
+  const fornecedor = await Fornecedor.findByPk(fornecedorId, { attributes: ['prazoEntregaDias'], transaction });
+  const prazo = fornecedor?.prazoEntregaDias;
+  return Number.isInteger(prazo) && prazo >= 0 ? somarDias(hoje(), prazo) : null;
+}
 
 async function calcularAlocado(pedidoItemIds, transaction) {
   if (!pedidoItemIds || pedidoItemIds.length === 0) return {};
@@ -60,7 +75,10 @@ async function gerarPedidoCompra({ pedidoId, fornecedorId, selecoes }) {
   }
 
   return sequelize.transaction(async (t) => {
-    const pedidoCompra = await PedidoCompra.create({ fornecedorId, situacao: 'P', valorTotal: 0 }, { transaction: t });
+    const pedidoCompra = await PedidoCompra.create(
+      { fornecedorId, situacao: 'P', valorTotal: 0, dataPrevistaEntrega: await previsaoDeEntrega(fornecedorId, t) },
+      { transaction: t }
+    );
 
     let valorTotal = 0;
     for (const sel of selecoes) {
@@ -151,12 +169,17 @@ async function marcarComoEncomendado(pedidoCompra) {
   if (pedidoCompra.situacao !== 'P') {
     throw new Error('Só é possível marcar como encomendado um pedido de compra pendente.');
   }
-  await pedidoCompra.update({ situacao: 'X', dataEncomenda: new Date() });
+  // Sem previsão ainda (fornecedor ganhou prazo depois da geração): calcula a partir da encomenda.
+  const previsao = pedidoCompra.dataPrevistaEntrega || (await previsaoDeEntrega(pedidoCompra.fornecedorId));
+  await pedidoCompra.update({ situacao: 'X', dataEncomenda: new Date(), dataPrevistaEntrega: previsao });
 }
 
 async function marcarComoPago(pedidoCompra) {
   if (pedidoCompra.situacao !== 'X') {
     throw new Error('Só é possível marcar como pago um pedido de compra encomendado.');
+  }
+  if (pedidoCompra.pagamentoCompraId) {
+    throw new Error(`Este pedido faz parte do pagamento agrupado #${pedidoCompra.pagamentoCompraId}: dê a baixa dele em Contas a pagar.`);
   }
   await pedidoCompra.update({ situacao: 'PG', dataPagamento: new Date() });
 }
@@ -193,6 +216,7 @@ async function atualizarValoresItens(pedidoCompraId, itens) {
 }
 
 module.exports = {
+  previsaoDeEntrega,
   calcularAlocado,
   calcularItensPendentesCompra,
   gerarPedidoCompra,

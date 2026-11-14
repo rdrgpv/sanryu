@@ -8,7 +8,15 @@ const { logErro } = require('../utils/logger');
 
 // Aplica a regra de valor do item 2: só é permitido usar o campo "valor" do evento
 // quando o tipo é cobrável e diferente de Exame de Faixa (cujo valor vem da faixa).
+const LINK_MAPA = /^https:\/\/((www\.)?google\.com(\.[a-z]{2})?\/maps|maps\.google\.com(\.[a-z]{2})?|maps\.app\.goo\.gl|goo\.gl\/maps)(\/|\?|$)/i;
+
 async function aplicarRegraValor(dados) {
+  const linkMapa = String(dados.linkMapa || '').trim();
+  if (linkMapa && !LINK_MAPA.test(linkMapa)) {
+    throw new Error('O link do mapa precisa ser do Google Maps (no Maps, use "Compartilhar" e copie o link).');
+  }
+  dados = { ...dados, linkMapa: linkMapa || null };
+
   const tipoEvento = await TipoEvento.findByPk(dados.tipoEventoId);
 
   if (!tipoEvento) {

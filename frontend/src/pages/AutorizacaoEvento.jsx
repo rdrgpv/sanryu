@@ -100,7 +100,7 @@ export default function AutorizacaoEvento() {
               {evento.local && (
                 <>
                   {' · '}
-                  <a href={linkMapa(evento.local)} target="_blank" rel="noopener noreferrer">
+                  <a href={linkMapa(evento.local, evento.linkMapa)} target="_blank" rel="noopener noreferrer">
                     {evento.local}
                   </a>
                 </>

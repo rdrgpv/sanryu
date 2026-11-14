@@ -1,6 +1,7 @@
 const { Op, fn, col } = require('sequelize');
 const { sequelize, ProdutoVariacao, Produto, Cor, Tamanho, PedidoCompra, PedidoCompraItem, Fornecedor, EstoqueMovimentacao, Inventario } = require('../models');
 const estoqueService = require('../services/estoqueService');
+const pedidoCompraService = require('../services/pedidoCompraService');
 const { logErro } = require('../utils/logger');
 
 const INCLUDES_VARIACAO = [
@@ -84,7 +85,14 @@ async function gerarCompraReposicao(req, res) {
     const compra = await sequelize.transaction(async (transaction) => {
       const variacoes = await ProdutoVariacao.findAll({ where: { id: itens.map((item) => item.produtoVariacaoId) }, transaction });
       const nova = await PedidoCompra.create(
-        { fornecedorId: fornecedor.id, dataPedido: new Date(), situacao: 'P', valorTotal: 0, observacao: 'Reposição de estoque (abaixo do mínimo).' },
+        {
+          fornecedorId: fornecedor.id,
+          dataPedido: new Date(),
+          situacao: 'P',
+          valorTotal: 0,
+          dataPrevistaEntrega: await pedidoCompraService.previsaoDeEntrega(fornecedor.id, transaction),
+          observacao: 'Reposição de estoque (abaixo do mínimo).',
+        },
         { transaction }
       );
       let total = 0;

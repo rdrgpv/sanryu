@@ -255,7 +255,7 @@ export default function InscricaoEvento() {
               <p className="tile__meta">{new Date(evento.data).toLocaleString('pt-BR')}</p>
               {evento.local && (
                 <p className="tile__meta">
-                  <a href={linkMapa(evento.local)} target="_blank" rel="noopener noreferrer">
+                  <a href={linkMapa(evento.local, evento.linkMapa)} target="_blank" rel="noopener noreferrer">
                     📍 {evento.local}
                   </a>{' '}
                   <span>(ver no mapa)</span>

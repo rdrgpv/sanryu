@@ -68,8 +68,9 @@ export function arrobaInstagram(valor) {
   return `@${usuario}`;
 }
 
-// Local do evento -> busca no Google Maps (abre o app no celular).
-export function linkMapa(local) {
+// Local do evento -> link colado no cadastro, ou busca do endereço no Google Maps (abre o app no celular).
+export function linkMapa(local, linkCadastrado) {
+  if (linkCadastrado) return linkCadastrado;
   const texto = String(local || '').trim();
   if (!texto) return null;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(texto)}`;

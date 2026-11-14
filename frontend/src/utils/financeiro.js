@@ -20,6 +20,7 @@ export const ORIGENS = {
   mensalidade: 'Mensalidade',
   pedido: 'Venda da loja',
   pedidoCompra: 'Pedido de compra',
+  pagamentoCompra: 'Compras agrupadas',
   recorrencia: 'Recorrente',
 };
 

@@ -262,6 +262,9 @@ router.put('/fornecedores/:id', fornecedorController.atualizar);
 router.delete('/fornecedores/:id', fornecedorController.remover);
 
 router.get('/pedidos-compra', pedidoCompraController.listar);
+router.get('/pagamentos-compra', pedidoCompraController.listarPagamentos);
+router.post('/pagamentos-compra', pedidoCompraController.agruparPagamento);
+router.delete('/pagamentos-compra/:id', pedidoCompraController.desfazerPagamento);
 router.get('/pedidos-compra/:id', pedidoCompraController.buscarPorId);
 router.put('/pedidos-compra/:id', pedidoCompraController.atualizar);
 router.delete('/pedidos-compra/:id', pedidoCompraController.remover);

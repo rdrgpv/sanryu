@@ -9,6 +9,7 @@ const {
   Aluno,
   Pedido,
   PedidoCompra,
+  PagamentoCompra,
   Fornecedor,
 } = require('../models');
 const { hoje } = require('./mensalidadeService');
@@ -158,7 +159,7 @@ async function sincronizarPedidos() {
 async function sincronizarPedidosCompra() {
   const categoria = await categoriaId('compras_estoque');
   const compras = await PedidoCompra.findAll({
-    attributes: ['id', 'fornecedorId', 'situacao', 'valorTotal', 'dataPedido', 'dataPagamento'],
+    attributes: ['id', 'fornecedorId', 'situacao', 'valorTotal', 'dataPedido', 'dataPagamento', 'pagamentoCompraId'],
     include: { model: Fornecedor, as: 'fornecedor', attributes: ['nome'] },
   });
 
@@ -166,6 +167,12 @@ async function sincronizarPedidosCompra() {
 
   for (const compra of compras) {
     const existente = existentes.get(compra.id);
+
+    // Agrupado: a conta a pagar é a do pagamento agrupado; a individual em aberto sai.
+    if (compra.pagamentoCompraId) {
+      if (existente?.status === 'pendente') await existente.destroy();
+      continue;
+    }
 
     if (compra.situacao === 'E' || !(Number(compra.valorTotal) > 0)) {
       if (existente?.status === 'pendente') await existente.update({ status: 'cancelado' });
@@ -193,6 +200,59 @@ async function sincronizarPedidosCompra() {
 
   const ids = compras.map((compra) => compra.id);
   await Lancamento.destroy({ where: { origem: 'pedidoCompra', status: 'pendente', ...(ids.length ? { origemId: { [Op.notIn]: ids } } : {}) } });
+}
+
+// Pagamento agrupado: uma conta a pagar com a soma dos pedidos do grupo (cancelados não contam).
+// Fica paga quando todos os pedidos do grupo têm data de pagamento (baixa aqui ou no pedido).
+async function sincronizarPagamentosCompra() {
+  const categoria = await categoriaId('compras_estoque');
+  const grupos = await PagamentoCompra.findAll({
+    include: [
+      { model: PedidoCompra, as: 'pedidos', attributes: ['id', 'situacao', 'valorTotal', 'dataPagamento'] },
+      { model: Fornecedor, as: 'fornecedor', attributes: ['nome'] },
+    ],
+  });
+
+  const existentes = await existentesDaOrigem('pagamentoCompra');
+
+  for (const grupo of grupos) {
+    const existente = existentes.get(grupo.id);
+    const ativos = grupo.pedidos.filter((pedido) => pedido.situacao !== 'E');
+    const valor = Math.round(ativos.reduce((soma, pedido) => soma + Number(pedido.valorTotal), 0) * 100) / 100;
+
+    if (!(valor > 0)) {
+      if (existente?.status === 'pendente') await existente.update({ status: 'cancelado' });
+      continue;
+    }
+
+    const pagoEm = ativos.every((pedido) => pedido.dataPagamento)
+      ? ativos.map((pedido) => new Date(pedido.dataPagamento)).sort((a, b) => a - b).pop()
+      : null;
+    if (existente?.status === 'pago' && pagoEm) continue;
+
+    const numeros = ativos
+      .map((pedido) => pedido.id)
+      .sort((a, b) => a - b)
+      .map((id) => `#${id}`)
+      .join(', ');
+    await upsertOrigem(
+      'pagamentoCompra',
+      grupo.id,
+      {
+        tipo: 'despesa',
+        descricao: `Pagamento agrupado — ${grupo.fornecedor?.nome || 'fornecedor'} (compras ${numeros})`,
+        valor,
+        fornecedorId: grupo.fornecedorId,
+        status: pagoEm ? 'pago' : 'pendente',
+        ...(pagoEm ? { dataPagamento: existente?.dataPagamento || dataBrasil(pagoEm), valorPago: existente?.valorPago || valor } : {}),
+      },
+      { categoriaId: categoria, vencimento: grupo.vencimento },
+      existente
+    );
+  }
+
+  const ids = grupos.map((grupo) => grupo.id);
+  await Lancamento.destroy({ where: { origem: 'pagamentoCompra', status: 'pendente', ...(ids.length ? { origemId: { [Op.notIn]: ids } } : {}) } });
 }
 
 // Recorrências: cria o lançamento de cada mês até N dias à frente (mesma antecedência das
@@ -247,6 +307,7 @@ function sincronizarOrigens() {
         await sincronizarMensalidades();
         await sincronizarPedidos();
         await sincronizarPedidosCompra();
+        await sincronizarPagamentosCompra();
         await gerarRecorrencias();
       } catch (err) {
         logErro('Erro ao sincronizar lançamentos automáticos do financeiro:', err);
@@ -260,6 +321,13 @@ function sincronizarOrigens() {
 
 // ---- Baixa ----
 
+// Pedidos de compra por trás de uma conta a pagar automática (um, ou os do pagamento agrupado).
+async function comprasDoLancamento(lancamento) {
+  if (lancamento.origem === 'pedidoCompra') return PedidoCompra.findAll({ where: { id: lancamento.origemId } });
+  if (lancamento.origem === 'pagamentoCompra') return PedidoCompra.findAll({ where: { pagamentoCompraId: lancamento.origemId } });
+  return [];
+}
+
 async function baixar(lancamento, { dataPagamento, valorPago, formaPagamento, contaFinanceiraId }) {
   await lancamento.update({
     status: 'pago',
@@ -269,10 +337,10 @@ async function baixar(lancamento, { dataPagamento, valorPago, formaPagamento, co
     contaFinanceiraId: contaFinanceiraId || (await contaPadraoPara(formaPagamento)) || lancamento.contaFinanceiraId,
   });
 
-  // Pagar a compra aqui reflete no pedido de compra (que tem o próprio "marcar como pago").
-  if (lancamento.origem === 'pedidoCompra') {
-    const compra = await PedidoCompra.findByPk(lancamento.origemId);
-    if (compra && !compra.dataPagamento) {
+  // Pagar a compra aqui reflete no pedido de compra (que tem o próprio "marcar como pago"); no
+  // pagamento agrupado, em todos os pedidos do grupo.
+  for (const compra of await comprasDoLancamento(lancamento)) {
+    if (!compra.dataPagamento && compra.situacao !== 'E') {
       await compra.update({ dataPagamento: new Date(), ...(compra.situacao === 'X' ? { situacao: 'PG' } : {}) });
     }
   }
@@ -397,6 +465,7 @@ module.exports = {
   sincronizarOrigens,
   gerarRecorrencias,
   baixar,
+  comprasDoLancamento,
   saldosDasContas,
   mensalidadesEmAberto,
   fluxoDeCaixa,

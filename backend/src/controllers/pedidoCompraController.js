@@ -1,5 +1,6 @@
 const { PedidoCompra, PedidoCompraItem, ProdutoVariacao, Produto, Cor, Tamanho, Fornecedor } = require('../models');
 const pedidoCompraService = require('../services/pedidoCompraService');
+const pagamentoCompraService = require('../services/pagamentoCompraService');
 
 const INCLUDE_ITENS = {
   model: PedidoCompraItem,
@@ -137,7 +138,31 @@ async function marcarComoPago(req, res) {
   }
 }
 
+async function listarPagamentos(req, res) {
+  res.json(await pagamentoCompraService.listar());
+}
+
+async function agruparPagamento(req, res) {
+  try {
+    res.status(201).json(await pagamentoCompraService.criar(req.body));
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async function desfazerPagamento(req, res) {
+  try {
+    await pagamentoCompraService.desfazer(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
 module.exports = {
+  listarPagamentos,
+  agruparPagamento,
+  desfazerPagamento,
   listar,
   buscarPorId,
   atualizar,
