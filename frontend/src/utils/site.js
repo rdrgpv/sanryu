@@ -67,3 +67,10 @@ export function arrobaInstagram(valor) {
   const usuario = texto.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '').replace(/^@/, '');
   return `@${usuario}`;
 }
+
+// Local do evento -> busca no Google Maps (abre o app no celular).
+export function linkMapa(local) {
+  const texto = String(local || '').trim();
+  if (!texto) return null;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(texto)}`;
+}

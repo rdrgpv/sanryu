@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
+import { linkMapa } from '../utils/site.js';
 import AssinaturaCanvas from '../components/AssinaturaCanvas.jsx';
 
 const DADOS_INICIAIS = { nomeAluno: '', faixa: '', idade: '', turmaId: '', nomeResponsavel: '' };
@@ -96,7 +97,14 @@ export default function AutorizacaoEvento() {
           {evento && (
             <p className="tile__meta" style={{ marginTop: '0.5rem' }}>
               {new Date(evento.data).toLocaleDateString('pt-BR')}
-              {evento.local ? ` · ${evento.local}` : ''}
+              {evento.local && (
+                <>
+                  {' · '}
+                  <a href={linkMapa(evento.local)} target="_blank" rel="noopener noreferrer">
+                    {evento.local}
+                  </a>
+                </>
+              )}
             </p>
           )}
         </div>

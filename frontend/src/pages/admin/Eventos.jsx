@@ -22,6 +22,20 @@ export default function Eventos() {
     carregarEventos();
   }, []);
 
+  const [copiadoId, setCopiadoId] = useState(null);
+
+  async function copiarLink(evento, clique) {
+    // Sem isso o clique no botão também selecionava/desselecionava a linha.
+    clique.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/eventos/${evento.slug || evento.id}`);
+      setCopiadoId(evento.id);
+      setTimeout(() => setCopiadoId((atual) => (atual === evento.id ? null : atual)), 2000);
+    } catch {
+      window.alert('Não foi possível copiar o link.');
+    }
+  }
+
   function selecionarLinha(id) {
     setSelecionadoId((atual) => (atual === id ? null : id));
   }
@@ -101,6 +115,21 @@ export default function Eventos() {
             label: 'Publicado',
             sortable: true,
             render: (evento) => (evento.publicado ? 'Sim' : 'Não'),
+          },
+          {
+            key: 'divulgar',
+            label: 'Divulgar',
+            render: (evento) => (
+              <CButton
+                size="sm"
+                color={copiadoId === evento.id ? 'success' : 'secondary'}
+                variant="outline"
+                onClick={(clique) => copiarLink(evento, clique)}
+                title={evento.publicado ? 'Copiar o link da página do evento' : 'O evento ainda não está publicado: o link só abre depois de publicar'}
+              >
+                {copiadoId === evento.id ? 'Copiado!' : 'Copiar link'}
+              </CButton>
+            ),
           },
         ]}
       />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
+import { linkMapa } from '../utils/site.js';
 import { OPCOES_TAMANHO_FAIXA } from '../utils/opcoesTamanhoFaixa.js';
 
 const TIPO_EXAME_DE_FAIXA_ID = 1;
@@ -252,7 +253,14 @@ export default function InscricaoEvento() {
               )}
               {evento.descricao && <p style={{ whiteSpace: 'pre-line' }}>{evento.descricao}</p>}
               <p className="tile__meta">{new Date(evento.data).toLocaleString('pt-BR')}</p>
-              {evento.local && <p className="tile__meta">{evento.local}</p>}
+              {evento.local && (
+                <p className="tile__meta">
+                  <a href={linkMapa(evento.local)} target="_blank" rel="noopener noreferrer">
+                    📍 {evento.local}
+                  </a>{' '}
+                  <span>(ver no mapa)</span>
+                </p>
+              )}
             </div>
           )}
 
