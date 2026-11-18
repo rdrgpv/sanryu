@@ -18,6 +18,7 @@ import { cilTruck, cilCash, cilSend, cilDescription, cilLayers } from '@coreui/i
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import ItensDoPedido, { resumoDosItens } from '../../admin/components/ItensDoPedido.jsx';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 import { formatarData, hoje } from '../../utils/financeiro.js';
 
@@ -237,6 +238,12 @@ export default function PedidosCompra() {
         selectedId={selecionadoId}
         onSelectRow={selecionarLinha}
         emptyMessage="Nenhum pedido de compra gerado."
+        renderDetail={(pc) => (
+          <>
+            <ItensDoPedido itens={pc.itens} tipo="compra" />
+            {pc.observacao && <div className="small text-body-secondary mt-1">Obs.: {pc.observacao}</div>}
+          </>
+        )}
         columns={[
           { key: 'id', label: 'Nº', sortable: true, render: (pc) => `#${pc.id}` },
           {
@@ -298,6 +305,20 @@ export default function PedidosCompra() {
           <AdminDataTable
             rows={pagamentos}
             emptyMessage="Nenhum pagamento agrupado."
+            renderDetail={(pagamento) => (
+              <>
+                {pagamento.pedidos.map((pedido) => (
+                  <div key={pedido.id} className="mb-2">
+                    <div className="small fw-semibold">
+                      Pedido de compra #{pedido.id} · {formatarDataHora(pedido.dataPedido)} · {formatarMoeda(pedido.valorTotal)}
+                      {pedido.situacao === 'E' && <CBadge color="danger" className="ms-1">Cancelado</CBadge>}
+                    </div>
+                    <ItensDoPedido itens={pedido.itens} tipo="compra" />
+                  </div>
+                ))}
+                {pagamento.observacao && <div className="small text-body-secondary">Obs.: {pagamento.observacao}</div>}
+              </>
+            )}
             columns={[
               { key: 'id', label: 'Nº', render: (pagamento) => `#${pagamento.id}` },
               { key: 'fornecedor', label: 'Fornecedor', render: (pagamento) => pagamento.fornecedor?.nome || '-' },
@@ -361,13 +382,26 @@ export default function PedidosCompra() {
             {pedidosCompra
               .filter((pc) => podeAgrupar(pc) && pc.fornecedorId === Number(agrupando.fornecedorId))
               .map((pc) => (
-                <CFormCheck
-                  key={pc.id}
-                  id={`agrupar-${pc.id}`}
-                  checked={agrupando.ids.includes(pc.id)}
-                  onChange={(event) => marcarParaAgrupar(pc.id, event.target.checked)}
-                  label={`#${pc.id} — ${formatarDataHora(pc.dataPedido)} — ${formatarMoeda(pc.valorTotal)}`}
-                />
+                <div key={pc.id} className={`border rounded p-2 mb-2 ${agrupando.ids.includes(pc.id) ? 'border-secondary bg-body-tertiary' : ''}`}>
+                  <CFormCheck
+                    id={`agrupar-${pc.id}`}
+                    checked={agrupando.ids.includes(pc.id)}
+                    onChange={(event) => marcarParaAgrupar(pc.id, event.target.checked)}
+                    label={
+                      <span>
+                        <strong>#{pc.id}</strong> — {formatarDataHora(pc.dataPedido)} — <strong>{formatarMoeda(pc.valorTotal)}</strong>
+                      </span>
+                    }
+                  />
+                  <details className="ms-4 mt-1">
+                    <summary className="small text-body-secondary" title="Ver os itens">
+                      {resumoDosItens(pc.itens) || 'Sem itens'}
+                    </summary>
+                    <div className="mt-2">
+                      <ItensDoPedido itens={pc.itens} tipo="compra" />
+                    </div>
+                  </details>
+                </div>
               ))}
 
             <div className="d-flex flex-wrap gap-3 mt-3 align-items-end">
@@ -394,7 +428,7 @@ export default function PedidosCompra() {
             Cancelar
           </CButton>
           <CButton color="primary" disabled={!agrupando || agrupando.ids.length < 2} onClick={confirmarAgrupar}>
-            Agrupar {agrupando?.ids.length || 0} pedidos
+            Agrupar {agrupando?.ids.length || 0} {agrupando?.ids.length === 1 ? 'pedido' : 'pedidos'}
           </CButton>
         </CModalFooter>
       </CModal>

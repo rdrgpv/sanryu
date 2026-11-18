@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import {
   CTable,
   CTableHead,
@@ -10,7 +10,7 @@ import {
   CButton,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilArrowTop, cilArrowBottom, cilInbox } from '@coreui/icons';
+import { cilArrowTop, cilArrowBottom, cilInbox, cilChevronBottom, cilChevronRight } from '@coreui/icons';
 
 const OPCOES_PAGINA_PADRAO = [10, 25, 50];
 
@@ -32,6 +32,8 @@ function compararValores(a, b) {
 // já que os dados continuam vindo inteiros do backend como sempre vieram.
 //
 // `columns`: [{ key, label, align?, sortable?, sortValue?(row), render?(row) }]
+// `renderDetail(row)` (opcional): cada linha ganha uma seta que abre, logo abaixo dela, o que essa
+// função devolver (ex.: os itens de um pedido) — sem sair da lista.
 export default function AdminDataTable({
   columns,
   rows,
@@ -43,8 +45,22 @@ export default function AdminDataTable({
   pageSize = OPCOES_PAGINA_PADRAO[0],
   tableClassName = '',
   tableStyle,
+  renderDetail,
 }) {
   const [ordenacao, setOrdenacao] = useState(null); // { key, direcao: 'asc' | 'desc' }
+  const [abertas, setAbertas] = useState(() => new Set());
+  const totalColunas = columns.length + (renderDetail ? 1 : 0);
+
+  function alternarDetalhe(id, clique) {
+    // Abrir os detalhes não seleciona/desseleciona a linha.
+    clique.stopPropagation();
+    setAbertas((atual) => {
+      const novas = new Set(atual);
+      if (novas.has(id)) novas.delete(id);
+      else novas.add(id);
+      return novas;
+    });
+  }
   const [pagina, setPagina] = useState(1);
   const [tamanhoPagina, setTamanhoPagina] = useState(pageSize);
 
@@ -90,6 +106,7 @@ export default function AdminDataTable({
         <CTable hover striped bordered className={`bg-white mb-0 ${tableClassName}`} style={tableStyle}>
           <CTableHead>
             <CTableRow>
+              {renderDetail && <CTableHeaderCell style={{ width: 36 }} className="d-print-none" />}
               {columns.map((coluna) => (
                 <CTableHeaderCell
                   key={coluna.key}
@@ -116,24 +133,45 @@ export default function AdminDataTable({
               const id = getRowId(row);
               const foraDaPaginaAtual = indice < inicio || indice >= fim;
 
+              const aberta = renderDetail && abertas.has(id);
+
               return (
-                <CTableRow
-                  key={id}
-                  active={selectedId === id}
-                  onClick={() => onSelectRow?.(id)}
-                  className={foraDaPaginaAtual ? 'admin-table-row--fora-da-pagina' : undefined}
-                >
-                  {columns.map((coluna) => (
-                    <CTableDataCell key={coluna.key} style={{ textAlign: coluna.align }}>
-                      {coluna.render ? coluna.render(row) : (valorPadraoDaColuna(coluna, row) ?? '-')}
-                    </CTableDataCell>
-                  ))}
-                </CTableRow>
+                <Fragment key={id}>
+                  <CTableRow
+                    active={selectedId === id}
+                    onClick={() => onSelectRow?.(id)}
+                    className={foraDaPaginaAtual ? 'admin-table-row--fora-da-pagina' : undefined}
+                  >
+                    {renderDetail && (
+                      <CTableDataCell className="d-print-none p-0 text-center align-middle">
+                        <button
+                          type="button"
+                          className="btn btn-link btn-sm text-body-secondary p-1"
+                          onClick={(clique) => alternarDetalhe(id, clique)}
+                          aria-expanded={aberta}
+                          title={aberta ? 'Esconder detalhes' : 'Ver detalhes'}
+                        >
+                          <CIcon icon={aberta ? cilChevronBottom : cilChevronRight} size="sm" />
+                        </button>
+                      </CTableDataCell>
+                    )}
+                    {columns.map((coluna) => (
+                      <CTableDataCell key={coluna.key} style={{ textAlign: coluna.align }}>
+                        {coluna.render ? coluna.render(row) : (valorPadraoDaColuna(coluna, row) ?? '-')}
+                      </CTableDataCell>
+                    ))}
+                  </CTableRow>
+                  {aberta && (
+                    <CTableRow className={`admin-table-detalhe ${foraDaPaginaAtual ? 'admin-table-row--fora-da-pagina' : ''}`}>
+                      <CTableDataCell colSpan={totalColunas}>{renderDetail(row)}</CTableDataCell>
+                    </CTableRow>
+                  )}
+                </Fragment>
               );
             })}
             {linhasOrdenadas.length === 0 && (
               <CTableRow>
-                <CTableDataCell colSpan={columns.length} className="p-0">
+                <CTableDataCell colSpan={totalColunas} className="p-0">
                   <div className="admin-empty-state">
                     <CIcon icon={cilInbox} size="xl" className="mb-2 opacity-50" />
                     <div>{emptyMessage}</div>

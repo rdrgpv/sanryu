@@ -1,10 +1,16 @@
 const { Op } = require('sequelize');
 const { sequelize, PagamentoCompra, PedidoCompra, Fornecedor, Lancamento } = require('../models');
 const financeiroService = require('./financeiroService');
+const { INCLUDE_ITENS_LISTA } = require('./pedidoCompraService');
 
 const INCLUDE = [
   { model: Fornecedor, as: 'fornecedor', attributes: ['id', 'nome'] },
-  { model: PedidoCompra, as: 'pedidos', attributes: ['id', 'situacao', 'valorTotal', 'dataPedido', 'dataPagamento'] },
+  {
+    model: PedidoCompra,
+    as: 'pedidos',
+    attributes: ['id', 'situacao', 'valorTotal', 'dataPedido', 'dataPagamento'],
+    include: [INCLUDE_ITENS_LISTA],
+  },
 ];
 
 // Junta a conta a pagar de cada grupo (status, valor) pra tela saber se ainda dá pra desfazer.

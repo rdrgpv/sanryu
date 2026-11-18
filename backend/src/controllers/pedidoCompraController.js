@@ -24,7 +24,7 @@ async function listar(req, res) {
 
   const pedidosCompra = await PedidoCompra.findAll({
     where,
-    include: [{ model: Fornecedor, as: 'fornecedor' }],
+    include: [{ model: Fornecedor, as: 'fornecedor' }, pedidoCompraService.INCLUDE_ITENS_LISTA],
     order: [['dataPedido', 'DESC']],
   });
   res.json(pedidosCompra);

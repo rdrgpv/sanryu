@@ -24,11 +24,36 @@ const INCLUDE_ITENS = {
   ],
 };
 
+// Itens na listagem: só o que a grade mostra (a foto do produto pesa e fica de fora).
+const INCLUDE_ITENS_LISTA = {
+  model: PedidoItem,
+  as: 'itens',
+  attributes: ['id', 'quantidade', 'valorUnitario', 'valorTotal', 'observacao'],
+  include: [
+    {
+      model: ProdutoVariacao,
+      as: 'produtoVariacao',
+      attributes: ['id', 'codigo'],
+      include: [
+        { model: Produto, as: 'produto', attributes: ['id', 'descricao'] },
+        { model: Cor, as: 'cor', attributes: ['id', 'descricao'] },
+        { model: Tamanho, as: 'tamanho', attributes: ['id', 'descricao'] },
+      ],
+    },
+    {
+      model: PedidoItemPersonalizacao,
+      as: 'personalizacoes',
+      attributes: ['id', 'textoPersonalizado', 'corPersonalizacao', 'posicao'],
+      include: [{ model: TipoPersonalizacao, as: 'tipoPersonalizacao', attributes: ['id', 'descricao'] }],
+    },
+  ],
+};
+
 async function listar(req, res) {
   const where = {};
   if (req.query.situacao) where.situacao = req.query.situacao;
 
-  const pedidos = await Pedido.findAll({ where, order: [['dataPedido', 'DESC']] });
+  const pedidos = await Pedido.findAll({ where, include: [INCLUDE_ITENS_LISTA], order: [['dataPedido', 'DESC']] });
 
   // O recebimento da venda é dado no financeiro (conta a receber de origem "pedido"); aqui só mostra.
   // Sincroniza antes pra pedido recém-criado já ter a conta a receber.

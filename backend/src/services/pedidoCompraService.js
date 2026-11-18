@@ -9,9 +9,31 @@ const {
   ProdutoVariacao,
   EstoqueMovimentacao,
   Fornecedor,
+  Produto,
+  Cor,
+  Tamanho,
 } = require('../models');
 const estoqueService = require('../services/estoqueService');
 const { hoje } = require('./mensalidadeService');
+
+// Itens do pedido de compra nas listagens: só o que a grade mostra (a foto do produto fica de fora).
+const INCLUDE_ITENS_LISTA = {
+  model: PedidoCompraItem,
+  as: 'itens',
+  attributes: ['id', 'quantidade', 'quantidadeRecebida', 'valorUnitario', 'valorTotal'],
+  include: [
+    {
+      model: ProdutoVariacao,
+      as: 'produtoVariacao',
+      attributes: ['id', 'codigo'],
+      include: [
+        { model: Produto, as: 'produto', attributes: ['id', 'descricao'] },
+        { model: Cor, as: 'cor', attributes: ['id', 'descricao'] },
+        { model: Tamanho, as: 'tamanho', attributes: ['id', 'descricao'] },
+      ],
+    },
+  ],
+};
 
 function somarDias(data, dias) {
   const [ano, mes, dia] = data.split('-').map(Number);
@@ -216,6 +238,7 @@ async function atualizarValoresItens(pedidoCompraId, itens) {
 }
 
 module.exports = {
+  INCLUDE_ITENS_LISTA,
   previsaoDeEntrega,
   calcularAlocado,
   calcularItensPendentesCompra,

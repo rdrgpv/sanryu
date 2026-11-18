@@ -277,6 +277,28 @@
   padding: 0.35em 0.75em;
 }
 
+/* Linha de detalhes aberta pela seta do AdminDataTable (ex.: itens do pedido). */
+.admin-table-detalhe > td {
+  background: var(--cui-tertiary-bg, #f8f9fa) !important;
+  padding: 0.5rem 0.75rem 0.75rem 2.75rem !important;
+}
+
+.itens-pedido {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.itens-pedido th {
+  font-weight: 600;
+  color: var(--cui-secondary-color, #6c757d);
+  white-space: nowrap;
+}
+
+.itens-pedido__extra {
+  font-size: 0.78rem;
+  color: var(--cui-secondary-color, #6c757d);
+}
+
 .admin-empty-state {
   padding: var(--sanryu-space-4) var(--sanryu-space-2);
   text-align: center;

@@ -20,6 +20,7 @@ import { cilTask, cilTruck, cilCheckCircle, cilReload } from '@coreui/icons';
 import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
+import ItensDoPedido from '../../admin/components/ItensDoPedido.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 
@@ -163,6 +164,12 @@ export default function Pedidos() {
         selectedId={selecionadoId}
         onSelectRow={selecionarLinha}
         emptyMessage="Nenhum pedido cadastrado."
+        renderDetail={(p) => (
+          <>
+            <ItensDoPedido itens={p.itens} tipo="venda" />
+            {p.observacao && <div className="small text-body-secondary mt-1">Obs. do pedido: {p.observacao}</div>}
+          </>
+        )}
         columns={[
           { key: 'nomeCliente', label: 'Cliente', sortable: true },
           {
