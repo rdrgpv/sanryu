@@ -25,6 +25,25 @@ async function listar() {
   return grupos.map((grupo) => ({ ...grupo.toJSON(), lancamento: porGrupo.get(grupo.id) || null }));
 }
 
+// Um pagamento com tudo pra montar o comprovante: fornecedor completo (telefone pro WhatsApp),
+// pedidos com itens e a conta a pagar (valor, vencimento, se já foi pago).
+async function buscar(id) {
+  await financeiroService.sincronizarOrigens();
+  const grupo = await PagamentoCompra.findByPk(id, {
+    include: [
+      { model: Fornecedor, as: 'fornecedor', attributes: ['id', 'nome', 'cnpjCpf', 'telefone', 'email'] },
+      INCLUDE[1],
+    ],
+  });
+  if (!grupo) return null;
+
+  const lancamento = await Lancamento.findOne({
+    where: { origem: 'pagamentoCompra', origemId: grupo.id },
+    attributes: ['id', 'status', 'valor', 'valorPago', 'vencimento', 'dataPagamento', 'formaPagamento'],
+  });
+  return { ...grupo.toJSON(), lancamento };
+}
+
 // Pedidos que podem entrar num pagamento agrupado: não cancelados, ainda não pagos, com valor e
 // fora de outro grupo.
 function podeAgrupar(pedido) {
@@ -78,4 +97,4 @@ async function desfazer(id) {
   await financeiroService.sincronizarOrigens();
 }
 
-module.exports = { listar, criar, desfazer, podeAgrupar };
+module.exports = { listar, buscar, criar, desfazer, podeAgrupar };

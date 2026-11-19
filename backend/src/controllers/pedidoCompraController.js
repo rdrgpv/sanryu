@@ -142,6 +142,12 @@ async function listarPagamentos(req, res) {
   res.json(await pagamentoCompraService.listar());
 }
 
+async function buscarPagamento(req, res) {
+  const pagamento = await pagamentoCompraService.buscar(req.params.id);
+  if (!pagamento) return res.status(404).json({ error: 'Pagamento agrupado não encontrado.' });
+  res.json(pagamento);
+}
+
 async function agruparPagamento(req, res) {
   try {
     res.status(201).json(await pagamentoCompraService.criar(req.body));
@@ -161,6 +167,7 @@ async function desfazerPagamento(req, res) {
 
 module.exports = {
   listarPagamentos,
+  buscarPagamento,
   agruparPagamento,
   desfazerPagamento,
   listar,

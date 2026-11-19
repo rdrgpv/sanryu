@@ -117,3 +117,21 @@ test('evento aceita só link do Google Maps no mapa', async () => {
   assert.equal(criado.status, 201);
   assert.equal(criado.dados.linkMapa, 'https://maps.app.goo.gl/AbC123');
 });
+
+test('comprovante do pagamento agrupado traz fornecedor, pedidos com itens e a conta a pagar', async () => {
+  await models.Fornecedor.update({ telefone: '(11) 98888-7777' }, { where: { id: fornecedor.id } });
+  const a = await compra({ valorTotal: 100 });
+  const b = await compra({ valorTotal: 60 });
+  await models.PedidoCompraItem.create({ pedidoCompraId: a.id, produtoVariacaoId: variacao.id, quantidade: 2, valorUnitario: 50, valorTotal: 100 });
+  const grupo = await chamar('POST', '/admin/pagamentos-compra', { corpo: { pedidoCompraIds: [a.id, b.id], vencimento: hoje() } });
+
+  const comprovante = await chamar('GET', `/admin/pagamentos-compra/${grupo.dados.id}`);
+  assert.equal(comprovante.status, 200);
+  assert.equal(comprovante.dados.fornecedor.telefone, '(11) 98888-7777');
+  assert.equal(Number(comprovante.dados.lancamento.valor), 160);
+  const pedidoA = comprovante.dados.pedidos.find((pedido) => pedido.id === a.id);
+  assert.equal(pedidoA.itens[0].produtoVariacao.codigo, 'VAR-K');
+  assert.equal(pedidoA.itens[0].produtoVariacao.produto.descricao, 'Kimono');
+
+  assert.equal((await chamar('GET', '/admin/pagamentos-compra/99999')).status, 404);
+});

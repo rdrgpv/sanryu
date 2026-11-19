@@ -18,10 +18,10 @@ function textoPersonalizacao(personalizacao) {
 
 // Tabela compacta dos itens de um pedido, pra abrir dentro das listas (venda, compra, pagamento
 // agrupado). Na compra mostra também quanto já foi recebido; na venda, as personalizações.
-export default function ItensDoPedido({ itens = [], tipo = 'venda' }) {
+export default function ItensDoPedido({ itens = [], tipo = 'venda', mostrarRecebido = tipo === 'compra', mostrarCodigo = true }) {
   if (!itens.length) return <div className="small text-body-secondary">Nenhum item.</div>;
 
-  const compra = tipo === 'compra';
+  const compra = mostrarRecebido;
   const quantidadeTotal = itens.reduce((soma, item) => soma + Number(item.quantidade || 0), 0);
   const valorTotal = itens.reduce((soma, item) => soma + Number(item.valorTotal || 0), 0);
 
@@ -29,7 +29,7 @@ export default function ItensDoPedido({ itens = [], tipo = 'venda' }) {
     <table className="table table-sm itens-pedido bg-transparent">
       <thead>
         <tr>
-          <th>Código</th>
+          {mostrarCodigo && <th>Código</th>}
           <th>Item</th>
           <th className="text-end">Qtd.</th>
           {compra && <th className="text-end">Recebido</th>}
@@ -42,7 +42,7 @@ export default function ItensDoPedido({ itens = [], tipo = 'venda' }) {
           const recebido = Number(item.quantidadeRecebida || 0);
           return (
             <tr key={item.id}>
-              <td className="text-nowrap">{item.produtoVariacao?.codigo || '-'}</td>
+              {mostrarCodigo && <td className="text-nowrap">{item.produtoVariacao?.codigo || '-'}</td>}
               <td>
                 {descricaoDoItem(item)}
                 {(item.personalizacoes || []).map((personalizacao) => (
@@ -67,7 +67,7 @@ export default function ItensDoPedido({ itens = [], tipo = 'venda' }) {
       {itens.length > 1 && (
         <tfoot>
           <tr>
-            <th colSpan={2}>Total</th>
+            <th colSpan={mostrarCodigo ? 2 : 1}>Total</th>
             <th className="text-end">{quantidadeTotal}</th>
             {compra && <th />}
             <th />

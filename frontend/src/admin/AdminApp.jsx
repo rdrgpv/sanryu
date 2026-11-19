@@ -28,6 +28,7 @@ import Reposicao from '../pages/admin/Reposicao.jsx';
 import Inventario from '../pages/admin/Inventario.jsx';
 import Etiquetas from '../pages/admin/Etiquetas.jsx';
 import PedidoCompraVisualizar from '../pages/admin/PedidoCompraVisualizar.jsx';
+import PagamentoCompraVisualizar from '../pages/admin/PagamentoCompraVisualizar.jsx';
 import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
 import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
 import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
@@ -197,6 +198,7 @@ export default function AdminApp() {
       <Route path="pedidos-compra" element={<AdminRoute><PedidosCompra /></AdminRoute>} />
       <Route path="pedidos-compra/:id" element={<AdminRoute><PedidoCompraDetalhe /></AdminRoute>} />
       <Route path="pedidos-compra/:id/visualizar" element={<AdminRoute><PedidoCompraVisualizar /></AdminRoute>} />
+      <Route path="pagamentos-compra/:id" element={<AdminRoute><PagamentoCompraVisualizar /></AdminRoute>} />
     </Routes>
   );
 }

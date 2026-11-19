@@ -345,12 +345,25 @@ export default function PedidosCompra() {
               {
                 key: 'acoes',
                 label: '',
-                render: (pagamento) =>
-                  pagamento.lancamento?.status === 'pago' ? null : (
-                    <CButton size="sm" color="danger" variant="outline" onClick={() => desfazerAgrupamento(pagamento)}>
-                      Desfazer
+                render: (pagamento) => (
+                  <div className="d-flex gap-1 justify-content-end">
+                    <CButton
+                      size="sm"
+                      color="secondary"
+                      variant="outline"
+                      onClick={() => navigate(`/admin/pagamentos-compra/${pagamento.id}`)}
+                      title="Comprovante para imprimir ou enviar ao fornecedor"
+                    >
+                      <CIcon icon={cilDescription} className="me-1" />
+                      Comprovante
                     </CButton>
-                  ),
+                    {pagamento.lancamento?.status !== 'pago' && (
+                      <CButton size="sm" color="danger" variant="outline" onClick={() => desfazerAgrupamento(pagamento)}>
+                        Desfazer
+                      </CButton>
+                    )}
+                  </div>
+                ),
               },
             ]}
           />
