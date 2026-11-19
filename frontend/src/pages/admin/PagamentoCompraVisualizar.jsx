@@ -6,44 +6,8 @@ import { cilPrint, cilSend } from '@coreui/icons';
 import api from '../../services/api';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 import { formatarData, labelForma } from '../../utils/financeiro.js';
-import ItensDoPedido, { descricaoDoItem } from '../../admin/components/ItensDoPedido.jsx';
-
-// Valor em reais no texto do WhatsApp (formatarMoeda pode sair com ponto decimal).
-function reais(valor) {
-  return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-// Mensagem pronta pro fornecedor: o que está sendo pago, pedido a pedido, e o total.
-function textoWhatsapp(pagamento, emissor) {
-  const ativos = pagamento.pedidos.filter((pedido) => pedido.situacao !== 'E');
-  const pago = pagamento.lancamento?.status === 'pago';
-  const linhas = [
-    `*${pago ? 'Comprovante de pagamento' : 'Pagamento'} — ${emissor?.reciboNome || 'San·Ryu Dojo'}*`,
-    `Pagamento agrupado #${pagamento.id} · ${pagamento.fornecedor?.nome || ''}`,
-    pago
-      ? `Pago em ${formatarData(pagamento.lancamento.dataPagamento)}${pagamento.lancamento.formaPagamento ? ` (${labelForma(pagamento.lancamento.formaPagamento)})` : ''}`
-      : `Vencimento: ${formatarData(pagamento.lancamento?.vencimento || pagamento.vencimento)}`,
-    '',
-  ];
-
-  ativos.forEach((pedido) => {
-    linhas.push(`*Pedido #${pedido.id}* (${new Date(pedido.dataPedido).toLocaleDateString('pt-BR')}) — ${reais(pedido.valorTotal)}`);
-    (pedido.itens || []).forEach((item) => {
-      linhas.push(`• ${item.quantidade}× ${descricaoDoItem(item)} —${reais(item.valorTotal)}`);
-    });
-    linhas.push('');
-  });
-
-  linhas.push(`*Total: ${reais(pago ? pagamento.lancamento.valorPago ?? pagamento.lancamento.valor : pagamento.lancamento?.valor)}*`);
-  if (pagamento.observacao) linhas.push('', pagamento.observacao);
-  return linhas.join('\n');
-}
-
-function linkWhatsapp(telefone, texto) {
-  let numero = String(telefone || '').replace(/\D/g, '');
-  if (numero && numero.length <= 11) numero = `55${numero}`;
-  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
-}
+import ItensDoPedido from '../../admin/components/ItensDoPedido.jsx';
+import { linkWhatsapp, textoPagamentoCompra } from '../../utils/whatsappCompras.js';
 
 // Comprovante do pagamento agrupado: pra imprimir/salvar em PDF ou mandar pelo WhatsApp ao fornecedor,
 // mostrando quais pedidos e itens estão sendo pagos.
@@ -83,7 +47,7 @@ export default function PagamentoCompraVisualizar() {
         <CButton
           color="success"
           variant="outline"
-          href={linkWhatsapp(fornecedor.telefone, textoWhatsapp(pagamento, emissor))}
+          href={linkWhatsapp(fornecedor.telefone, textoPagamentoCompra(pagamento, emissor))}
           target="_blank"
           rel="noopener noreferrer"
           title={fornecedor.telefone ? `Enviar para ${fornecedor.telefone}` : 'Fornecedor sem telefone: o WhatsApp abre pra você escolher o contato'}

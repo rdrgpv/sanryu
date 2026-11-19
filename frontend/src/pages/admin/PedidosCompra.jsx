@@ -19,6 +19,7 @@ import api from '../../services/api';
 import AdminToolbar from '../../admin/components/AdminToolbar.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import ItensDoPedido, { resumoDosItens } from '../../admin/components/ItensDoPedido.jsx';
+import { linkWhatsapp, textoPedidoCompra } from '../../utils/whatsappCompras.js';
 import { formatarMoeda, formatarDataHora } from '../../utils/formato.js';
 import { formatarData, hoje } from '../../utils/financeiro.js';
 
@@ -29,22 +30,6 @@ const SITUACOES = {
   R: { label: 'Recebido', cor: 'success' },
   E: { label: 'Cancelado', cor: 'danger' },
 };
-
-function montarLinkWhatsApp(pedidoCompra) {
-  const telefone = (pedidoCompra.fornecedor?.telefone || '').replace(/\D/g, '');
-  const numero = telefone.length <= 11 ? `55${telefone}` : telefone;
-  const itens = (pedidoCompra.itens || [])
-    .map((item) => {
-      const variacao = item.produtoVariacao;
-      const descricao = [variacao?.produto?.descricao, variacao?.cor?.descricao, variacao?.tamanho?.descricao]
-        .filter(Boolean)
-        .join(' — ');
-      return `- ${descricao} (${variacao?.codigo}): ${item.quantidade} un.`;
-    })
-    .join('\n');
-  const texto = `Pedido de compra #${pedidoCompra.id}\nFornecedor: ${pedidoCompra.fornecedor?.nome}\n\nItens:\n${itens}\n\nValor total: ${formatarMoeda(pedidoCompra.valorTotal)}`;
-  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
-}
 
 // Mesma regra do backend (pagamentoCompraService.podeAgrupar).
 function podeAgrupar(pedido) {
@@ -58,6 +43,14 @@ export default function PedidosCompra() {
   const [pagamentos, setPagamentos] = useState([]);
   const [agrupando, setAgrupando] = useState(null);
   const [erroAgrupar, setErroAgrupar] = useState(null);
+  const [emissor, setEmissor] = useState(null);
+
+  useEffect(() => {
+    api
+      .get('/admin/configuracao-academia')
+      .then((res) => setEmissor(res.data))
+      .catch(() => setEmissor(null));
+  }, []);
 
   async function carregarPagamentos() {
     const res = await api.get('/admin/pagamentos-compra');
@@ -160,7 +153,7 @@ export default function PedidosCompra() {
   async function handleEnviarWhatsApp() {
     if (!selecionado) return;
     const res = await api.get(`/admin/pedidos-compra/${selecionado.id}`);
-    window.open(montarLinkWhatsApp(res.data), '_blank');
+    window.open(linkWhatsapp(res.data.fornecedor?.telefone, textoPedidoCompra(res.data, emissor)), '_blank');
   }
 
   return (
@@ -185,9 +178,10 @@ export default function PedidosCompra() {
               variant="outline"
               disabled={!selecionado}
               onClick={() => navigate(`/admin/pedidos-compra/${selecionadoId}/visualizar`)}
-              title="Visualizar / imprimir o pedido"
+              title="Visualizar, imprimir ou enviar o pedido ao fornecedor"
             >
-              <CIcon icon={cilDescription} />
+              <CIcon icon={cilDescription} className="me-1" />
+              Visualizar / imprimir
             </CButton>
             <CButton
               color="secondary"
@@ -210,9 +204,9 @@ export default function PedidosCompra() {
             <CButton
               color="secondary"
               variant="outline"
-              disabled={!selecionado || !['P', 'X'].includes(selecionado.situacao)}
+              disabled={!selecionado || selecionado.situacao === 'E'}
               onClick={handleEnviarWhatsApp}
-              title="Enviar por WhatsApp"
+              title="Enviar por WhatsApp ao fornecedor (pedido, ou comprovante se já pago)"
             >
               <CIcon icon={cilSend} />
             </CButton>
