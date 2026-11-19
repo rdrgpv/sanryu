@@ -356,4 +356,34 @@ async function enviarPedidoLojaPago({ destinatario, nome, pedidoId, itens, total
   }
 }
 
-module.exports = { enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental, enviarAviso, enviarPedidoLojaPago };
+// Certificado de participação (treinamento): link pra página do certificado. Devolve true/false.
+async function enviarCertificado({ destinatario, nome, evento, link }) {
+  try {
+    const transportador = await obterTransportador();
+    if (!transportador) {
+      logErro('SMTP não configurado em Configurações; certificado não enviado.');
+      return false;
+    }
+    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+
+    await transportador.sendMail({
+      from: remetente,
+      to: destinatario,
+      subject: `Seu certificado — ${evento}`,
+      text: `Olá, ${nome}!\n\nObrigado por participar de ${evento}. Seu certificado está aqui: ${link}\n\nSan·Ryu Dojo`,
+      html: `
+        <p>Olá, ${escaparHtml(nome)}!</p>
+        <p>Obrigado por participar de <strong>${escaparHtml(evento)}</strong>.</p>
+        <p><a href="${escaparHtml(link)}" style="display:inline-block;padding:10px 18px;background:#B23A2F;color:#fff;text-decoration:none;border-radius:4px">Ver meu certificado</a></p>
+        <p style="color:#666;font-size:13px">No certificado, use "Salvar PDF / imprimir" para guardar uma cópia.</p>
+        <p>San·Ryu Dojo</p>
+      `,
+    });
+    return true;
+  } catch (err) {
+    logErro('Erro ao enviar certificado por e-mail:', err);
+    return false;
+  }
+}
+
+module.exports = { enviarCertificado, enviarConfirmacaoInscricao, enviarLembretePagamentoPendente, enviarCobrancaMensalidade, enviarCodigoAcesso, enviarAulaExperimental, enviarAviso, enviarPedidoLojaPago };

@@ -11,7 +11,7 @@ const TELAS_RECEPCAO = [
   /^\/admin\/turmas\/\d+\/chamada$/,
   /^\/admin\/frequencia(\/|$)/,
   /^\/admin\/eventos\/?$/,
-  /^\/admin\/eventos\/\d+\/(inscricoes|lista-inscritos|autorizacoes)$/,
+  /^\/admin\/eventos\/\d+\/(inscricoes|lista-inscritos|autorizacoes|qrcode)$/,
   /^\/admin\/academias\/?$/,
   /^\/admin\/alunos-externos\/?$/,
   /^\/admin\/balcao\/?$/,

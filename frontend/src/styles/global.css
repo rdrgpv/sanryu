@@ -1806,3 +1806,201 @@ button, input, select, textarea {
     display: none;
   }
 }
+
+/* Certificado de participação (treinamento) — A4 deitado, na tela como prévia e no PDF. */
+@page certificado {
+  size: A4 landscape;
+  margin: 0;
+}
+
+.certificado-pagina {
+  min-height: 100vh;
+  background: var(--cor-off-white-alt);
+  padding: 1.5rem 1rem 2rem;
+}
+
+.certificado-acoes {
+  max-width: 297mm;
+  margin: 0 auto 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.certificado {
+  page: certificado;
+  width: 297mm;
+  max-width: 100%;
+  aspect-ratio: 297 / 210;
+  margin: 0 auto;
+  background: var(--cor-branco);
+  padding: 10mm;
+  box-shadow: var(--sombra);
+  box-sizing: border-box;
+}
+
+.certificado__moldura {
+  height: 100%;
+  border: 2px solid var(--cor-sumi);
+  outline: 1px solid var(--cor-hanko);
+  outline-offset: -6px;
+  padding: 8% 9% 6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.certificado__logos {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 4%;
+}
+
+.certificado__logo {
+  height: clamp(28px, 5vw, 56px);
+  width: auto;
+}
+
+.certificado__selo {
+  height: clamp(36px, 6.5vw, 72px);
+  width: auto;
+}
+
+.certificado__titulo {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.6rem, 5vw, 3.2rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--cor-sumi);
+}
+
+.certificado__subtitulo {
+  margin: 0 0 4%;
+  color: var(--cor-hanko);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: clamp(0.65rem, 1.4vw, 0.95rem);
+}
+
+.certificado__nome {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.1rem, 3.4vw, 2.2rem);
+  margin: 0 0 3%;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.2);
+  min-width: 60%;
+}
+
+.certificado__texto {
+  font-size: clamp(0.8rem, 1.8vw, 1.15rem);
+  line-height: 1.6;
+  max-width: 85%;
+  margin: 0;
+}
+
+.certificado__rodape {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+}
+
+.certificado__assinatura {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: clamp(0.65rem, 1.3vw, 0.9rem);
+  min-width: 30%;
+}
+
+.certificado__assinatura span:last-child {
+  color: var(--cor-cinza);
+}
+
+.certificado__linha {
+  display: block;
+  width: 100%;
+  border-top: 1px solid var(--cor-sumi);
+  margin-bottom: 0.35rem;
+}
+
+@media print {
+  .certificado-pagina {
+    padding: 0;
+    background: none;
+    min-height: 0;
+  }
+
+  .certificado-acoes {
+    display: none;
+  }
+
+  .certificado {
+    width: 297mm;
+    height: 210mm;
+    max-width: none;
+    aspect-ratio: auto;
+    box-shadow: none;
+  }
+
+  .certificado__logo {
+    height: 14mm;
+  }
+
+  .certificado__selo {
+    height: 18mm;
+  }
+
+  .certificado__titulo {
+    font-size: 30pt;
+  }
+
+  .certificado__subtitulo {
+    font-size: 10pt;
+  }
+
+  .certificado__nome {
+    font-size: 22pt;
+  }
+
+  .certificado__texto {
+    font-size: 13pt;
+  }
+
+  .certificado__assinatura {
+    font-size: 10pt;
+  }
+}
+
+/* Inscrição de treinamento: aviso neutro, botão com cara de link e escolha entre cadastros. */
+.alert--info {
+  background: rgba(17, 17, 17, 0.05);
+  color: var(--cor-sumi);
+  border: 1px solid rgba(17, 17, 17, 0.15);
+}
+
+.link-botao {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--cor-hanko);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.escolha-cadastro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.form__field input[readonly] {
+  background: var(--cor-off-white-alt);
+  color: var(--cor-cinza);
+}

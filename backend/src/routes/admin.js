@@ -191,6 +191,8 @@ router.put('/eventos/:id', eventoController.atualizar);
 router.delete('/eventos/:id', eventoController.remover);
 router.get('/eventos/:id/inscricoes', eventoController.listarInscricoes);
 router.get('/eventos/:id/descontos', eventoController.listarDescontos);
+router.post('/eventos/:id/certificados', eventoController.enviarCertificados);
+router.get('/eventos/:id/qrcode-inscricao', eventoController.qrCodeInscricao);
 router.post('/eventos/:id/descontos', eventoController.criarDesconto);
 router.delete('/eventos/:id/descontos/:descontoId', eventoController.removerDesconto);
 router.put('/eventos/:id/descontos/:descontoId/carteirinha', eventoController.marcarCarteirinhaDesconto);

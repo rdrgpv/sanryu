@@ -81,6 +81,20 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  // Treinamento: professor da pessoa (vem do Gatame quando existe; senão ela mesma informa).
+  professor: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  // Certificado (treinamento): token do link público e quando o e-mail saiu.
+  tokenCertificado: {
+    type: DataTypes.STRING(64),
+    allowNull: true,
+  },
+  certificadoEnviadoEm: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   // "cancelado" é sempre uma ação manual do admin (cancelar a cobrança Pix no Mercado Pago pra
   // ninguém pagar por engano) — diferente de "expirado", que o próprio Mercado Pago reporta e que
   // o fluxo de notificar pendentes trata como "gera um Pix novo e tenta de novo". Por isso os dois

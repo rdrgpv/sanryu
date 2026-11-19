@@ -5,6 +5,7 @@ const emailService = require('../services/emailService');
 const { calcularValorInscricao, TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const { qrExpirado, gerarPagamentoPix } = require('../services/pagamentoInscricaoService');
 const eventoDescontoService = require('../services/eventoDescontoService');
+const certificadoService = require('../services/certificadoService');
 const { logErro } = require('../utils/logger');
 
 // Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
@@ -29,6 +30,8 @@ function mapCandidato(raw) {
     tamanhoFaixa: raw.tamanho_faixa || null,
     origem: raw.origem,
     email: raw.email || null,
+    // O nome exato do campo do professor na API do Gatame não é documentado: aceita as variações.
+    professor: raw.professor || raw.nome_professor || raw.professor_nome || null,
   };
 }
 
@@ -84,7 +87,7 @@ async function listarPublicados(req, res) {
   const eventos = await Evento.findAll({
     where: { publicado: true },
     attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'linkMapa', 'data', 'banner'],
-    include: { model: TipoEvento, as: 'tipoEvento', attributes: ['nome'] },
+    include: { model: TipoEvento, as: 'tipoEvento', attributes: ['nome', 'treinamento'] },
     order: [['data', 'ASC']],
   });
 
@@ -94,8 +97,8 @@ async function listarPublicados(req, res) {
 async function buscarPublico(req, res) {
   const evento = await Evento.findOne({
     where: { ...whereIdOuSlug(req.params.id), publicado: true },
-    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'linkMapa', 'data', 'banner'],
-    include: { model: TipoEvento, as: 'tipoEvento', attributes: ['id', 'nome'] },
+    attributes: ['id', 'slug', 'nome', 'descricao', 'local', 'linkMapa', 'data', 'banner', 'valor', 'cargaHoraria'],
+    include: { model: TipoEvento, as: 'tipoEvento', attributes: ['id', 'nome', 'treinamento', 'cobravel'] },
   });
 
   if (!evento) {
@@ -150,6 +153,97 @@ async function consultarCarteirinha(req, res) {
   }
 }
 
+// Pessoa do Gatame com o mesmo nome (sem acento/maiúscula), pra gravar os dados oficiais dela.
+// Gatame fora do ar não impede a inscrição do treinamento: segue com o que a pessoa digitou.
+async function cadastroNoGatame(email, nome) {
+  try {
+    const resultado = await gatameService.consultarAluno(email);
+    if (!resultado.apto) return null;
+    const alvo = eventoDescontoService.normalizar(nome);
+    const raw = resultado.candidatos.find((candidato) => eventoDescontoService.normalizar(candidato.nome) === alvo);
+    return raw ? mapCandidato(raw) : null;
+  } catch (err) {
+    logErro('Gatame indisponível na inscrição de treinamento (segue com os dados digitados):', err);
+    return null;
+  }
+}
+
+// Treinamento: a tela consulta o Gatame pelo e-mail e já traz nome, faixa e professor; quem não tem
+// cadastro lá (ou não tem algum desses dados) preenche. Não depende de carteirinha.
+// Valor = o do evento (ou gratuito); valor especial por pessoa (EventoDesconto) também vale aqui.
+async function inscreverTreinamento(req, res, evento) {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  let nome = String(req.body.nome || '').trim().replace(/\s+/g, ' ');
+  const telefone = String(req.body.telefone || '').trim() || null;
+  const dataNascimento = String(req.body.dataNascimento || '').trim();
+  const responsavel = String(req.body.responsavel || '').trim();
+  let faixa = String(req.body.faixa || '').trim();
+  let professor = String(req.body.professor || '').trim().replace(/\s+/g, ' ');
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Informe um e-mail válido.' });
+  if (nome.length < 3) return res.status(400).json({ error: 'Informe o nome completo (é o que vai no certificado).' });
+
+  // Já inscrito (abriu a página de novo): devolve a inscrição, sem cobrar os outros campos.
+  const jaInscritas = await EventoAluno.findAll({ where: { eventoId: evento.id, email } });
+  const existente = jaInscritas.find((inscricao) => eventoDescontoService.normalizar(inscricao.nome) === eventoDescontoService.normalizar(nome));
+  if (existente) return res.status(200).json({ ...existente.toJSON(), jaInscrito: true });
+
+  // Do Gatame valem os dados oficiais (nome como está lá, faixa, professor); o que faltar lá vem do
+  // que a pessoa digitou.
+  const gatame = await cadastroNoGatame(email, nome);
+  if (gatame?.nome) nome = gatame.nome;
+  if (gatame?.faixa) faixa = gatame.faixa;
+  if (gatame?.professor) professor = gatame.professor;
+  if (!faixa) return res.status(400).json({ error: 'Informe a sua faixa.' });
+  if (professor.length < 3) return res.status(400).json({ error: 'Informe o nome do seu professor.' });
+  const idade = calcularIdade(dataNascimento);
+  if (idade === null || idade < 0 || idade > 120) return res.status(400).json({ error: 'Informe a data de nascimento.' });
+  if (idade < 18 && !responsavel) return res.status(400).json({ error: 'Para menores de idade, informe o nome do responsável.', menorDeIdade: true });
+
+  try {
+    // Valor do próprio evento (tipo cobrável); nunca a regra de faixa/carteirinha do exame.
+    const valorDoEvento = evento.tipoEvento.cobravel && evento.valor != null ? Number(evento.valor) : null;
+    const desconto = await eventoDescontoService.encontrar(evento.id, email, nome);
+    const valorOriginal = desconto ? valorDoEvento : null;
+    const valor = desconto ? Number(desconto.valor) : valorDoEvento;
+    const temValor = valor != null && Number(valor) > 0;
+    const pagamento = temValor ? await gerarPagamentoPix({ valor, evento, email }) : { qrcodePix: null, pixCopiaCola: null, mpPaymentId: null };
+
+    const eventoAluno = await EventoAluno.create({
+      eventoId: evento.id,
+      email,
+      nome,
+      telefone,
+      dataNascimento,
+      responsavel: idade < 18 ? responsavel : null,
+      faixaAtual: faixa,
+      professor,
+      numeroCarteirinha: gatame?.numeroCarteirinha || null,
+      validadeCarteirinha: gatame?.validadeCarteirinha || null,
+      origemDados: gatame ? gatame.origem : 'treinamento',
+      apto: true,
+      valorCobrado: temValor ? valor : null,
+      valorOriginal,
+      eventoDescontoId: desconto?.id || null,
+      statusPagamento: temValor ? 'pendente' : 'pago',
+      ...pagamento,
+    });
+    if (desconto) await desconto.update({ eventoAlunoId: eventoAluno.id });
+
+    emailService.enviarConfirmacaoInscricao({ evento, eventoAluno });
+    return res.status(201).json(eventoAluno.toJSON());
+  } catch (err) {
+    logErro('Erro ao processar inscrição de treinamento:', err);
+    return res.status(500).json({ error: 'Não foi possível concluir sua inscrição. Tente novamente em instantes.' });
+  }
+}
+
+async function certificadoPublico(req, res) {
+  const certificado = await certificadoService.buscarPorToken(req.params.token);
+  if (!certificado) return res.status(404).json({ error: 'Certificado não encontrado.' });
+  res.json(certificado);
+}
+
 async function inscrever(req, res) {
   const evento = await Evento.findOne({
     where: { ...whereIdOuSlug(req.params.id), publicado: true },
@@ -201,6 +295,10 @@ async function inscrever(req, res) {
     emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: existente });
 
     return res.status(200).json({ ...existente.toJSON(), jaInscrito: true, qrCodeRenovado: true });
+  }
+
+  if (evento.tipoEvento.treinamento) {
+    return inscreverTreinamento(req, res, evento);
   }
 
   let resultado;
@@ -361,4 +459,4 @@ async function inscrever(req, res) {
   }
 }
 
-module.exports = { listarPublicados, buscarPublico, imagemCompartilhamento, consultarCarteirinha, inscrever };
+module.exports = { listarPublicados, buscarPublico, imagemCompartilhamento, consultarCarteirinha, inscrever, certificadoPublico };

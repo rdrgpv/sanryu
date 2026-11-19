@@ -75,6 +75,7 @@ export default function EventoInscricoes() {
   const { id } = useParams();
   // Valores especiais mexem no que é cobrado: só o admin (a recepção vê as inscrições, mas não isso).
   const podeVerDescontos = useAuth().perfil === 'admin';
+  const [enviandoCertificados, setEnviandoCertificados] = useState(false);
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
   const [notificando, setNotificando] = useState(false);
@@ -217,6 +218,32 @@ export default function EventoInscricoes() {
     enviarCadastroAluno(inscricao, academiaId || undefined);
   }
 
+  // Treinamento: manda o certificado por e-mail a quem tem inscrição paga (gratuita conta). Primeiro
+  // só quem ainda não recebeu; quem já recebeu só ganha reenvio se o admin pedir.
+  async function handleEnviarCertificados() {
+    const naoEnviados = inscricoes.filter((inscricao) => inscricao.statusPagamento === 'pago' && !inscricao.certificadoEnviadoEm).length;
+    const reenviar = naoEnviados === 0;
+    const pergunta = reenviar
+      ? 'Todos os inscritos pagos já receberam o certificado. Reenviar para todos?'
+      : `Enviar o certificado por e-mail para ${naoEnviados} inscrito(s) que ainda não receberam?`;
+    if (!window.confirm(pergunta)) return;
+
+    setEnviandoCertificados(true);
+    try {
+      const res = await api.post(`/admin/eventos/${id}/certificados`, { somenteNaoEnviados: !reenviar });
+      const partes = [`${res.data.enviados} certificado(s) enviado(s).`];
+      if (res.data.falhas.length) partes.push(`Falhou para: ${res.data.falhas.join(', ')}.`);
+      if (res.data.semPagamento) partes.push(`${res.data.semPagamento} inscrição(ões) sem pagamento não receberam.`);
+      window.alert(partes.join('\n'));
+      const atualizadas = await api.get(`/admin/eventos/${id}/inscricoes`);
+      setInscricoes(atualizadas.data);
+    } catch (err) {
+      window.alert(err.response?.data?.error || 'Não foi possível enviar os certificados agora.');
+    } finally {
+      setEnviandoCertificados(false);
+    }
+  }
+
   async function handleNotificarPendentes() {
     if (pendentes.length === 0) return;
     if (!window.confirm(`Enviar lembrete de pagamento pendente para ${pendentes.length} inscrito(s)?`)) return;
@@ -295,6 +322,11 @@ export default function EventoInscricoes() {
           >
             <CIcon icon={cilList} />
           </CButton>
+          {evento?.tipoEvento?.treinamento && podeVerDescontos && (
+            <CButton color="success" onClick={handleEnviarCertificados} disabled={enviandoCertificados || inscricoes.length === 0} title="Enviar o certificado por e-mail">
+              {enviandoCertificados ? 'Enviando...' : 'Enviar certificados'}
+            </CButton>
+          )}
           {podeVerDescontos && (
             <CButton as={Link} to={`/admin/eventos/${id}/descontos`} color="secondary" variant="outline" title="Valores especiais (desconto por pessoa)">
               Valores especiais
@@ -385,6 +417,24 @@ export default function EventoInscricoes() {
               ),
           },
           { key: 'statusPagamento', label: 'Pagamento', sortable: true },
+          ...(evento?.tipoEvento?.treinamento
+            ? [
+                { key: 'professor', label: 'Professor', sortable: true, render: (i) => i.professor || '-' },
+                {
+                  key: 'certificadoEnviadoEm',
+                  label: 'Certificado',
+                  sortable: true,
+                  render: (i) =>
+                    i.certificadoEnviadoEm ? (
+                      <a href={`/certificados/${i.tokenCertificado}`} target="_blank" rel="noopener noreferrer" title="Abrir o certificado">
+                        Enviado {new Date(i.certificadoEnviadoEm).toLocaleDateString('pt-BR')}
+                      </a>
+                    ) : (
+                      '-'
+                    ),
+                },
+              ]
+            : []),
           {
             key: 'qrcodePix',
             label: 'QR Pix',

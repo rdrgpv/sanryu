@@ -25,6 +25,7 @@ router.get('/eventos/:id/publico', inscricaoController.buscarPublico);
 router.get('/eventos/:id/imagem-compartilhamento', inscricaoController.imagemCompartilhamento);
 router.post('/eventos/:id/consulta', inscricaoController.consultarCarteirinha);
 router.post('/eventos/:id/inscricoes', inscricaoController.inscrever);
+router.get('/certificados/:token', inscricaoController.certificadoPublico);
 router.get('/eventos/:id/autorizacao', autorizacaoController.buscarPublico);
 router.post('/eventos/:id/autorizacoes', autorizacaoController.criar);
 

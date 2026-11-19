@@ -118,6 +118,15 @@ export default function InscricaoEvento() {
   const [copiado, setCopiado] = useState(false);
   const [mostrarQrCode, setMostrarQrCode] = useState(false);
   const [gerandoNovoQrCode, setGerandoNovoQrCode] = useState(false);
+  // Treinamento: consulta o Gatame pelo e-mail (traz nome, faixa e professor); quem não tem cadastro
+  // lá, ou não tem algum desses dados, preenche. Não depende de carteirinha.
+  const [dadosTreinamento, setDadosTreinamento] = useState({ nome: '', faixa: '', professor: '', telefone: '', dataNascimento: '', responsavel: '' });
+  // null = ainda não consultou; [] = não achou no Gatame; [...] = cadastros achados.
+  const [cadastrosTreino, setCadastrosTreino] = useState(null);
+  // Campos que vieram do Gatame ficam travados (nome, faixa, professor).
+  const [doGatame, setDoGatame] = useState({});
+  const treinamento = Boolean(evento?.tipoEvento?.treinamento);
+  const menorNoTreinamento = (calcularIdade(dadosTreinamento.dataNascimento) ?? 99) < 18;
 
   useEffect(() => {
     api
@@ -189,6 +198,64 @@ export default function InscricaoEvento() {
     } finally {
       setInscrevendo(false);
     }
+  }
+
+  async function handleConsultarTreinamento(event) {
+    event.preventDefault();
+    setErro(null);
+    setConsultando(true);
+    try {
+      const res = await api.post(`/eventos/${id}/consulta`, { email });
+      const achados = res.data.apto ? res.data.candidatos : [];
+      setCadastrosTreino(achados);
+      if (achados.length === 1) escolherCadastroTreino(achados[0]);
+      else escolherCadastroTreino(null);
+    } catch (err) {
+      // Gatame fora do ar não impede a inscrição: a pessoa preenche os dados.
+      setCadastrosTreino([]);
+      escolherCadastroTreino(null);
+    } finally {
+      setConsultando(false);
+    }
+  }
+
+  // Preenche com o cadastro do Gatame (ou limpa, pra preencher à mão).
+  function escolherCadastroTreino(cadastro) {
+    setDoGatame({ nome: Boolean(cadastro?.nome), faixa: Boolean(cadastro?.faixa), professor: Boolean(cadastro?.professor), escolhido: Boolean(cadastro) });
+    setDadosTreinamento((prev) => ({
+      ...prev,
+      nome: cadastro?.nome || '',
+      faixa: cadastro?.faixa || '',
+      professor: cadastro?.professor || '',
+      dataNascimento: paraInputDate(cadastro?.dataNascimento) || prev.dataNascimento,
+    }));
+  }
+
+  function trocarEmailTreino() {
+    setCadastrosTreino(null);
+    setDoGatame({});
+    setDadosTreinamento({ nome: '', faixa: '', professor: '', telefone: '', dataNascimento: '', responsavel: '' });
+    setErro(null);
+  }
+
+  async function handleInscreverTreinamento(event) {
+    event.preventDefault();
+    setErro(null);
+    setInscrevendo(true);
+
+    try {
+      const res = await api.post(`/eventos/${id}/inscricoes`, { email, ...dadosTreinamento });
+      setResultado(res.data);
+      setMostrarQrCode(!res.data.jaInscrito);
+    } catch (err) {
+      setErro(err.response?.data?.error || 'Não foi possível concluir sua inscrição. Tente novamente.');
+    } finally {
+      setInscrevendo(false);
+    }
+  }
+
+  function atualizarTreinamento(campo, valor) {
+    setDadosTreinamento((prev) => ({ ...prev, [campo]: valor }));
   }
 
   async function handleCopiarPix() {
@@ -264,7 +331,124 @@ export default function InscricaoEvento() {
             </div>
           )}
 
-          {!resultado && (
+          {!resultado && treinamento && cadastrosTreino === null && (
+            <form className="form" onSubmit={handleConsultarTreinamento}>
+              <label className="form__field">
+                <span>Seu e-mail (o certificado chega aqui)</span>
+                <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
+              </label>
+              <button type="submit" className="btn btn--primary" disabled={consultando}>
+                {consultando ? 'Consultando...' : 'Continuar'}
+              </button>
+              {erro && <p className="alert alert--error">{erro}</p>}
+            </form>
+          )}
+
+          {!resultado && treinamento && cadastrosTreino !== null && (
+            <form className="form" onSubmit={handleInscreverTreinamento}>
+              <p className="tile__meta">
+                {email} ·{' '}
+                <button type="button" className="link-botao" onClick={trocarEmailTreino}>
+                  trocar
+                </button>
+              </p>
+
+              {cadastrosTreino.length > 1 && (
+                <div className="form__field">
+                  <span>Encontramos mais de um cadastro com este e-mail. Quem vai participar?</span>
+                  <div className="escolha-cadastro">
+                    {cadastrosTreino.map((cadastro) => (
+                      <button
+                        key={`${cadastro.nome}-${cadastro.numeroCarteirinha || ''}`}
+                        type="button"
+                        className={`filter-chip ${doGatame.escolhido && dadosTreinamento.nome === cadastro.nome ? 'is-active' : ''}`}
+                        onClick={() => escolherCadastroTreino(cadastro)}
+                      >
+                        {cadastro.nome}
+                        {cadastro.faixa ? ` · ${cadastro.faixa}` : ''}
+                      </button>
+                    ))}
+                    <button type="button" className={`filter-chip ${!doGatame.escolhido ? 'is-active' : ''}`} onClick={() => escolherCadastroTreino(null)}>
+                      Outra pessoa
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {cadastrosTreino.length === 0 && (
+                <p className="alert alert--info">Não encontramos seu cadastro no Morganti University. Preencha seus dados abaixo.</p>
+              )}
+              {doGatame.escolhido && cadastrosTreino.length === 1 && (
+                <p className="alert alert--success">Encontramos seu cadastro. Confira os dados e complete o que faltar.</p>
+              )}
+
+              <label className="form__field">
+                <span>Nome completo (vai no certificado)</span>
+                <input
+                  value={dadosTreinamento.nome}
+                  onChange={(event) => atualizarTreinamento('nome', event.target.value)}
+                  readOnly={doGatame.nome}
+                  required
+                  minLength={3}
+                  autoComplete="name"
+                />
+              </label>
+              <label className="form__field">
+                <span>Faixa</span>
+                {doGatame.faixa ? (
+                  <input value={dadosTreinamento.faixa} readOnly />
+                ) : (
+                  <select value={dadosTreinamento.faixa} onChange={(event) => atualizarTreinamento('faixa', event.target.value)} required>
+                    <option value="">Selecione</option>
+                    {faixas.map((faixa) => (
+                      <option key={faixa.id} value={faixa.nome}>
+                        {faixa.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </label>
+              <label className="form__field">
+                <span>Professor</span>
+                <input
+                  value={dadosTreinamento.professor}
+                  onChange={(event) => atualizarTreinamento('professor', event.target.value)}
+                  readOnly={doGatame.professor}
+                  required
+                  minLength={3}
+                  placeholder="Nome do seu professor / sensei"
+                />
+              </label>
+              <label className="form__field">
+                <span>Telefone / WhatsApp</span>
+                <input
+                  value={dadosTreinamento.telefone}
+                  onChange={(event) => atualizarTreinamento('telefone', formatarTelefone(event.target.value))}
+                  inputMode="tel"
+                  autoComplete="tel"
+                />
+              </label>
+              <label className="form__field">
+                <span>Data de nascimento</span>
+                <input type="date" value={dadosTreinamento.dataNascimento} onChange={(event) => atualizarTreinamento('dataNascimento', event.target.value)} required />
+              </label>
+              {dadosTreinamento.dataNascimento && menorNoTreinamento && (
+                <label className="form__field">
+                  <span>Nome do responsável</span>
+                  <input value={dadosTreinamento.responsavel} onChange={(event) => atualizarTreinamento('responsavel', event.target.value)} required />
+                </label>
+              )}
+              {evento.tipoEvento?.cobravel && Number(evento.valor) > 0 && (
+                <p className="tile__meta">Valor da inscrição: R$ {Number(evento.valor).toFixed(2).replace('.', ',')} (pagamento por Pix)</p>
+              )}
+              <button type="submit" className="btn btn--primary" disabled={inscrevendo}>
+                {inscrevendo ? 'Inscrevendo...' : 'Fazer inscrição'}
+              </button>
+              {erro && <p className="alert alert--error">{erro}</p>}
+            </form>
+          )}
+
+          {!resultado && !treinamento && evento && (
             <form className="form" onSubmit={handleConsultar}>
               <label className="form__field">
                 <span>Email (Email utilizado no Morganti University)</span>
@@ -525,7 +709,7 @@ export default function InscricaoEvento() {
                 )}
               </div>
 
-              {resultado.valorCobrado != null ? (
+              {resultado.valorCobrado != null && Number(resultado.valorCobrado) > 0 ? (
                 <>
                   <p>Valor: R$ {Number(resultado.valorCobrado).toFixed(2)}</p>
                   {resultado.carteirinhaValida === false &&
@@ -574,7 +758,7 @@ export default function InscricaoEvento() {
                   )}
                 </>
               ) : resultado.statusPagamento === 'pago' ? (
-                <p className="alert alert--success">Inscrição gratuita, sem pagamento necessário.</p>
+                <p className="alert alert--success">Inscrição confirmada, sem pagamento necessário.</p>
               ) : (
                 <p className="alert alert--error">
                   Ainda não foi possível calcular o valor da sua inscrição. Nossa equipe entrará em contato.
@@ -582,6 +766,11 @@ export default function InscricaoEvento() {
               )}
 
               {resultado.aviso && <p className="alert alert--error">{resultado.aviso}</p>}
+              {treinamento && (
+                <p className="tile__meta" style={{ marginTop: '1rem' }}>
+                  Ao final do treinamento, o certificado de participação chega no seu e-mail.
+                </p>
+              )}
             </div>
           )}
         </div>

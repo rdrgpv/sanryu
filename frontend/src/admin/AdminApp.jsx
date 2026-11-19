@@ -30,6 +30,7 @@ import Etiquetas from '../pages/admin/Etiquetas.jsx';
 import PedidoCompraVisualizar from '../pages/admin/PedidoCompraVisualizar.jsx';
 import PagamentoCompraVisualizar from '../pages/admin/PagamentoCompraVisualizar.jsx';
 import EventoDescontos from '../pages/admin/EventoDescontos.jsx';
+import EventoQrCode from '../pages/admin/EventoQrCode.jsx';
 import ResumoFinanceiro from '../pages/admin/financeiro/ResumoFinanceiro.jsx';
 import Lancamentos from '../pages/admin/financeiro/Lancamentos.jsx';
 import Recorrencias from '../pages/admin/financeiro/Recorrencias.jsx';
@@ -157,6 +158,7 @@ export default function AdminApp() {
       <Route path="eventos/:id/editar" element={<AdminRoute><EventoForm /></AdminRoute>} />
       <Route path="eventos/:id/inscricoes" element={<AdminRoute><EventoInscricoes /></AdminRoute>} />
       <Route path="eventos/:id/descontos" element={<AdminRoute><EventoDescontos /></AdminRoute>} />
+      <Route path="eventos/:id/qrcode" element={<AdminRoute><EventoQrCode /></AdminRoute>} />
       <Route path="eventos/:id/relatorio-exame" element={<AdminRoute><RelatorioExame /></AdminRoute>} />
       <Route path="eventos/:id/lista-inscritos" element={<AdminRoute><ListaInscritos /></AdminRoute>} />
       <Route path="eventos/:id/autorizacoes" element={<AdminRoute><EventoAutorizacoes /></AdminRoute>} />

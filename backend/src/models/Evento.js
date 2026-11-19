@@ -59,6 +59,16 @@ const Evento = sequelize.define('Evento', {
     allowNull: false,
     defaultValue: false,
   },
+  // Treinamento: carga horária impressa no certificado (texto livre, ex.: "4 horas") e o texto do
+  // certificado com marcadores {{nome}}, {{evento}}... (vazio = texto padrão).
+  cargaHoraria: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+  },
+  textoCertificado: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
   // Link do Google Maps colado pelo admin (o "Compartilhar" do Maps). Opcional: sem ele, o site
   // busca o "local" no Maps, o que pode cair no lugar errado se o texto for só um nome.
   linkMapa: {

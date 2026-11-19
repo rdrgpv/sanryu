@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { CCard, CCardBody, CForm, CFormLabel, CFormInput, CFormCheck, CRow, CCol, CButton } from '@coreui/react';
 import api from '../../services/api';
 
-const estadoInicial = { nome: '', cobravel: false, valor: '' };
+const estadoInicial = { nome: '', cobravel: false, valor: '', treinamento: false };
 
 export default function TipoEventoForm() {
   const { id } = useParams();
@@ -15,7 +15,7 @@ export default function TipoEventoForm() {
   useEffect(() => {
     if (!editando) return;
     api.get(`/admin/tipos-evento/${id}`).then((res) => {
-      setForm({ nome: res.data.nome, cobravel: res.data.cobravel, valor: res.data.valor ?? '' });
+      setForm({ nome: res.data.nome, cobravel: res.data.cobravel, valor: res.data.valor ?? '', treinamento: !!res.data.treinamento });
     });
   }, [id, editando]);
 
@@ -73,6 +73,14 @@ export default function TipoEventoForm() {
                   />
                 </CCol>
               )}
+              <CCol xs={12}>
+                <CFormCheck
+                  name="treinamento"
+                  label="Treinamento: inscrição aberta (sem consultar a carteirinha) e certificado de participação por e-mail no final"
+                  checked={form.treinamento}
+                  onChange={handleChange}
+                />
+              </CCol>
             </CRow>
 
             <div className="d-flex gap-2 mt-4">

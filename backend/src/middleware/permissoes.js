@@ -43,7 +43,7 @@ const RECEPCAO = [
   ['GET', /^\/frequencia$/],
 
   ['GET', /^\/eventos(\/\d+)?$/],
-  ['GET', /^\/eventos\/\d+\/(inscricoes|autorizacoes)$/],
+  ['GET', /^\/eventos\/\d+\/(inscricoes|autorizacoes|qrcode-inscricao)$/],
   ['POST', /^\/inscricoes\/\d+\/verificar-pagamento$/],
   ['POST', /^\/inscricoes\/\d+\/cadastrar-aluno$/],
 

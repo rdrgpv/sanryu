@@ -14,6 +14,7 @@ import PagamentoMensalidade from './pages/PagamentoMensalidade.jsx';
 import AulaExperimental from './pages/AulaExperimental.jsx';
 import ReciboMensalidade from './pages/ReciboMensalidade.jsx';
 import PagamentoPedidoLoja from './pages/PagamentoPedidoLoja.jsx';
+import Certificado from './pages/Certificado.jsx';
 import Login from './pages/Login.jsx';
 import PublicLayout from './components/PublicLayout.jsx';
 
@@ -39,6 +40,7 @@ export default function App() {
       <Route path="/mensalidades/:token" element={<PublicLayout><PagamentoMensalidade /></PublicLayout>} />
       {/* Sem o layout do site: página limpa pra imprimir/salvar em PDF. */}
       <Route path="/mensalidades/:token/recibo" element={<ReciboMensalidade />} />
+      <Route path="/certificados/:token" element={<Certificado />} />
       <Route path="/loja/pedidos/:token" element={<PublicLayout><PagamentoPedidoLoja /></PublicLayout>} />
       <Route path="/aula-experimental" element={<PublicLayout><AulaExperimental /></PublicLayout>} />
       <Route path="/login" element={<Login />} />

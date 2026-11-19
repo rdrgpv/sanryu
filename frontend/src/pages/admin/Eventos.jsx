@@ -59,15 +59,26 @@ export default function Eventos() {
         onExcluir={handleExcluir}
         onAtualizar={carregarEventos}
         extra={
-          <CButton
-            color="secondary"
-            variant="outline"
-            disabled={!selecionadoId}
-            onClick={() => navigate(`/admin/eventos/${selecionadoId}/inscricoes`)}
-            title="Inscrições"
-          >
-            <CIcon icon={cilList} />
-          </CButton>
+          <>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionadoId}
+              onClick={() => navigate(`/admin/eventos/${selecionadoId}/inscricoes`)}
+              title="Inscrições"
+            >
+              <CIcon icon={cilList} />
+            </CButton>
+            <CButton
+              color="secondary"
+              variant="outline"
+              disabled={!selecionadoId}
+              onClick={() => navigate(`/admin/eventos/${selecionadoId}/qrcode`)}
+              title="QR Code para a pessoa se inscrever no evento"
+            >
+              QR Code
+            </CButton>
+          </>
         }
       />
 

@@ -732,3 +732,65 @@
     outline: none;
   }
 }
+
+/* Cartaz do QR Code de inscrição do evento (imprime numa folha A4 em pé). */
+.cartaz-qrcode {
+  max-width: 180mm;
+  margin: 0 auto;
+  padding: 12mm 10mm;
+  background: #fff;
+  text-align: center;
+  border: 1px solid #ddd;
+  break-inside: avoid;
+}
+
+.cartaz-qrcode__logo {
+  height: 16mm;
+  width: auto;
+  margin-bottom: 6mm;
+}
+
+.cartaz-qrcode__chamada {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #b23a2f;
+  font-weight: 700;
+  margin: 0 0 2mm;
+}
+
+.cartaz-qrcode__evento {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 2mm;
+}
+
+.cartaz-qrcode__data {
+  color: #555;
+  margin: 0 0 6mm;
+}
+
+.cartaz-qrcode__qr {
+  width: 120mm;
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.cartaz-qrcode__instrucao {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 4mm 0 1mm;
+}
+
+.cartaz-qrcode__link {
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0;
+  word-break: break-all;
+}
+
+@media print {
+  .cartaz-qrcode {
+    border: none;
+  }
+}

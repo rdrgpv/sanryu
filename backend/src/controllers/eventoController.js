@@ -1,5 +1,8 @@
 const { Evento, TipoEvento, EventoAluno, Instrutor, Aluno, Faixa, Academia } = require('../models');
 const eventoDescontoService = require('../services/eventoDescontoService');
+const certificadoService = require('../services/certificadoService');
+const configService = require('../services/configService');
+const QRCode = require('qrcode');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
@@ -372,6 +375,25 @@ async function notificarPendentes(req, res) {
   res.json({ enviados: pendentes.length });
 }
 
+async function enviarCertificados(req, res) {
+  try {
+    res.json(await certificadoService.enviar(Number(req.params.id), { somenteNaoEnviados: req.body.somenteNaoEnviados !== false }));
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+// QR Code que leva à página de inscrição do evento (pra imprimir e deixar na entrada).
+async function qrCodeInscricao(req, res) {
+  const evento = await Evento.findByPk(req.params.id);
+  if (!evento) return res.status(404).json({ error: 'Evento não encontrado.' });
+
+  const base = ((await configService.obterValor('SITE_URL')) || '').replace(/\/+$/, '');
+  const link = `${base}/eventos/${evento.slug || evento.id}`;
+  const qrcode = await QRCode.toDataURL(link, { width: 900, margin: 1, errorCorrectionLevel: 'M' });
+  res.json({ link, qrcode, publicado: evento.publicado });
+}
+
 async function listarDescontos(req, res) {
   res.json(await eventoDescontoService.listar(req.params.id));
 }
@@ -402,6 +424,8 @@ async function marcarCarteirinhaDesconto(req, res) {
 }
 
 module.exports = {
+  enviarCertificados,
+  qrCodeInscricao,
   listarDescontos,
   criarDesconto,
   removerDesconto,

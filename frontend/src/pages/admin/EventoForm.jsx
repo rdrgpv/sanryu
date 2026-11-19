@@ -44,7 +44,11 @@ const estadoInicial = {
   valor: '',
   publicado: false,
   banner: '',
+  cargaHoraria: '',
+  textoCertificado: '',
 };
+
+const MARCADORES_CERTIFICADO = ['{{nome}}', '{{evento}}', '{{data}}', '{{cargaHoraria}}', '{{instrutor}}', '{{local}}'];
 
 function paraInputDatetime(iso) {
   if (!iso) return '';
@@ -85,6 +89,8 @@ export default function EventoForm() {
         valor: evento.valor ?? '',
         publicado: evento.publicado,
         banner: evento.banner || '',
+        cargaHoraria: evento.cargaHoraria || '',
+        textoCertificado: evento.textoCertificado || '',
       });
     });
   }, [id, editando]);
@@ -257,6 +263,33 @@ export default function EventoForm() {
               <CCol md={2} className="d-flex align-items-end">
                 <CFormCheck name="publicado" label="Publicado" checked={form.publicado} onChange={handleChange} />
               </CCol>
+
+              {tipoSelecionado?.treinamento && (
+                <>
+                  <CCol md={3}>
+                    <CFormLabel>Carga horária</CFormLabel>
+                    <CFormInput name="cargaHoraria" value={form.cargaHoraria} onChange={handleChange} placeholder="4 horas" />
+                  </CCol>
+                  <CCol md={9}>
+                    <CFormLabel>Texto do certificado</CFormLabel>
+                    <CFormTextarea
+                      name="textoCertificado"
+                      rows={3}
+                      value={form.textoCertificado}
+                      onChange={handleChange}
+                      placeholder="Vazio = Certificamos que {{nome}} participou do treinamento {{evento}}, realizado em {{data}}, em {{local}}, com carga horária de {{cargaHoraria}}."
+                    />
+                    <div className="form-text">
+                      Marcadores preenchidos automaticamente:{' '}
+                      {MARCADORES_CERTIFICADO.map((marcador) => (
+                        <code key={marcador} className="me-2">
+                          {marcador}
+                        </code>
+                      ))}
+                    </div>
+                  </CCol>
+                </>
+              )}
 
               <CCol xs={12}>
                 <CFormLabel>Descrição</CFormLabel>
