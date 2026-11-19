@@ -528,9 +528,12 @@ export default function InscricaoEvento() {
               {resultado.valorCobrado != null ? (
                 <>
                   <p>Valor: R$ {Number(resultado.valorCobrado).toFixed(2)}</p>
-                  {resultado.carteirinhaValida === false && (
-                    <p className="tile__meta">Aluno sem carteirinha válida — valor cobrado sem o desconto de carteirinha.</p>
-                  )}
+                  {resultado.carteirinhaValida === false &&
+                    (resultado.eventoDescontoId ? (
+                      <p className="tile__meta">Carteirinha inválida — desconto concedido pelo administrador.</p>
+                    ) : (
+                      <p className="tile__meta">Aluno sem carteirinha válida — valor cobrado sem o desconto de carteirinha.</p>
+                    ))}
                   {resultado.qrcodePix ? (
                     <div style={{ marginTop: '1rem' }}>
                       <button type="button" className="btn btn--ghost" onClick={() => setMostrarQrCode((v) => !v)}>
