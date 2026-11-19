@@ -71,6 +71,16 @@ const EventoAluno = sequelize.define('EventoAluno', {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
+  // Com valor especial (EventoDesconto): o que seria cobrado pela regra normal, pra mostrar a
+  // diferença na lista. Null = sem valor especial.
+  valorOriginal: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  eventoDescontoId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   // "cancelado" é sempre uma ação manual do admin (cancelar a cobrança Pix no Mercado Pago pra
   // ninguém pagar por engano) — diferente de "expirado", que o próprio Mercado Pago reporta e que
   // o fluxo de notificar pendentes trata como "gera um Pix novo e tenta de novo". Por isso os dois

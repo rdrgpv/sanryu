@@ -4,6 +4,7 @@ const gatameService = require('../services/gatameService');
 const emailService = require('../services/emailService');
 const { calcularValorInscricao, TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const { qrExpirado, gerarPagamentoPix } = require('../services/pagamentoInscricaoService');
+const eventoDescontoService = require('../services/eventoDescontoService');
 const { logErro } = require('../utils/logger');
 
 // Rotas públicas aceitam tanto o id numérico quanto o slug amigável no mesmo parâmetro.
@@ -304,6 +305,17 @@ async function inscrever(req, res) {
       return res.status(400).json({ error: resultadoValor.erroValidacao, opcoesFaixa: resultadoValor.opcoesFaixa });
     }
 
+    // Valor especial cadastrado pelo admin pra essa pessoa (ex.: carteirinha paga e não efetivada):
+    // substitui o valor da regra, que fica guardado em valorOriginal pra mostrar a diferença.
+    const desconto = await eventoDescontoService.encontrar(evento.id, email, candidato.nome, existente?.id);
+    let valorOriginal = null;
+    if (desconto) {
+      valorOriginal = resultadoValor.valor ?? null;
+      resultadoValor.valor = Number(desconto.valor);
+      resultadoValor.statusPagamento = Number(desconto.valor) > 0 ? 'pendente' : 'pago';
+      resultadoValor.aviso = undefined;
+    }
+
     let qrcodePix = null;
     let pixCopiaCola = null;
     let mpPaymentId = null;
@@ -328,6 +340,8 @@ async function inscrever(req, res) {
       origemDados: candidato.origem,
       apto: true,
       valorCobrado: resultadoValor.valor,
+      valorOriginal,
+      eventoDescontoId: desconto?.id || null,
       statusPagamento: resultadoValor.statusPagamento,
       qrcodePix,
       pixCopiaCola,
@@ -335,6 +349,7 @@ async function inscrever(req, res) {
     };
 
     const eventoAluno = pendenteSemValor ? await existente.update(dadosInscricao) : await EventoAluno.create(dadosInscricao);
+    if (desconto) await desconto.update({ eventoAlunoId: eventoAluno.id });
 
     // Não aguarda nem deixa falha de e-mail atrasar/derrubar a resposta — a inscrição já está concluída.
     emailService.enviarConfirmacaoInscricao({ evento, eventoAluno });

@@ -40,6 +40,7 @@ const PedidoItem = require('./PedidoItem');
 const PedidoItemPersonalizacao = require('./PedidoItemPersonalizacao');
 const Fornecedor = require('./Fornecedor');
 const PagamentoCompra = require('./PagamentoCompra');
+const EventoDesconto = require('./EventoDesconto');
 const PedidoCompra = require('./PedidoCompra');
 const PedidoCompraItem = require('./PedidoCompraItem');
 const PedidoItemCompra = require('./PedidoItemCompra');
@@ -59,6 +60,9 @@ TipoEvento.hasMany(Evento, { foreignKey: 'tipoEventoId', as: 'eventos' });
 Evento.belongsTo(TipoEvento, { foreignKey: 'tipoEventoId', as: 'tipoEvento' });
 
 Evento.hasMany(EventoAluno, { foreignKey: 'eventoId', as: 'inscricoes' });
+Evento.hasMany(EventoDesconto, { foreignKey: 'eventoId', as: 'descontos' });
+EventoDesconto.belongsTo(EventoAluno, { foreignKey: 'eventoAlunoId', as: 'inscricao' });
+EventoAluno.belongsTo(EventoDesconto, { foreignKey: 'eventoDescontoId', as: 'desconto' });
 EventoAluno.belongsTo(Evento, { foreignKey: 'eventoId', as: 'evento' });
 
 Evento.hasMany(EventoAutorizacao, { foreignKey: 'eventoId', as: 'autorizacoes' });
@@ -225,6 +229,7 @@ module.exports = {
   PedidoItemPersonalizacao,
   Fornecedor,
   PagamentoCompra,
+  EventoDesconto,
   PedidoCompra,
   PedidoCompraItem,
   PedidoItemCompra,

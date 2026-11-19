@@ -1,4 +1,5 @@
 const { Evento, TipoEvento, EventoAluno, Instrutor, Aluno, Faixa, Academia } = require('../models');
+const eventoDescontoService = require('../services/eventoDescontoService');
 const { TIPO_EXAME_DE_FAIXA_ID } = require('../services/valorInscricaoService');
 const mercadoPagoService = require('../services/mercadoPagoService');
 const emailService = require('../services/emailService');
@@ -371,7 +372,40 @@ async function notificarPendentes(req, res) {
   res.json({ enviados: pendentes.length });
 }
 
+async function listarDescontos(req, res) {
+  res.json(await eventoDescontoService.listar(req.params.id));
+}
+
+async function criarDesconto(req, res) {
+  try {
+    res.status(201).json(await eventoDescontoService.criar(Number(req.params.id), req.body));
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async function removerDesconto(req, res) {
+  try {
+    await eventoDescontoService.remover(req.params.id, req.params.descontoId);
+    res.status(204).send();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async function marcarCarteirinhaDesconto(req, res) {
+  try {
+    res.json(await eventoDescontoService.marcarCarteirinha(req.params.id, req.params.descontoId, req.body.enviada !== false));
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
 module.exports = {
+  listarDescontos,
+  criarDesconto,
+  removerDesconto,
+  marcarCarteirinhaDesconto,
   listar,
   buscarPorId,
   criar,

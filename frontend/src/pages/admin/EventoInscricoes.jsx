@@ -34,6 +34,7 @@ import {
   cilOptions,
 } from '@coreui/icons';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext.jsx';
 import AdminDataTable from '../../admin/components/AdminDataTable.jsx';
 import { OPCOES_TAMANHO_FAIXA } from '../../utils/opcoesTamanhoFaixa.js';
 import { formatarDataHora, formatarMoeda } from '../../utils/formato.js';
@@ -72,6 +73,8 @@ function formatarData(valor) {
 
 export default function EventoInscricoes() {
   const { id } = useParams();
+  // Valores especiais mexem no que é cobrado: só o admin (a recepção vê as inscrições, mas não isso).
+  const podeVerDescontos = useAuth().perfil === 'admin';
   const [evento, setEvento] = useState(null);
   const [inscricoes, setInscricoes] = useState([]);
   const [notificando, setNotificando] = useState(false);
@@ -292,6 +295,11 @@ export default function EventoInscricoes() {
           >
             <CIcon icon={cilList} />
           </CButton>
+          {podeVerDescontos && (
+            <CButton as={Link} to={`/admin/eventos/${id}/descontos`} color="secondary" variant="outline" title="Valores especiais (desconto por pessoa)">
+              Valores especiais
+            </CButton>
+          )}
           <CButton
             as={Link}
             to={`/admin/eventos/${id}/autorizacoes`}
@@ -361,7 +369,20 @@ export default function EventoInscricoes() {
             align: 'end',
             sortable: true,
             sortValue: (i) => (i.valorCobrado != null ? Number(i.valorCobrado) : null),
-            render: (i) => (i.valorCobrado != null ? `R$ ${Number(i.valorCobrado).toFixed(2)}` : '-'),
+            render: (i) =>
+              i.valorCobrado == null ? (
+                '-'
+              ) : (
+                <>
+                  {i.valorOriginal != null && (
+                    <s className="text-body-secondary small me-1" title="Valor pela regra normal">
+                      R$ {Number(i.valorOriginal).toFixed(2)}
+                    </s>
+                  )}
+                  R$ {Number(i.valorCobrado).toFixed(2)}
+                  {i.eventoDescontoId && <div className="small text-info">valor especial</div>}
+                </>
+              ),
           },
           { key: 'statusPagamento', label: 'Pagamento', sortable: true },
           {
