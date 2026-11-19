@@ -1,20 +1,29 @@
 import { formatarData, labelForma } from './financeiro.js';
 import { descricaoDoItem } from '../admin/components/ItensDoPedido.jsx';
 
-// Mensagens pro fornecedor pelo WhatsApp: pedido de compra (o que estamos pedindo/pagando) e
-// pagamento agrupado. Só a descrição dos itens — o código é interno, não diz nada ao fornecedor.
+// Mensagens pro fornecedor pelo WhatsApp: pedido de compra e pagamento agrupado. Formato enxuto:
+// título, a data (pagamento, vencimento ou previsão), os itens em sequência e o total. Só a
+// descrição dos itens — o código e o número do pedido são internos, não dizem nada ao fornecedor.
 
 // Valor em reais no texto (formatarMoeda pode sair com ponto decimal).
 function reais(valor) {
   return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function nomeDoDojo(emissor) {
-  return emissor?.reciboNome || 'San·Ryu Dojo';
+function titulo(pago, emissor, semPagamento = 'Pedido de compra') {
+  return `*${pago ? 'Comprovante de pagamento' : semPagamento} — ${emissor?.reciboNome || 'San·Ryu Dojo'}*`;
 }
 
 function linhasDosItens(itens = []) {
   return itens.map((item) => `• ${item.quantidade}× ${descricaoDoItem(item)} — ${reais(item.valorTotal)}`);
+}
+
+function montar(cabecalho, data, itens, total, observacao) {
+  const linhas = [cabecalho, ''];
+  if (data) linhas.push(data, '');
+  linhas.push(...linhasDosItens(itens), '', `*Total: ${reais(total)}*`);
+  if (observacao) linhas.push('', observacao);
+  return linhas.join('\n');
 }
 
 export function linkWhatsapp(telefone, texto) {
@@ -26,37 +35,22 @@ export function linkWhatsapp(telefone, texto) {
 // Um pedido de compra: vira "comprovante" quando já foi pago.
 export function textoPedidoCompra(pedido, emissor) {
   const pago = Boolean(pedido.dataPagamento);
-  const linhas = [
-    `*${pago ? 'Comprovante de pagamento' : 'Pedido de compra'} — ${nomeDoDojo(emissor)}*`,
-    `Pedido #${pedido.id} (${new Date(pedido.dataPedido).toLocaleDateString('pt-BR')}) · ${pedido.fornecedor?.nome || ''}`,
-  ];
-  if (pago) linhas.push(`Pago em ${new Date(pedido.dataPagamento).toLocaleDateString('pt-BR')}`);
-  else if (pedido.dataPrevistaEntrega) linhas.push(`Previsão de entrega: ${formatarData(pedido.dataPrevistaEntrega)}`);
-
-  linhas.push('', ...linhasDosItens(pedido.itens), '', `*Total: ${reais(pedido.valorTotal)}*`);
-  if (pedido.observacao) linhas.push('', pedido.observacao);
-  return linhas.join('\n');
+  const data = pago
+    ? `Pago em ${new Date(pedido.dataPagamento).toLocaleDateString('pt-BR')}`
+    : pedido.dataPrevistaEntrega
+      ? `Previsão de entrega: ${formatarData(pedido.dataPrevistaEntrega)}`
+      : null;
+  return montar(titulo(pago, emissor), data, pedido.itens, pedido.valorTotal, pedido.observacao);
 }
 
-// Pagamento agrupado: o que está sendo pago, pedido a pedido, e o total.
+// Pagamento agrupado: os itens de todos os pedidos do grupo numa lista só (cancelados ficam de fora).
 export function textoPagamentoCompra(pagamento, emissor) {
-  const ativos = pagamento.pedidos.filter((pedido) => pedido.situacao !== 'E');
   const pago = pagamento.lancamento?.status === 'pago';
-  const linhas = [
-    `*${pago ? 'Comprovante de pagamento' : 'Pagamento'} — ${nomeDoDojo(emissor)}*`,
-    `Pagamento agrupado #${pagamento.id} · ${pagamento.fornecedor?.nome || ''}`,
-    pago
-      ? `Pago em ${formatarData(pagamento.lancamento.dataPagamento)}${pagamento.lancamento.formaPagamento ? ` (${labelForma(pagamento.lancamento.formaPagamento)})` : ''}`
-      : `Vencimento: ${formatarData(pagamento.lancamento?.vencimento || pagamento.vencimento)}`,
-    '',
-  ];
-
-  ativos.forEach((pedido) => {
-    linhas.push(`*Pedido #${pedido.id}* (${new Date(pedido.dataPedido).toLocaleDateString('pt-BR')}) — ${reais(pedido.valorTotal)}`);
-    linhas.push(...linhasDosItens(pedido.itens), '');
-  });
-
-  linhas.push(`*Total: ${reais(pago ? pagamento.lancamento.valorPago ?? pagamento.lancamento.valor : pagamento.lancamento?.valor)}*`);
-  if (pagamento.observacao) linhas.push('', pagamento.observacao);
-  return linhas.join('\n');
+  const itens = pagamento.pedidos.filter((pedido) => pedido.situacao !== 'E').flatMap((pedido) => pedido.itens || []);
+  const forma = pagamento.lancamento?.formaPagamento ? ` (${labelForma(pagamento.lancamento.formaPagamento)})` : '';
+  const data = pago
+    ? `Pago em ${formatarData(pagamento.lancamento.dataPagamento)}${forma}`
+    : `Vencimento: ${formatarData(pagamento.lancamento?.vencimento || pagamento.vencimento)}`;
+  const total = pago ? pagamento.lancamento.valorPago ?? pagamento.lancamento.valor : pagamento.lancamento?.valor;
+  return montar(titulo(pago, emissor, 'Pagamento'), data, itens, total, pagamento.observacao);
 }
