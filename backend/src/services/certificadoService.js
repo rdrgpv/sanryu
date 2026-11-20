@@ -5,21 +5,17 @@ const emailService = require('./emailService');
 const configService = require('./configService');
 
 // Certificado de participação dos eventos do tipo "treinamento". O texto é editável por evento, com
-// marcadores; vazio usa o padrão abaixo (que só cita local e carga horária quando existem).
+// marcadores; vazio usa o padrão abaixo.
 const MARCADORES = ['nome', 'evento', 'data', 'cargaHoraria', 'instrutor', 'local'];
 
 function dataPorExtenso(data) {
   return new Date(data).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' });
 }
 
-function textoPadrao(evento) {
-  return [
-    'Certificamos que {{nome}} participou do treinamento {{evento}}',
-    ', realizado em {{data}}',
-    evento.local ? ', em {{local}}' : '',
-    evento.cargaHoraria ? ', com carga horária de {{cargaHoraria}}' : '',
-    '.',
-  ].join('');
+// Data, local e carga horária já aparecem na faixa lateral do certificado; o texto fica pra
+// mensagem do evento (o que foi treinado, com quem...).
+function textoPadrao() {
+  return 'Obrigado pela presença e dedicação no tatame. Seguimos juntos no caminho do Método Morganti Ju-Jitsu.';
 }
 
 function montarTexto(evento, inscricao) {
@@ -31,7 +27,7 @@ function montarTexto(evento, inscricao) {
     instrutor: evento.instrutor?.nome || '',
     local: evento.local || '',
   };
-  const modelo = (evento.textoCertificado || '').trim() || textoPadrao(evento);
+  const modelo = (evento.textoCertificado || '').trim() || textoPadrao();
   return modelo.replace(/\{\{\s*(\w+)\s*\}\}/g, (marcador, chave) => (MARCADORES.includes(chave) ? valores[chave] : marcador));
 }
 
@@ -87,6 +83,11 @@ async function buscarPorToken(token) {
     cargaHoraria: evento.cargaHoraria,
     instrutor: evento.instrutor?.nome || null,
     texto: montarTexto(evento, inscricao),
+    assinatura: {
+      nome: evento.assinaturaNome || evento.instrutor?.nome || 'San·Ryu Dojo',
+      cargo: evento.assinaturaCargo || 'Morganti Ju-Jitsu',
+      imagem: evento.assinaturaImagem || null,
+    },
   };
 }
 

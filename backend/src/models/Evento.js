@@ -69,6 +69,20 @@ const Evento = sequelize.define('Evento', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  // Quem assina o certificado (vazio = o instrutor responsável do evento), o cargo embaixo do nome
+  // (vazio = "Morganti Ju-Jitsu") e a imagem da assinatura (PNG em data URL, opcional).
+  assinaturaNome: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  assinaturaCargo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  assinaturaImagem: {
+    type: DataTypes.TEXT('long'),
+    allowNull: true,
+  },
   // Link do Google Maps colado pelo admin (o "Compartilhar" do Maps). Opcional: sem ele, o site
   // busca o "local" no Maps, o que pode cair no lugar errado se o texto for só um nome.
   linkMapa: {

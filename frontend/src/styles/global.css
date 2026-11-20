@@ -1807,7 +1807,9 @@ button, input, select, textarea {
   }
 }
 
-/* Certificado de participação (treinamento) — A4 deitado, na tela como prévia e no PDF. */
+/* Certificado de participação (treinamento), no modelo Morganti Ju-Jitsu: faixa escura à esquerda,
+   certificado claro à direita. A4 deitado; na tela é a prévia, no imprimir sai o PDF. As medidas em
+   "cqw" acompanham a largura do certificado, então a tela pequena (celular) mostra igual ao papel. */
 @page certificado {
   size: A4 landscape;
   margin: 0;
@@ -1815,7 +1817,7 @@ button, input, select, textarea {
 
 .certificado-pagina {
   min-height: 100vh;
-  background: var(--cor-off-white-alt);
+  background: #e9e7e2;
   padding: 1.5rem 1rem 2rem;
 }
 
@@ -1828,104 +1830,180 @@ button, input, select, textarea {
 
 .certificado {
   page: certificado;
+  container-type: inline-size;
   width: 297mm;
   max-width: 100%;
   aspect-ratio: 297 / 210;
   margin: 0 auto;
-  background: var(--cor-branco);
-  padding: 10mm;
+  display: grid;
+  grid-template-columns: 26% 1fr;
+  background: #f8f7f3;
   box-shadow: var(--sombra);
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  color: #1b1a17;
+  overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.certificado__lateral {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 9px) top / 100% 15% no-repeat,
+    #1c1c1f;
+  border-right: 0.55cqw solid #d4a24c;
+  color: #fff;
+  padding: 9cqw 3cqw 4cqw;
+  display: flex;
+  flex-direction: column;
+}
+
+.certificado__selo {
+  width: 16cqw;
+  height: 16cqw;
+  border-radius: 50%;
+  background: #fff;
+  padding: 0.6cqw;
+  margin: 0 auto 3.2cqw;
   box-sizing: border-box;
 }
 
-.certificado__moldura {
+.certificado__selo img {
+  width: 100%;
   height: 100%;
-  border: 2px solid var(--cor-sumi);
-  outline: 1px solid var(--cor-hanko);
-  outline-offset: -6px;
-  padding: 8% 9% 6%;
+  display: block;
+}
+
+.certificado__marca {
+  font-weight: 800;
+  font-size: 2.7cqw;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.certificado__traco {
+  display: block;
+  width: 6cqw;
+  height: 0.25cqw;
+  background: #d4a24c;
+  margin: 2.6cqw 0;
+}
+
+.certificado__data {
+  color: #d4a24c;
+  font-weight: 700;
+  font-size: 1.45cqw;
+  margin: 0 0 2cqw;
+}
+
+.certificado__lugar {
+  font-weight: 700;
+  font-size: 1.4cqw;
+  margin: 0;
+}
+
+.certificado__cidade {
+  color: #c9c9c9;
+  font-size: 1.15cqw;
+  margin: 0.2cqw 0 0;
+}
+
+.certificado__carga {
+  margin: auto 0 0;
+  font-size: 1.15cqw;
+  color: #e4e4e4;
+}
+
+.certificado__corpo {
+  padding: 8.5cqw 7cqw 4cqw;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-sizing: border-box;
 }
 
-.certificado__logos {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 4%;
-}
-
-.certificado__logo {
-  height: clamp(28px, 5vw, 56px);
-  width: auto;
-}
-
-.certificado__selo {
-  height: clamp(36px, 6.5vw, 72px);
-  width: auto;
+.certificado__kicker {
+  color: #a8742a;
+  font-weight: 700;
+  font-size: 1cqw;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin: 0 0 1cqw;
 }
 
 .certificado__titulo {
-  font-family: var(--fonte-titulo);
-  font-size: clamp(1.6rem, 5vw, 3.2rem);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 4.9cqw;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
   margin: 0;
-  color: var(--cor-sumi);
+  color: #1b1a17;
+  max-width: 48cqw;
 }
 
-.certificado__subtitulo {
-  margin: 0 0 4%;
-  color: var(--cor-hanko);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: clamp(0.65rem, 1.4vw, 0.95rem);
+.certificado__corpo .certificado__traco {
+  width: 7cqw;
+  margin: 2.4cqw 0;
+}
+
+.certificado__parabens {
+  font-size: 1.5cqw;
+  margin: 0;
+}
+
+.certificado__evento {
+  font-weight: 800;
+  font-size: 2.25cqw;
+  margin: 0.4cqw 0 3cqw;
 }
 
 .certificado__nome {
-  font-family: var(--fonte-titulo);
-  font-size: clamp(1.1rem, 3.4vw, 2.2rem);
-  margin: 0 0 3%;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid rgba(17, 17, 17, 0.2);
-  min-width: 60%;
+  width: 82%;
+  margin: 0 0 3cqw;
+  padding: 1.6cqw 2cqw;
+  background: #efebe4;
+  border-radius: 0.8cqw;
+  box-shadow: inset 0 -0.18cqw 0 #d4a24c;
+  font-weight: 800;
+  font-size: 2.15cqw;
+  box-sizing: border-box;
 }
 
 .certificado__texto {
-  font-size: clamp(0.8rem, 1.8vw, 1.15rem);
-  line-height: 1.6;
-  max-width: 85%;
+  font-size: 1.45cqw;
+  line-height: 1.65;
+  max-width: 78%;
   margin: 0;
-}
-
-.certificado__rodape {
-  margin-top: auto;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  gap: 2rem;
+  white-space: pre-line;
 }
 
 .certificado__assinatura {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: clamp(0.65rem, 1.3vw, 0.9rem);
-  min-width: 30%;
+  min-width: 21cqw;
+  font-size: 1.15cqw;
 }
 
-.certificado__assinatura span:last-child {
-  color: var(--cor-cinza);
+.certificado__assinatura strong {
+  font-size: 1.45cqw;
+  margin-top: 0.6cqw;
+}
+
+.certificado__rubrica {
+  display: block;
+  height: 5.5cqw;
+  max-width: 21cqw;
+  object-fit: contain;
+  margin-bottom: -0.6cqw;
 }
 
 .certificado__linha {
   display: block;
   width: 100%;
-  border-top: 1px solid var(--cor-sumi);
-  margin-bottom: 0.35rem;
+  border-top: 0.15cqw solid #a8742a;
 }
 
 @media print {
@@ -1945,34 +2023,6 @@ button, input, select, textarea {
     max-width: none;
     aspect-ratio: auto;
     box-shadow: none;
-  }
-
-  .certificado__logo {
-    height: 14mm;
-  }
-
-  .certificado__selo {
-    height: 18mm;
-  }
-
-  .certificado__titulo {
-    font-size: 30pt;
-  }
-
-  .certificado__subtitulo {
-    font-size: 10pt;
-  }
-
-  .certificado__nome {
-    font-size: 22pt;
-  }
-
-  .certificado__texto {
-    font-size: 13pt;
-  }
-
-  .certificado__assinatura {
-    font-size: 10pt;
   }
 }
 

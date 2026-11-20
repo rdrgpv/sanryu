@@ -46,7 +46,14 @@ const estadoInicial = {
   banner: '',
   cargaHoraria: '',
   textoCertificado: '',
+  assinaturaNome: '',
+  assinaturaCargo: '',
+  assinaturaImagem: '',
 };
+
+// Assinatura escaneada/exportada (PNG com fundo transparente fica melhor). Vai como está, sem
+// converter pra JPEG, pra não ganhar fundo branco em cima do papel creme do certificado.
+const ASSINATURA_TAMANHO_MAXIMO = 600 * 1024;
 
 const MARCADORES_CERTIFICADO = ['{{nome}}', '{{evento}}', '{{data}}', '{{cargaHoraria}}', '{{instrutor}}', '{{local}}'];
 
@@ -91,6 +98,9 @@ export default function EventoForm() {
         banner: evento.banner || '',
         cargaHoraria: evento.cargaHoraria || '',
         textoCertificado: evento.textoCertificado || '',
+        assinaturaNome: evento.assinaturaNome || '',
+        assinaturaCargo: evento.assinaturaCargo || '',
+        assinaturaImagem: evento.assinaturaImagem || '',
       });
     });
   }, [id, editando]);
@@ -129,6 +139,19 @@ export default function EventoForm() {
     const reader = new FileReader();
     reader.onload = () => setForm((prev) => ({ ...prev, banner: reader.result }));
     reader.readAsDataURL(file);
+  }
+
+  function handleAssinaturaChange(event) {
+    const arquivo = event.target.files[0];
+    event.target.value = '';
+    if (!arquivo) return;
+    if (arquivo.size > ASSINATURA_TAMANHO_MAXIMO) {
+      setErro('A imagem da assinatura deve ter no máximo 600KB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setForm((prev) => ({ ...prev, assinaturaImagem: reader.result }));
+    reader.readAsDataURL(arquivo);
   }
 
   function removerBanner() {
@@ -277,16 +300,45 @@ export default function EventoForm() {
                       rows={3}
                       value={form.textoCertificado}
                       onChange={handleChange}
-                      placeholder="Vazio = Certificamos que {{nome}} participou do treinamento {{evento}}, realizado em {{data}}, em {{local}}, com carga horária de {{cargaHoraria}}."
+                      placeholder="Ex.: Com o Shihan Marcelo e a equipe de senseis, o encontro reuniu amigos para aprender e revisar kata, kihon, chutes, projeções e técnicas de chão (ne-waza)."
                     />
                     <div className="form-text">
-                      Marcadores preenchidos automaticamente:{' '}
+                      Data, local e carga horária já aparecem na faixa lateral do certificado. Marcadores preenchidos automaticamente:{' '}
                       {MARCADORES_CERTIFICADO.map((marcador) => (
                         <code key={marcador} className="me-2">
                           {marcador}
                         </code>
                       ))}
                     </div>
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel>Quem assina o certificado</CFormLabel>
+                    <CFormInput
+                      name="assinaturaNome"
+                      value={form.assinaturaNome}
+                      onChange={handleChange}
+                      placeholder={instrutores.find((instrutor) => String(instrutor.id) === String(form.instrutorId))?.nome || 'Ex.: Shihan Marcelo Barcelar'}
+                    />
+                    <div className="form-text">Vazio = o instrutor responsável do evento.</div>
+                  </CCol>
+                  <CCol md={3}>
+                    <CFormLabel>Cargo / linha de baixo</CFormLabel>
+                    <CFormInput name="assinaturaCargo" value={form.assinaturaCargo} onChange={handleChange} placeholder="Morganti Ju-Jitsu" />
+                  </CCol>
+                  <CCol md={5}>
+                    <CFormLabel>Imagem da assinatura (PNG, opcional)</CFormLabel>
+                    <div className="d-flex align-items-center gap-2">
+                      {form.assinaturaImagem && (
+                        <img src={form.assinaturaImagem} alt="Assinatura" style={{ height: 48, maxWidth: 160, objectFit: 'contain', background: '#f8f7f3', border: '1px solid #ddd' }} />
+                      )}
+                      <CFormInput type="file" accept="image/png,image/jpeg,image/webp" onChange={handleAssinaturaChange} />
+                      {form.assinaturaImagem && (
+                        <CButton color="link" className="text-danger" onClick={() => setForm((prev) => ({ ...prev, assinaturaImagem: '' }))}>
+                          Remover
+                        </CButton>
+                      )}
+                    </div>
+                    <div className="form-text">Exporte do Corel em PNG com fundo transparente.</div>
                   </CCol>
                 </>
               )}

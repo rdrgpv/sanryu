@@ -90,8 +90,13 @@ test('certificados: só inscrições pagas, texto com os dados do evento e não 
   assert.ok(ana.tokenCertificado && ana.certificadoEnviadoEm);
   const certificado = await chamar('GET', `/certificados/${ana.tokenCertificado}`, { token: null });
   assert.equal(certificado.status, 200);
-  assert.match(certificado.dados.texto, /Certificamos que Ana Lima participou do treinamento Treinamento de Defesa, realizado em 20 de novembro de 2026, em Dojo San·Ryu, com carga horária de 4 horas\./);
-  assert.equal(certificado.dados.instrutor, 'Sensei Rodrigo');
+  assert.equal(certificado.dados.nome, 'Ana Lima');
+  assert.equal(certificado.dados.evento, 'Treinamento de Defesa');
+  assert.equal(certificado.dados.cargaHoraria, '4 horas');
+  assert.match(certificado.dados.texto, /Método Morganti Ju-Jitsu/, 'texto padrão');
+  assert.deepEqual(certificado.dados.assinatura, { nome: 'Sensei Rodrigo', cargo: 'Morganti Ju-Jitsu', imagem: null }, 'sem assinante: o instrutor do evento');
+  await gratuito.update({ assinaturaNome: 'Shihan Marcelo Barcelar' });
+  assert.equal((await chamar('GET', `/certificados/${ana.tokenCertificado}`, { token: null })).dados.assinatura.nome, 'Shihan Marcelo Barcelar');
 
   // Segunda vez: só quem ainda não recebeu (ninguém).
   assert.equal((await chamar('POST', `/admin/eventos/${gratuito.id}/certificados`, { corpo: {} })).dados.enviados, 0);
