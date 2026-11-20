@@ -195,7 +195,7 @@ async function inscreverTreinamento(req, res, evento) {
   if (gatame?.faixa) faixa = gatame.faixa;
   if (gatame?.professor) professor = gatame.professor;
   if (!faixa) return res.status(400).json({ error: 'Informe a sua faixa.' });
-  if (professor.length < 3) return res.status(400).json({ error: 'Informe o nome do seu professor.' });
+  if (professor.length < 3) return res.status(400).json({ error: 'Informe o nome do seu sensei.' });
   const idade = calcularIdade(dataNascimento);
   if (idade === null || idade < 0 || idade > 120) return res.status(400).json({ error: 'Informe a data de nascimento.' });
   if (idade < 18 && !responsavel) return res.status(400).json({ error: 'Para menores de idade, informe o nome do responsável.', menorDeIdade: true });

@@ -388,7 +388,14 @@ async function qrCodeInscricao(req, res) {
   const evento = await Evento.findByPk(req.params.id);
   if (!evento) return res.status(404).json({ error: 'Evento não encontrado.' });
 
-  const base = ((await configService.obterValor('SITE_URL')) || '').replace(/\/+$/, '');
+  // Endereço do site de onde o admin abriu a tela (sempre o certo, mesmo com SITE_URL vazio ou
+  // desatualizado); sem ele, cai no SITE_URL. Só aceita "https://dominio" (ou http em localhost).
+  const informado = String(req.query.base || '').replace(/\/+$/, '');
+  const valido = /^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(informado) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(informado);
+  const base = valido ? informado : ((await configService.obterValor('SITE_URL')) || '').replace(/\/+$/, '');
+  if (!/^https?:\/\//i.test(base)) {
+    return res.status(400).json({ error: 'Endereço do site não configurado (SITE_URL em Configurações).' });
+  }
   const link = `${base}/eventos/${evento.slug || evento.id}`;
   const qrcode = await QRCode.toDataURL(link, { width: 900, margin: 1, errorCorrectionLevel: 'M' });
   res.json({ link, qrcode, publicado: evento.publicado });

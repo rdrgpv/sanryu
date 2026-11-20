@@ -409,14 +409,14 @@ export default function InscricaoEvento() {
                 )}
               </label>
               <label className="form__field">
-                <span>Professor</span>
+                <span>Sensei</span>
                 <input
                   value={dadosTreinamento.professor}
                   onChange={(event) => atualizarTreinamento('professor', event.target.value)}
                   readOnly={doGatame.professor}
                   required
                   minLength={3}
-                  placeholder="Nome do seu professor / sensei"
+                  placeholder="Nome do seu sensei"
                 />
               </label>
               <label className="form__field">

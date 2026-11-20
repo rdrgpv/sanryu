@@ -419,7 +419,7 @@ export default function EventoInscricoes() {
           { key: 'statusPagamento', label: 'Pagamento', sortable: true },
           ...(evento?.tipoEvento?.treinamento
             ? [
-                { key: 'professor', label: 'Professor', sortable: true, render: (i) => i.professor || '-' },
+                { key: 'professor', label: 'Sensei', sortable: true, render: (i) => i.professor || '-' },
                 {
                   key: 'certificadoEnviadoEm',
                   label: 'Certificado',

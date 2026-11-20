@@ -112,8 +112,13 @@ test('certificados: só inscrições pagas, texto com os dados do evento e não 
 });
 
 test('QR Code da inscrição aponta pra página do evento', async () => {
-  const resposta = await chamar('GET', `/admin/eventos/${gratuito.id}/qrcode-inscricao`);
+  // Usa o endereço do site de onde o admin abriu a tela.
+  const resposta = await chamar('GET', `/admin/eventos/${gratuito.id}/qrcode-inscricao?base=${encodeURIComponent('https://sanryu.com.br/')}`);
   assert.equal(resposta.status, 200);
-  assert.ok(resposta.dados.link.endsWith(`/eventos/${gratuito.slug}`));
+  assert.equal(resposta.dados.link, `https://sanryu.com.br/eventos/${gratuito.slug}`);
   assert.match(resposta.dados.qrcode, /^data:image\/png;base64,/);
+
+  // Sem endereço válido e sem SITE_URL: erro claro em vez de um QR com link incompleto (o bug antigo).
+  assert.equal((await chamar('GET', `/admin/eventos/${gratuito.id}/qrcode-inscricao`)).status, 400);
+  assert.equal((await chamar('GET', `/admin/eventos/${gratuito.id}/qrcode-inscricao?base=${encodeURIComponent('javascript:alert(1)')}`)).status, 400);
 });
