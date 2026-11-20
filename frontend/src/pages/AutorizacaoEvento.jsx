@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import { linkMapa } from '../utils/site.js';
+import { faixasSemRepetir } from '../utils/formato.js';
 import AssinaturaCanvas from '../components/AssinaturaCanvas.jsx';
 
 const DADOS_INICIAIS = { nomeAluno: '', faixa: '', idade: '', turmaId: '', nomeResponsavel: '' };
@@ -155,7 +156,7 @@ export default function AutorizacaoEvento() {
                     <span>Faixa</span>
                     <select value={dados.faixa} onChange={(event) => atualizar('faixa', event.target.value)} required>
                       <option value="">Selecione</option>
-                      {faixas.map((faixa) => (
+                      {faixasSemRepetir(faixas).map((faixa) => (
                         <option key={faixa.id} value={faixa.nome}>
                           {faixa.nome}
                         </option>

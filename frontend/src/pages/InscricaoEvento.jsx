@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
 import { linkMapa } from '../utils/site.js';
+import { faixasSemRepetir } from '../utils/formato.js';
 import { OPCOES_TAMANHO_FAIXA } from '../utils/opcoesTamanhoFaixa.js';
 
 const TIPO_EXAME_DE_FAIXA_ID = 1;
@@ -400,7 +401,7 @@ export default function InscricaoEvento() {
                 ) : (
                   <select value={dadosTreinamento.faixa} onChange={(event) => atualizarTreinamento('faixa', event.target.value)} required>
                     <option value="">Selecione</option>
-                    {faixas.map((faixa) => (
+                    {faixasSemRepetir(faixas).map((faixa) => (
                       <option key={faixa.id} value={faixa.nome}>
                         {faixa.nome}
                       </option>

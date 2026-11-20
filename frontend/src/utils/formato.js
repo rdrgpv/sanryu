@@ -70,3 +70,15 @@ export function calcularIdade(dataNascimento) {
   if (hoje.getMonth() + 1 < mes || (hoje.getMonth() + 1 === mes && hoje.getDate() < dia)) idade -= 1;
   return idade;
 }
+
+// Lista de faixas pra um <select> por nome: os graus (ex.: Preta 1º, 2º, 3º Dan) têm o mesmo nome e
+// apareciam repetidos. Mantém a primeira de cada nome, na ordem em que vieram (já por "ordem").
+export function faixasSemRepetir(faixas = []) {
+  const vistos = new Set();
+  return faixas.filter((faixa) => {
+    const chave = String(faixa.nome || '').trim().toLowerCase();
+    if (!chave || vistos.has(chave)) return false;
+    vistos.add(chave);
+    return true;
+  });
+}
