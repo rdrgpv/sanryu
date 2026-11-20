@@ -48,7 +48,13 @@ export default function Footer() {
           </div>
         )}
       </div>
-      <p className="footer__copy">© {new Date().getFullYear()} San·Ryu Dojo. Todos os direitos reservados.</p>
+      <div className="footer__copy">
+        <span>© {new Date().getFullYear()} San·Ryu Dojo. Todos os direitos reservados.</span>
+        <span className="creditos-rrp">
+          Desenvolvido por
+          <img src="/logos/rrp-sistemas.svg" alt="RRP Sistemas" />
+        </span>
+      </div>
     </footer>
   );
 }

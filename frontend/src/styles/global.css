@@ -2054,3 +2054,32 @@ button, input, select, textarea {
   background: var(--cor-off-white-alt);
   color: var(--cor-cinza);
 }
+
+/* Crédito "Desenvolvido por RRP Sistemas": o logo é azul-marinho, então vai num selo claro pra
+   aparecer tanto no rodapé preto do site quanto no do admin. */
+.footer__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 1.25rem;
+  /* Largura toda: o CSS do admin (CoreUI) também tem uma classe .footer, em flex. */
+  width: 100%;
+}
+
+.creditos-rrp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  color: inherit;
+}
+
+.creditos-rrp img {
+  height: 22px;
+  width: auto;
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  box-sizing: content-box;
+}
