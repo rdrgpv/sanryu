@@ -4,13 +4,17 @@ const { logErro } = require('../utils/logger');
 
 // Credenciais SMTP ficam em Configurações (sistema SAN), mesmo padrão do Gatame/Mercado Pago —
 // podem ser trocadas sem reiniciar o servidor.
-async function obterTransportador() {
-  const [host, porta, usuario, senha] = await Promise.all([
+// credenciais: { usuario, senha } pra mandar de outra caixa no mesmo servidor (ex.: certificados@);
+// sem elas, usa a caixa padrão (SMTP_USER/SMTP_SENHA).
+async function obterTransportador(credenciais = null) {
+  const [host, porta, usuarioPadrao, senhaPadrao] = await Promise.all([
     configService.obterValor('SMTP_HOST'),
     configService.obterValor('SMTP_PORT'),
     configService.obterValor('SMTP_USER'),
     configService.obterValor('SMTP_SENHA'),
   ]);
+  const usuario = credenciais?.usuario || usuarioPadrao;
+  const senha = credenciais?.usuario ? credenciais.senha : senhaPadrao;
 
   if (!host || !porta || !usuario || !senha) {
     return null;
@@ -357,14 +361,22 @@ async function enviarPedidoLojaPago({ destinatario, nome, pedidoId, itens, total
 }
 
 // Certificado de participação (treinamento): link pra página do certificado. Devolve true/false.
+// Remetente próprio (CERTIFICADO_FROM), e caixa própria quando CERTIFICADO_SMTP_USER estiver preenchido
+// — o servidor SMTP (ex.: Hostinger) só deixa mandar "de" uma caixa com o login dela.
 async function enviarCertificado({ destinatario, nome, evento, link }) {
   try {
-    const transportador = await obterTransportador();
+    const [usuarioCertificado, senhaCertificado, remetenteCertificado] = await Promise.all([
+      configService.obterValor('CERTIFICADO_SMTP_USER'),
+      configService.obterValor('CERTIFICADO_SMTP_SENHA'),
+      configService.obterValor('CERTIFICADO_FROM'),
+    ]);
+    const transportador = await obterTransportador(usuarioCertificado ? { usuario: usuarioCertificado, senha: senhaCertificado } : null);
     if (!transportador) {
       logErro('SMTP não configurado em Configurações; certificado não enviado.');
       return false;
     }
-    const remetente = (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
+    const remetente =
+      remetenteCertificado || usuarioCertificado || (await configService.obterValor('SMTP_FROM')) || (await configService.obterValor('SMTP_USER'));
 
     await transportador.sendMail({
       from: remetente,

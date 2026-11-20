@@ -19,6 +19,9 @@ const CAMPOS = [
   { parametro: 'SMTP_SENHA', label: 'Senha SMTP', tipo: 'text', sensivel: true },
   { parametro: 'SMTP_FROM', label: 'Remetente dos e-mails (ex.: San·Ryu Dojo <contato@sanryu.com.br>)', tipo: 'text', sensivel: false },
   { parametro: 'SMTP_BCC', label: 'Cópia oculta dos e-mails enviados (opcional)', tipo: 'text', sensivel: false },
+  { parametro: 'CERTIFICADO_FROM', label: 'Remetente dos certificados (ex.: Morganti Ju-Jitsu <certificados@sanryu.com.br>). Vazio = o mesmo dos outros e-mails', tipo: 'text', sensivel: false },
+  { parametro: 'CERTIFICADO_SMTP_USER', label: 'Usuário SMTP da caixa dos certificados (só se for outra caixa de e-mail)', tipo: 'text', sensivel: false },
+  { parametro: 'CERTIFICADO_SMTP_SENHA', label: 'Senha SMTP da caixa dos certificados', tipo: 'text', sensivel: true },
 ];
 
 const estadoInicial = CAMPOS.reduce((acc, campo) => ({ ...acc, [campo.parametro]: '' }), {});

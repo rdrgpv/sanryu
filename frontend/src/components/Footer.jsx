@@ -52,7 +52,7 @@ export default function Footer() {
         <span>© {new Date().getFullYear()} San·Ryu Dojo. Todos os direitos reservados.</span>
         <span className="creditos-rrp">
           Desenvolvido por
-          <img src="/logos/rrp-sistemas.svg" alt="RRP Sistemas" />
+          <img src="/logos/rrp-sistemas-claro.svg" alt="RRP Sistemas" />
         </span>
       </div>
     </footer>

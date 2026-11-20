@@ -1,4 +1,4 @@
-const { EventoDesconto, EventoAluno, Evento } = require('../models');
+const { EventoDesconto, EventoAluno, Evento, TipoEvento } = require('../models');
 const mercadoPagoService = require('./mercadoPagoService');
 const emailService = require('./emailService');
 const { gerarPagamentoPix } = require('./pagamentoInscricaoService');
@@ -34,7 +34,7 @@ async function aplicarEmInscricao(desconto, inscricao) {
     throw new Error('Esta pessoa já pagou a inscrição. O valor especial não pode ser aplicado (a diferença precisa ser devolvida à parte).');
   }
 
-  const evento = await Evento.findByPk(inscricao.eventoId);
+  const evento = await Evento.findByPk(inscricao.eventoId, { include: { model: TipoEvento, as: 'tipoEvento' } });
   const valor = Number(desconto.valor);
 
   if (inscricao.mpPaymentId) {
@@ -51,7 +51,8 @@ async function aplicarEmInscricao(desconto, inscricao) {
   });
   await desconto.update({ eventoAlunoId: inscricao.id });
 
-  emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: inscricao });
+  // Treinamento não manda e-mail de inscrição (só o certificado no final).
+  if (!evento.tipoEvento?.treinamento) emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: inscricao });
 }
 
 async function listar(eventoId) {

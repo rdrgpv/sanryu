@@ -4,7 +4,7 @@ export default function AdminFooter() {
       <span>© {new Date().getFullYear()} San·Ryu Dojo</span>
       <span className="creditos-rrp ms-3">
         Desenvolvido por
-        <img src="/logos/rrp-sistemas.svg" alt="RRP Sistemas" />
+        <img src="/logos/rrp-sistemas-claro.svg" alt="RRP Sistemas" />
       </span>
     </footer>
   );

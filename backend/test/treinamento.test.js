@@ -39,12 +39,14 @@ test('treinamento: inscrição aberta sem Gatame, validações e menor precisa d
   assert.equal((await inscrever(gratuito, { email: 'x@y.com', nome: 'Ana Lima' })).status, 400, 'sem nascimento');
   assert.equal((await inscrever(gratuito, { email: 'x@y.com', nome: 'Ana Lima', dataNascimento: '2015-01-01' })).status, 400, 'menor sem responsável');
 
+  const confirmacoesAntes = emails.filter((email) => email.funcao === 'enviarConfirmacaoInscricao').length;
   const ok = await inscrever(gratuito, { email: ' ANA@Email.com ', nome: 'Ana  Lima', dataNascimento: '1990-05-10', telefone: '11999990000', faixa: 'Branca', professor: 'Sensei Rodrigo' });
   assert.equal(ok.status, 201);
   assert.equal(ok.dados.email, 'ana@email.com');
   assert.equal(ok.dados.nome, 'Ana Lima');
   assert.equal(ok.dados.statusPagamento, 'pago', 'sem valor: gratuito');
   assert.equal(ok.dados.origemDados, 'treinamento');
+  assert.equal(emails.filter((email) => email.funcao === 'enviarConfirmacaoInscricao').length, confirmacoesAntes, 'treinamento não manda e-mail de inscrição');
 
   const denovo = await inscrever(gratuito, { email: 'ana@email.com', nome: 'Ana Lima', dataNascimento: '1990-05-10' });
   assert.equal(denovo.dados.jaInscrito, true);

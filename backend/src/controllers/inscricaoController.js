@@ -230,7 +230,7 @@ async function inscreverTreinamento(req, res, evento) {
     });
     if (desconto) await desconto.update({ eventoAlunoId: eventoAluno.id });
 
-    emailService.enviarConfirmacaoInscricao({ evento, eventoAluno });
+    // Treinamento não manda e-mail de "inscrição confirmada": o único e-mail é o certificado no final.
     return res.status(201).json(eventoAluno.toJSON());
   } catch (err) {
     logErro('Erro ao processar inscrição de treinamento:', err);
@@ -292,7 +292,7 @@ async function inscrever(req, res) {
     const novoPagamento = await gerarPagamentoPix({ valor: existente.valorCobrado, evento, email });
     await existente.update({ ...novoPagamento, statusPagamento: 'pendente' });
 
-    emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: existente });
+    if (!evento.tipoEvento.treinamento) emailService.enviarConfirmacaoInscricao({ evento, eventoAluno: existente });
 
     return res.status(200).json({ ...existente.toJSON(), jaInscrito: true, qrCodeRenovado: true });
   }
